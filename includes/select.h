@@ -10,7 +10,6 @@ Copyright (c) 2015-2017, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
-
 #if CUSTOM_PATTERNS
 
 // returns false if fails to find any stored pattern strings
@@ -37,17 +36,33 @@ void CheckForPatterns(void)
   if (!codePatterns) ErrorHandler(1, 1, true);
 
   curPattern = FlashGetPattern();
+
+  #if (SEGMENT_COUNT <= 1)
   if (!curPattern || (curPattern > codePatterns))
     curPattern = 1;
+  #endif
 
   DBGOUT((F("Starting pattern = #%d"), curPattern));
 }
 
 void GetCurPattern(void)
 {
-  if (curPattern <= codePatterns) // sanity check
+  if ((curPattern > 0) && (curPattern <= codePatterns)) // sanity check
   {
     strcpy_P(cmdStr, customPatterns[curPattern-1]);
+  }
+  #if (SEGMENT_COUNT > 1)
+  else
+  {
+    curPattern = FlashGetPattern();
+    FlashGetStr(cmdStr);
+  }
+  #else
+  else cmdStr[0] = 0;
+  #endif
+
+  if (cmdStr[0])
+  {
     DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(cmdStr)));
     pPixelNutEngine->popPluginStack(); // clear stack to prepare for new cmds
   }
@@ -73,15 +88,16 @@ void GetPrevPattern(void)
 
 #else // !CUSTOM_PATTERNS
 
-void CheckForPatterns(void) {}
+void CheckForPatterns(void)
+{
+  curPattern = FlashGetPattern();
+}
 
 void GetCurPattern(void)
 {
-  curPattern = FlashGetPattern();
   FlashGetStr(cmdStr);
-
   DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(cmdStr)));
 }
 
-#endif // !CUSTOM_PATTERNS
+#endif // CUSTOM_PATTERNS
 //========================================================================================
