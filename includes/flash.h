@@ -22,7 +22,7 @@ See license.txt for the terms of this license.
 #endif // !defined(EEPROM_BYTES)
 
 #if (EEPROM_BYTES <= 0)
-#define FLASHLEN_PATTERN_SPACE 0
+#define EEPROM_FREE_BYTES 0
 void FlashSetStr(char *str, int offset) {}
 void FlashGetStr(char *str) { *str = 0; }
 void FlashSetBright() {}
@@ -34,10 +34,10 @@ void FlashSetExterns(uint16_t hue, byte wht, byte cnt) {}
 void FlashSetForce(short force) {}
 short FlashGetForce(void) { return 0; }
 void FlashSetProperties(void) {}
+
 #else
 
 #include <EEPROM.h>
-//int CheckFlashLength(void)  { return EEPROM.length(); }
 
 // for each segment:
 #define FLASH_SEG_LENGTH        10
@@ -89,7 +89,9 @@ void FlashGetStr(char *str)
 {
   for (int i = 0; ; ++i)
   {
-    if ((strOffset + i) >= EEPROM_BYTES) str[i] = 0; // prevent overrun
+    if ((i >= (STRLEN_PATTERNS-1)) ||
+        ((strOffset + i) >= EEPROM_BYTES))
+         str[i] = 0; // prevent overrun
     else str[i] = EEPROM.read(strOffset + i);
     if (!str[i]) break;
   }
