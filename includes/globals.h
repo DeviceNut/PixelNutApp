@@ -28,13 +28,13 @@ byte *pPixelData = pixelArray;
 NeoPixelShow neoPixels = NeoPixelShow(DPIN_PIXELS);
 NeoPixelShow *pNeoPixels = &neoPixels;
 
-PixelValOrder pixorder = {1,0,2};
-PixelNutSupport pixelNutSupport = PixelNutSupport(millis, &pixorder);
+PixelValOrder pixorder = {1,0,2}; // mapping of (RGB) to (GRB) for WS8218B
+PixelNutSupport pixelNutSupport = PixelNutSupport((GetMsecsTime)millis, &pixorder);
 PixelNutEngine::Status engineStatus; // status from command execution
 #endif
 
 #if !PIXENGINE_OVERRIDE
-PixelNutEngine pixelNutEngine = PixelNutEngine(pPixelData, PIXEL_COUNT, PIXEL_OFFSET, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
+PixelNutEngine pixelNutEngine = PixelNutEngine(pPixelData, PIXEL_COUNT, PIXEL_OFFSET, DIRECTION_UP, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
 PixelNutEngine *pPixelNutEngine = &pixelNutEngine;
 #else
 extern PixelNutEngine *pPixelNutEngine;

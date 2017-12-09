@@ -118,11 +118,11 @@ public:
         outstr[0] = 0;
 
         #if (STRAND_COUNT <= 1)
-        DBGOUT((F("  Segments:    %d"), SEGMENT_COUNT)); // number of pixel segments
-        AddNumToStr(outstr, SEGMENT_COUNT);
+        DBGOUT((F("  Segments:    %d"), -SEGMENT_COUNT)); // number of pixel segments
+        AddNumToStr(outstr, -SEGMENT_COUNT);
         #else
-        DBGOUT((F("  Segments:    %d"), -SEGMENT_COUNT));
-        AddNumToStr(outstr, -SEGMENT_COUNT); // indicates physically separate segments
+        DBGOUT((F("  Segments:    %d"), SEGMENT_COUNT));
+        AddNumToStr(outstr, SEGMENT_COUNT); // indicates physically separate segments
         #endif
 
         DBGOUT((F("  CurPattern:  %d"), curPattern));
@@ -130,13 +130,8 @@ public:
         DBGOUT((F("  NumPatterns: %d"), codePatterns));         // number of custom patterns
         AddNumToStr(outstr, codePatterns);
 
-        #if defined(FEATURE_BITS)
-        DBGOUT((F("  Features:    %d"), FEATURE_BITS));         // feature bits (high bit set if used)
-        AddNumToStr(outstr, (FEATURE_BITS | 0x80));
-        #else
-        AddNumToStr(outstr, 0);
-        #endif
-
+        DBGOUT((F("  Features:    %d"), FEATURE_BITS));         // feature bits
+        AddNumToStr(outstr, FEATURE_BITS);
         DBGOUT((F("  XPlugins:    %d"), CUSTOM_PLUGINS));       // number of custom plugins
         AddNumToStr(outstr, CUSTOM_PLUGINS);
         DBGOUT((F("  CmdStrLen:   %d"), STRLEN_PATTERNS));      // maxlen of commands/patterns

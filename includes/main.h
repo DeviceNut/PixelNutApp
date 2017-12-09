@@ -10,9 +10,9 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-//*********************************************************************************************
-// Setup and Loop Routines
-//*********************************************************************************************
+#if (EXTERNAL_COMM && (EEPROM_BYTES == 0))
+#error("Must have EEPROM to use external communications")
+#endif
 
 #if !MAIN_OVERRIDE
 
@@ -61,7 +61,6 @@ void setup()
   DBGOUT((F("  NUM_PLUGIN_LAYERS = %d"), NUM_PLUGIN_LAYERS));
   DBGOUT((F("  NUM_PLUGIN_TRACKS = %d"), NUM_PLUGIN_TRACKS));
   DBGOUT((F("  EEPROM_FREE_BYTES = %d"), EEPROM_FREE_BYTES));
-  
 
   pCustomCode->setup(); // custom initialization here
   // this is where the external communications are setup

@@ -15,8 +15,8 @@ class PixelNutEngineX : public PixelNutEngine
 {
 public:
 
-  PixelNutEngineX(byte *ptr_pixels, uint16_t num_pixels, uint16_t first_pixel, short num_layers, short num_tracks) :
-    PixelNutEngine(ptr_pixels, num_pixels, first_pixel, num_layers, num_tracks)
+  PixelNutEngineX(byte *ptr_pixels, uint16_t num_pixels, uint16_t first_pixel, bool goupwards, short num_layers, short num_tracks) :
+    PixelNutEngine(ptr_pixels, num_pixels, first_pixel, goupwards, num_layers, num_tracks)
   {
     // NOTE: cannot call DBGOUT from constructor
   }
@@ -35,7 +35,7 @@ public:
   }
 };
 
-PixelNutEngineX pixelNutEngineX   = PixelNutEngineX(pPixelData, PIXEL_COUNT, PIXEL_OFFSET, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
+PixelNutEngineX pixelNutEngineX   = PixelNutEngineX(pPixelData, PIXEL_COUNT, PIXEL_OFFSET, DIRECTION_UP, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
 PixelNutEngineX *pPixelNutEngineX = &pixelNutEngineX;
 PixelNutEngine *pPixelNutEngine   = pPixelNutEngineX;
 

@@ -8,8 +8,7 @@ See license.txt for the terms of this license.
 */
 
 #if !defined(FEATURE_BITS)
-#define FEATURE_BITS            0           // feature bits:
-                                            // 0x01: 1 if display is paused
+#define FEATURE_BITS            0           // extended feature bits
 #endif
 
 #if BLUETOOTH_COMM
@@ -38,6 +37,10 @@ See license.txt for the terms of this license.
 #define CUSTOM_OVERRIDE         1           // must extend for bluetooth
 #endif
 
+#if !defined(EXTERNAL_COMM)
+#define EXTERNAL_COMM           0
+#endif
+
 #if !defined(CUSTOM_PATTERNS) // use internal patterns if no external client
 #define CUSTOM_PATTERNS         !EXTERNAL_COMM
 #endif
@@ -52,6 +55,14 @@ See license.txt for the terms of this license.
 
 #if !defined(PIXEL_OFFSET)
 #define PIXEL_OFFSET            0           // start drawing at the first pixel
+#endif
+
+#if !defined(DIRECTION_UP)
+#define DIRECTION_UP            true        // draw from start to end by default
+#endif
+
+#if !defined(MAX_BRIGHTNESS)
+#define MAX_BRIGHTNESS          100         // default is to allow for maximum brightness
 #endif
 
 //========================================================================================
