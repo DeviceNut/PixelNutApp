@@ -117,12 +117,12 @@ public:
         DBGOUT((F("Info Line #2")));
         outstr[0] = 0;
 
-        #if (STRAND_COUNT <= 1)
-        DBGOUT((F("  Segments:    %d"), -SEGMENT_COUNT)); // number of pixel segments
-        AddNumToStr(outstr, -SEGMENT_COUNT);
-        #else
+        #if ((STRAND_COUNT > 1) || (SEGMENT_COUNT <= 1))
         DBGOUT((F("  Segments:    %d"), SEGMENT_COUNT));
         AddNumToStr(outstr, SEGMENT_COUNT); // indicates physically separate segments
+        #else
+        DBGOUT((F("  Segments:    %d"), -SEGMENT_COUNT)); // number of logical segments
+        AddNumToStr(outstr, -SEGMENT_COUNT);
         #endif
 
         DBGOUT((F("  CurPattern:  %d"), curPattern));

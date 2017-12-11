@@ -1,7 +1,7 @@
 // PixelNutApp Bluetooth Communications
 //
 // Uses global variables: 'pixelNutSupport', 'cmdStr', 'pAppCmd'.
-// Calls global routines: 'CheckExecCmd', 'FlashStartup', 'ErrorHandler'.
+// Calls global routines: 'CheckExecCmd', 'ErrorHandler'.
 //========================================================================================
 /*
 Copyright (c) 2015-2017, Greg de Valois
@@ -116,7 +116,11 @@ static void ResponseCB(void)
 bool Bluetooth::control(void)
 {
   // check if already have command input
-  if (cmdStr[0] != 0) return true;
+  if (cmdStr[0] != 0)
+  {
+    DBGOUT((F("BLE: have input=\"%s\""), cmdStr));
+    return true;
+  }
 
   if (msecsConnect < pixelNutSupport.getMsecs())
   {

@@ -37,7 +37,7 @@ void CheckForPatterns(void)
 
   curPattern = FlashGetPattern();
 
-  #if (SEGMENT_COUNT <= 1)
+  #if !EXTERNAL_COMM // else client handles it
   if (!curPattern || (curPattern > codePatterns))
     curPattern = 1;
   #endif
@@ -47,16 +47,14 @@ void CheckForPatterns(void)
 
 void GetCurPattern(void)
 {
-  if ((curPattern > 0) && (curPattern <= codePatterns)) // sanity check
+  // check for an internal pattern first
+  if ((curPattern > 0) && (curPattern <= codePatterns))
   {
     strcpy_P(cmdStr, customPatterns[curPattern-1]);
   }
-  #if (SEGMENT_COUNT > 1)
-  else
-  {
-    curPattern = FlashGetPattern();
-    FlashGetStr(cmdStr);
-  }
+  #if EXTERNAL_COMM
+  // else retrieve pattern from flash for current segment
+  else FlashGetStr(cmdStr);
   #else
   else cmdStr[0] = 0;
   #endif

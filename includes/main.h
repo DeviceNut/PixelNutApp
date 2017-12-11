@@ -74,7 +74,8 @@ void setup()
   SetupPatternControls();
 
   CheckForPatterns();   // read internal patterns (if any) and current pattern number
-  GetCurPattern();      // get current pattern string, wait until loop() to load it
+  GetCurPattern();      // get pattern string cooresponding that that pattern number
+  CheckExecCmd();       // load that pattern into the engine: ready to be displayed
 
   BlinkStatusLED(0,1);  // indicate success
   DBGOUT((F("** Setup complete **")));
@@ -112,9 +113,9 @@ void loop()
     CheckCountControls();
     CheckTriggerControls();
     CheckPatternControls();
-  }
 
-  CheckExecCmd();
+    CheckExecCmd(); // load any new pattern into the engine
+  }
 
   // if enabled: display new pixel values if anything has changed
   if (doUpdate && pPixelNutEngine->updateEffects())

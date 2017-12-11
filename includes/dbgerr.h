@@ -34,16 +34,17 @@ void MsgFormat(const __FlashStringHelper *str_in_code, ...)
 
 void SetupDebugInterface(void)
 {
+  // function called from DBGOUT macro
+  pixelNutSupport.msgFormat = MsgFormat;
+
   Serial.begin(115200); // MATCH THIS BAUD RATE <<<
 
   // wait up to 5 secs for serial window
   uint32_t tout = millis() + 5000;
   while (!Serial) if (millis() > tout) break;
 
-  // function called from DBGOUT macro
-  pixelNutSupport.msgFormat = MsgFormat;
-
-  // now can send sign-on message
+  // wait a little, then send sign-on message
+  delay(10);
   DBGOUT((F(DEBUG_SIGNON)));
 }
 
