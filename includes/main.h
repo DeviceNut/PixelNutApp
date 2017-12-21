@@ -16,6 +16,24 @@ See license.txt for the terms of this license.
 
 #if !MAIN_OVERRIDE
 
+void CheckExecCmd()
+{
+  if (cmdStr[0]) // if have new command for engine
+  {
+    DBGOUT((F("Exec: \"%s\""), cmdStr));
+
+    engineStatus = pPixelNutEngine->execCmdStr(cmdStr);
+    cmdStr[0] = 0; // must clear command string after finished
+
+    if (engineStatus != PixelNutEngine::Status_Success)
+    {
+      DBGOUT((F("CmdErr: %d"), engineStatus));
+      ErrorHandler(2, engineStatus, false); // blink for error and continue
+    }
+    else pCustomCode->display();
+  }
+}
+
 void setup()
 {
   SetupLEDs(); // status LED: indicate in setup now
@@ -82,24 +100,6 @@ void setup()
 }
 
 //*********************************************************************************************
-
-void CheckExecCmd()
-{
-  if (cmdStr[0]) // if have new command for engine
-  {
-    DBGOUT((F("Exec: \"%s\""), cmdStr));
-
-    engineStatus = pPixelNutEngine->execCmdStr(cmdStr);
-    cmdStr[0] = 0; // must clear command string after finished
-
-    if (engineStatus != PixelNutEngine::Status_Success)
-    {
-      DBGOUT((F("CmdErr: %d"), engineStatus));
-      ErrorHandler(2, engineStatus, false); // blink for error and continue
-    }
-    else pCustomCode->display();
-  }
-}
 
 void loop()
 {

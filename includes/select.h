@@ -50,6 +50,7 @@ void GetCurPattern(void)
   // check for an internal pattern first
   if ((curPattern > 0) && (curPattern <= codePatterns))
   {
+    DBGOUT((F("Copying pattern = #%d"), curPattern));
     strcpy_P(cmdStr, customPatterns[curPattern-1]);
   }
   #if EXTERNAL_COMM

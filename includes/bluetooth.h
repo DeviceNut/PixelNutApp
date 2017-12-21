@@ -124,6 +124,7 @@ bool Bluetooth::control(void)
 
   if (msecsConnect < pixelNutSupport.getMsecs())
   {
+    //DBGOUT((F("BLE: check for connection...")));
     isConnected = bfruit.isConnected();
     // NOTE: immediately sending data causes failures
 
@@ -132,6 +133,7 @@ bool Bluetooth::control(void)
 
   if (isConnected)
   {
+    //DBGOUT((F("BLE: reading...")));
     if (!bfruit.readDataStr(ResponseCB))
     {
       DBGOUT((F("BLE read data failed")));
