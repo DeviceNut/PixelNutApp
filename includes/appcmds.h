@@ -118,11 +118,11 @@ public:
         outstr[0] = 0;
 
         #if ((STRAND_COUNT > 1) || (SEGMENT_COUNT <= 1))
-        DBGOUT((F("  Segments:    %d"), SEGMENT_COUNT));
-        AddNumToStr(outstr, SEGMENT_COUNT); // indicates physically separate segments
+        DBGOUT((F("  Segments:    %d"), -SEGMENT_COUNT));
+        AddNumToStr(outstr, -SEGMENT_COUNT); // indicates physically separate segments
         #else
-        DBGOUT((F("  Segments:    %d"), -SEGMENT_COUNT)); // number of logical segments
-        AddNumToStr(outstr, -SEGMENT_COUNT);
+        DBGOUT((F("  Segments:    %d"), SEGMENT_COUNT)); // number of logical segments
+        AddNumToStr(outstr, SEGMENT_COUNT);
         #endif
 
         DBGOUT((F("  CurPattern:  %d"), curPattern));
@@ -130,8 +130,14 @@ public:
         DBGOUT((F("  NumPatterns: %d"), codePatterns));         // number of custom patterns
         AddNumToStr(outstr, codePatterns);
 
-        DBGOUT((F("  Features:    %d"), FEATURE_BITS));         // feature bits
+        #if BASIC_PATTERNS
+        DBGOUT((F("  Features:    %d"), FEATURE_BITS | 0x02));  // cannot use advanced patterns
+        AddNumToStr(outstr, FEATURE_BITS | 0x02);
+        #else
+        DBGOUT((F("  Features:    %d"), FEATURE_BITS));         // other feature bits
         AddNumToStr(outstr, FEATURE_BITS);
+        #endif
+
         DBGOUT((F("  XPlugins:    %d"), CUSTOM_PLUGINS));       // number of custom plugins
         AddNumToStr(outstr, CUSTOM_PLUGINS);
         DBGOUT((F("  CmdStrLen:   %d"), STRLEN_PATTERNS));      // maxlen of commands/patterns
