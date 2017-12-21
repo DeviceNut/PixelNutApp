@@ -56,7 +56,14 @@ public:
         pPixelNutEngineX->SetTrackSegEnable(curSegment);
         break;
       }
-
+      case '%': // brightness/delay: affects all segments so set in segment 0
+      case ':':
+      {
+        FlashSetSegment(1);
+        AppCommands::cmdHandler(instr);
+        FlashSetSegment(curSegment);
+        break;
+      }
       default: return AppCommands::cmdHandler(instr);
     }
 

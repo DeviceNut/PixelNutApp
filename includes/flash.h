@@ -71,7 +71,10 @@ static byte GetFlashValue(uint16_t offset) { return EEPROM.read(valOffset + offs
 void FlashSetSegment(byte seg)
 {
   valOffset = ((seg-1) * FLASH_SEG_LENGTH);
+
+  #if (STRAND_COUNT > 1) // logical segments use a single string
   strOffset = FLASHOFF_PATTERN_START + ((seg-1) * STRLEN_PATTERNS);
+  #endif
 }
 
 void FlashSetStr(char *str, int offset)
