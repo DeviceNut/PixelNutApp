@@ -6,7 +6,7 @@
 // box along with a Bluefruit LE SPI Friend module from Adafruit (www.adafruit.com),
 // can be powered from an adapter, and is sold attached to a strand of 300 WS2812B LEDs.
 //
-// To purchase one of these products: www.pixelnutstore.com//
+// To purchase one of these products: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU

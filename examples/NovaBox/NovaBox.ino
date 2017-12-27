@@ -5,7 +5,7 @@
 // A Teensy 3.2 processor module from PJRC (www.pjrc.com), in a box with an physical
 // controls, powered from an adapter, and attached to a strand of 300 WS2812B LEDs.
 //
-// To purchase one of these products: www.pixelnutstore.com
+// To purchase one of these products: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -38,11 +38,11 @@
 #define MAX_BRIGHTNESS          100         // allow for the maximum brightness
 #define DELAY_OFFSET            0           // no additional delay needed
 #define PIXEL_COUNT             300         // 5 meter strand of pixels
-#define DPIN_PIXELS             9           // drives output pixel data @3.3v
+#define DPIN_PIXELS             20          // drives output pixel data @3.3v
 #define DPIN_LED                13          // on-board red LED for status
 #define DPIN_PATTERN_BUTTON     2           // preset selection button
 #define DPIN_PAT_BUTTON_PREV    6           // prev pattern select button
-#define DPIN_TRIGGER_BUTTON     20          // trigger control button
+#define DPIN_TRIGGER_BUTTON     4           // trigger control button
 #define APIN_SEED               A0          // used to seed randomizer
 #define APIN_DELAY_POT          A1          // delay control potentiometer
 #define APIN_BRIGHT_POT         A3          // brightness control potentiometer

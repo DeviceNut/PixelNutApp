@@ -6,7 +6,7 @@
 // with a strand of WS2812B LEDs and one or more pixel rings from Adafruit,
 // powered by a battery, and controlled by the PixelNut! phone application.
 //
-// These can be special ordered from: www.pixelnutstore.com
+// These can be special ordered from: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU

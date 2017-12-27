@@ -8,7 +8,7 @@
 // installed inside a stylish quality Mad Hatter or Top Hat style head gear, and
 // attached to a 1 meter strand of 144 WS2812B LEDs.
 //
-// To purchase one of these products: www.pixelnutstore.com//
+// To purchase one of these products: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU

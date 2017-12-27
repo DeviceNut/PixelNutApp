@@ -6,7 +6,7 @@
 // with a strand of WS2812B LEDs, powered by a battery, and controlled by the
 // PixelNut! phone application.
 //
-// To purchase one of these products: www.pixelnutstore.com
+// To purchase one of these products: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU

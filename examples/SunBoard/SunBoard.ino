@@ -7,7 +7,7 @@
 // powered by a 2000-2500 mA lithium battery, uses 4 buttons for control, and is
 // attached to a 1 meter strand of 144 WS2812B LEDs.
 //
-// To purchase one of these products: www.pixelnutstore.com
+// To purchase one of these products: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@
 #define DEBUG_SIGNON            "PixelNut! Sun Board" // name displayed on debug output
 
 #define MAX_BRIGHTNESS          85          // limit brightness for longer battery life
-#define DELAY_OFFSET            -10         // speed it up a little
+#define DELAY_OFFSET            -15         // speed it up a little
 #define PIXEL_COUNT             144         // can support up to 240
 #define DPIN_PIXELS             17          // drives output pixel data (@Vin)
 #define DPIN_LED                13          // on-board red LED for status

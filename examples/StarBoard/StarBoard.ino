@@ -7,7 +7,7 @@
 // from Adafruit (www.adafruit.com), powered by a 2000-2500 mA lithium battery,
 // and attached to a 1 meter strand of 144 WS2812B LEDs.
 //
-// To purchase one of these products: www.pixelnutstore.com//
+// To purchase one of these products: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@
 
 #define PIXEL_COUNT             144         // standard 1 meter strand of pixels
 #define DPIN_PIXELS             17          // drives output pixel data (@Vin)
-#define DPIN_LED                5           // off-board red LED for status
+#define DPIN_LED                5           // if have off-board red LED for status
 #define APIN_SEED               A0          // used to seed randomizer
 
 #define BLUETOOTH_COMM          1           // include bluetooth code
