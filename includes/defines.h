@@ -11,9 +11,23 @@ See license.txt for the terms of this license.
 #define FEATURE_BITS            0           // extended feature bits
 #endif
 
+#if defined(SPARK)
+#define EXTERNAL_COMM           1           // external communications using WiFi
+#endif
+
 #if BLUETOOTH_COMM
-#define EXTERNAL_COMM           1           // external communications uses bluetooth
+#define EXTERNAL_COMM           1           // external communications using bluetooth
+#define USE_SPI                 1           // which uses SPI
+#endif
+
+#if USE_SPI
+#if defined(SPARK)
+SPI.setDataMode(SPI_MODE0);
+SPI.setBitOrder(MSBFIRST);
+SPI.setClockSpeed(4000000);
+#else
 #include <SPI.h>
+#endif
 #endif
 
 #if !defined(STRAND_COUNT)
