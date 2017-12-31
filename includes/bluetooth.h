@@ -55,6 +55,8 @@ void NotifyCB(NotifyMessage msgval, char *msgstr)
 void Bluetooth::setup(void)
 {
   inSetup = true;
+  isConnected = false;
+
   DBGOUT((F("Setting up bluetooth...")));
   bfruit.init(cmdStr, STRLEN_PATTERNS, NotifyCB);
 
@@ -63,10 +65,10 @@ void Bluetooth::setup(void)
   bfruit.sendCmdStr((char*)"ATZ", NULL);
   delay(1000); // Bluefruit takes 1 second to reboot
 
-  isConnected = false;
   inSetup = false;
 }
 
+// return false if failed to set name
 bool Bluetooth::setName(char *name)
 {
   // 14 chars for command + terminator
@@ -85,6 +87,7 @@ bool Bluetooth::setName(char *name)
   return true;
 }
 
+// return false if failed to send message
 // upon exit cmdStr[] has garbage from calling writeDataStr()
 bool Bluetooth::sendReply(char *instr)
 {

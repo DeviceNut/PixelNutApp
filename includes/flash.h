@@ -15,7 +15,7 @@ See license.txt for the terms of this license.
 #elif defined(__arm__) && defined(__MK20DX256__)      // Teensy 3.x
 #define EEPROM_BYTES            2048
 #elif defined(STM32F2XX)                              // Particle Photon
-#define LEN_EEPROM              2048
+#define EEPROM_BYTES            2048
 #elif defined(__AVR__)                                // all other AVR processors
 #define EEPROM_BYTES            1024
 #else                                                 // disable for unknown processor

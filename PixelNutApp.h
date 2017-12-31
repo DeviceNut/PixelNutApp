@@ -5,6 +5,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
+#if defined(ARDUINO)
 #include "includes/defines.h"       // Global Defines
 #include "includes/globals.h"       // Global Variables
 #include "includes/custom.h"        // Default Custom Code
@@ -14,6 +15,7 @@ See license.txt for the terms of this license.
 #include "includes/flash.h"         // Flash Storage Handling
 #include "includes/select.h"        // Preset Patterns Selection
 #include "includes/appcmds.h"       // Application Commands
+#include "includes/ethernet.h"      // Ethernet Communications
 #include "includes/bluetooth.h"     // Bluetooth Communications
 #include "includes/segments.h"      // Logical Segment Support
                                     // Physical Controls:
@@ -26,3 +28,25 @@ See license.txt for the terms of this license.
 #include "includes/count.h"         // Sets pixel count property in pixelnut engine
                                     // Main Routines:
 #include "includes/main.h"          // setup() and loop() functions
+
+#elif defined(SPARK)
+#include "defines.h"
+#include "globals.h"
+#include "custom.h"
+#include "leds.h"
+#include "dbgerr.h"
+#include "flash.h"
+#include "select.h"
+#include "appcmds.h"
+#include "ethernet.h"
+#include "bluetooth.h"
+#include "segments.h"
+#include "pattern.h"
+#include "trigger.h"
+#include "emode.h"
+#include "delay.h"
+#include "bright.h"
+#include "color.h"
+#include "count.h"
+#include "main.h"
+#endif

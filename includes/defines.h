@@ -42,20 +42,20 @@ SPI.setClockSpeed(4000000);
 #error("Must be same number of segments as strands (if more than one strand)")
 #endif
 
-#if ((STRAND_COUNT <= 1) && (SEGMENT_COUNT > 1)) // in order to support:
+#if ((STRAND_COUNT <= 1) && (SEGMENT_COUNT > 1)) // to support logical segments:
 #define PIXENGINE_OVERRIDE      1           // must extend engine class
 #define APPCMDS_OVERRIDE        1           // must extend appcmds class
 #define CUSTOM_OVERRIDE         1           // must extend custom class
 
-#elif BLUETOOTH_COMM
-#define CUSTOM_OVERRIDE         1           // must extend for bluetooth
+#elif EXTERNAL_COMM
+#define CUSTOM_OVERRIDE         1           // must extend for bluetooth/
 #endif
 
 #if !defined(EXTERNAL_COMM)
 #define EXTERNAL_COMM           0
 #endif
 
-#if !defined(CUSTOM_PATTERNS) // use internal patterns if no external client
+#if !defined(CUSTOM_PATTERNS) // MUST use internal patterns if no external client
 #define CUSTOM_PATTERNS         !EXTERNAL_COMM
 #endif
 

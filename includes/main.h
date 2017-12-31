@@ -61,7 +61,8 @@ void setup()
   #if EXTERNAL_COMM
   FlashStartup(); // get saved settings from flash
   #endif
-  #if BLUETOOTH_COMM
+
+  #if USE_SPI
   SPI.begin();    // initialize SPI library
   #endif
 

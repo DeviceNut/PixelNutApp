@@ -10,21 +10,19 @@ class CustomCode
 {
 public:
 
-  // called during main setup()
+  // called during setup()
   virtual void setup(void) {}
   
-  // return true if have command input,
-  // else false to check physical controls
+  // return true if have command input
   virtual bool control(void)
   {
-    // check if already have command input
-    return (cmdStr[0] != 0);
+    return (cmdStr[0] != 0); // true if already have command
   }
 
   // called in loop() if have new pattern to display
   virtual void display(void) {}
 
-  // overriden for external communications
+  // override for external communications
   virtual bool setName(char *name) { return false; }
   virtual bool sendReply(char *instr) { return false; }
 };
