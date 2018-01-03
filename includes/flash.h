@@ -56,7 +56,9 @@ void FlashSetProperties(void) {}
 #define FLASH_SEG_XT_CNT        7
 #define FLASH_SEG_FORCE         8 // 2 bytes
 
-#define FLASHOFF_PATTERN_START  (SEGMENT_COUNT * FLASH_SEG_LENGTH)
+#define FLASHOFF_DEVICE_NAME    0
+#define FLASHOFF_SEGMENT_DATA   MAXLEN_DEVICE_NAME
+#define FLASHOFF_PATTERN_START  (FLASHOFF_SEGMENT_DATA + (SEGMENT_COUNT * FLASH_SEG_LENGTH))
 #define FLASHOFF_PATTERN_END    (FLASHOFF_PATTERN_START + (STRLEN_PATTERNS * STRAND_COUNT))
 
 #if (FLASHOFF_PATTERN_END > EEPROM_BYTES)
@@ -66,7 +68,7 @@ void FlashSetProperties(void) {}
 #define EEPROM_FREE_START  FLASHOFF_PATTERN_END
 #define EEPROM_FREE_BYTES  (EEPROM_BYTES - EEPROM_FREE_START)
 
-static byte valOffset = 0;
+static byte valOffset = FLASHOFF_SEGMENT_DATA;
 static uint16_t strOffset = FLASHOFF_PATTERN_START;
 
 static void SetFlashValue(uint16_t offset, byte value) { EEPROM.write(valOffset + offset, value); }
@@ -74,11 +76,26 @@ static byte GetFlashValue(uint16_t offset) { return EEPROM.read(valOffset + offs
 
 void FlashSetSegment(byte seg)
 {
-  valOffset = ((seg-1) * FLASH_SEG_LENGTH);
+  valOffset = FLASHOFF_SEGMENT_DATA + ((seg-1) * FLASH_SEG_LENGTH);
 
   #if (STRAND_COUNT > 1) // logical segments use a single string
   strOffset = FLASHOFF_PATTERN_START + ((seg-1) * STRLEN_PATTERNS);
   #endif
+}
+
+void FlashSetName(char *name)
+{
+  for (int i = 0; i < MAXLEN_DEVICE_NAME; ++i)
+    EEPROM.write((FLASHOFF_DEVICE_NAME + i), name[i]);
+}
+
+void FlashGetName(char *name)
+{
+  for (int i = 0; i < MAXLEN_DEVICE_NAME; ++i)
+    name[i] = EEPROM.read(FLASHOFF_DEVICE_NAME + i);
+
+  name[MAXLEN_DEVICE_NAME] = 0;
+  DBGOUT((F("FlashGetName: \"%s\""), name));
 }
 
 void FlashSetStr(char *str, int offset)

@@ -39,7 +39,7 @@ Bluetooth bluetooth;
 
 // this will be called upon any bluetooth communication errors
 // upon return the hardware will be reset automatically for us
-void NotifyCB(NotifyMessage msgval, char *msgstr)
+void notifyCB(NotifyMessage msgval, char *msgstr)
 {
   DBGOUT((F("Bluetooth Notification %d: %s"), msgval, msgstr));
   ErrorHandler(3, msgval, bluetooth.inSetup); // hangs here if in setup
@@ -50,6 +50,19 @@ void NotifyCB(NotifyMessage msgval, char *msgstr)
   DBGOUT((F("Reset completed")));
 }
 
+// response is in cmdStr
+void getNameCB(void)
+{
+  char flashname[MAXLEN_DEVICE_NAME+1];
+  FlashGetName(flashname);
+
+  if (flashname[0] && strcmp(flashname, cmdStr))
+  {
+    DBGOUT((F("Resetting device name: %s"), flashname));
+    bluetooth.setName(flashname);
+  }
+}
+
 // does not return if fail because NotifyCB gets
 // called which will then hang in ErrorHandler
 void Bluetooth::setup(void)
@@ -58,18 +71,23 @@ void Bluetooth::setup(void)
   isConnected = false;
 
   DBGOUT((F("Setting up bluetooth...")));
-  bfruit.init(cmdStr, STRLEN_PATTERNS, NotifyCB);
+  bfruit.init(cmdStr, STRLEN_PATTERNS, notifyCB);
 
   // this seems to insure a clean start, otherwise
   // it sometimes gets stuck in connected mode:
   bfruit.sendCmdStr((char*)"ATZ", NULL);
   delay(1000); // Bluefruit takes 1 second to reboot
 
+  if (!bfruit.sendCmdStr((char*)"AT+GAPDEVNAME", getNameCB))
+  {
+    DBGOUT((F("BLE get name failed")));
+  }
+
   inSetup = false;
 }
 
 // return false if failed to set name
-bool Bluetooth::setName(char *name)
+bool setNameBLE(char *name)
 {
   // 14 chars for command + terminator
   // + beginning "P!" to name
@@ -85,6 +103,13 @@ bool Bluetooth::setName(char *name)
     return false;
   }
   return true;
+}
+
+// return false if failed to set name
+bool Bluetooth::setName(char *name)
+{
+  FlashSetName(name);
+  return setNameBLE(name);
 }
 
 // return false if failed to send message

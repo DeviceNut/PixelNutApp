@@ -13,8 +13,6 @@ See license.txt for the terms of this license.
 
 #if EXTERNAL_COMM
 
-#define MAXLEN_DEVICE_NAME      16          // maxlen for device name
-
 class AppCommands
 {
 public:
@@ -117,7 +115,7 @@ public:
         DBGOUT((F("Info Line #2")));
         outstr[0] = 0;
 
-        #if ((STRAND_COUNT > 1) || (SEGMENT_COUNT <= 1))
+        #if (STRAND_COUNT > 1)
         DBGOUT((F("  Segments:    %d"), -SEGMENT_COUNT));
         AddNumToStr(outstr, -SEGMENT_COUNT); // indicates physically separate segments
         #else
@@ -235,13 +233,11 @@ public:
         FlashSetForce(force);
         break;
       }
-      case '@': // change the bluetooth device name
+      case '@': // change the device name
       {
         ++instr; // skip '@'
         instr[MAXLEN_DEVICE_NAME] = 0; // limit length
         DBGOUT((F("Seting device name: \"%s\""), instr));
-      
-        // if this fails we've already reset the device
         if (!pCustomCode->setName(instr)) return false;
         break;
       }

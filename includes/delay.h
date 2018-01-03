@@ -72,6 +72,7 @@ static void CheckDelayPot(void)
 
 static void SetupDelayPot(void)
 {
+  DBGOUT((F("Delay: range=%d offset=%d msecs"), DELAY_RANGE, DELAY_OFFSET));
   SetDelayOffset( pc_delay.newValue );
 }
 

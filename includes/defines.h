@@ -7,12 +7,14 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
+#define MAXLEN_DEVICE_NAME      16          // maxlen for device name
+
 #if !defined(FEATURE_BITS)
 #define FEATURE_BITS            0           // extended feature bits
 #endif
 
-#if defined(SPARK)
-#define EXTERNAL_COMM           1           // external communications using WiFi
+#if ETHERNET_COMM
+#define EXTERNAL_COMM           1           // external communications using ethernet
 #endif
 
 #if BLUETOOTH_COMM
@@ -48,7 +50,7 @@ SPI.setClockSpeed(4000000);
 #define CUSTOM_OVERRIDE         1           // must extend custom class
 
 #elif EXTERNAL_COMM
-#define CUSTOM_OVERRIDE         1           // must extend for bluetooth/
+#define CUSTOM_OVERRIDE         1           // must extend for bluetooth/ethernet
 #endif
 
 #if !defined(EXTERNAL_COMM)
