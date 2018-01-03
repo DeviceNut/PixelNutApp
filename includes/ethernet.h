@@ -10,8 +10,9 @@ See license.txt for the terms of this license.
 */
 
 #if ETHERNET_COMM
+#if defined(SPARK)
 
-#if BE_WEB_SERVER
+#if WEB_SERVER
 TCPServer webServer = TCPServer(80);
 TCPClient webClient;
 #endif
@@ -40,21 +41,22 @@ public:
   uint32_t timePublished;
   byte countPublished;
 
-  #if BE_WEB_SERVER
+  #if WEB_SERVER
   uint32_t inctime = 1000; // 1 second checks for incoming messages
   uint32_t nextime = 0;
   #endif
 
-private:
+//private:
 
   void handler(const char *name, const char *data)
   {
-    if (!strcmp(name, "command"))
+    if (!strcmp(name, "PixelNutCommand"))
     {
+      DBGOUT((F("Particle cmd: %s"), data));
       strcpy(usercmd, data);
       havecmd = true;
     }
-    DBG( else DBGOUT((F("Subscribe name unknown: %s"), name)); )
+    DBG( else DBGOUT((F("Subscribe: name=%s data=%s"), name, data)); )
   }
 };
 Ethernet ethernet;
@@ -70,23 +72,14 @@ void Ethernet::setup(void)
   havecmd = false;
 
   DBGOUT((F("Particle Photon:")));
-  DBGOUT((F("  Version=%s"),      System.version().c_str()));
+  DBGOUT((F("  Version=%s"), System.version().c_str()));
   System.deviceID().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
-  DBGOUT((F("  DeviceID=%s"),     cmdStr));
-  DBGOUT((F("  Memory=%d bytes"), System.freeMemory()));
+  DBGOUT((F("  DeviceID=%s"), cmdStr));
+  DBGOUT((F("  Memory=%d free bytes"), System.freeMemory()));
   Time.timeStr().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
-  DBGOUT((F("  Time=%s bytes"),   cmdStr));
+  DBGOUT((F("  Time=%s"), cmdStr));
 
-  if (!Particle.subscribe("command", &Ethernet::handler, this))
-  {
-    DBGOUT((F("Spark registration failed")));
-    return;
-  }
-
-  #if BE_WEB_SERVER
-  DBGOUT((F("Starting web server...")));
-  webServer.begin();
-  #else
+  #if !USE_SOFTAP
   DBGOUT((F("Waiting for connection...")));
   Particle.connect();
 
@@ -100,7 +93,7 @@ void Ethernet::setup(void)
   if (!WiFi.ready())
   {
     DBGOUT((F("...connection failed")));
-    return;
+    ErrorHandler(3, 1, true); // does not return from this call
   }
   DBGOUT((F("...network found")));
 
@@ -109,7 +102,31 @@ void Ethernet::setup(void)
   Serial.print("Subnet:  "); Serial.println(WiFi.subnetMask());
   Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
   Serial.print("SSID:    "); Serial.println(WiFi.SSID());
+  if (WiFi.hasCredentials())
+  {
+    WiFiAccessPoint ap[5];
+    int count = WiFi.getCredentials(ap, 5);
+    DBGOUT((F("Credentials=%d"), count));
+    for (int i = 0; i < count; i++)
+        DBGOUT((F("  %d) SSID: %s"), i+1, ap[i].ssid));
+  }
   #endif
+  #endif
+
+  if (!Particle.subscribe("PixelNutCommand", &Ethernet::handler, this))
+  {
+    DBGOUT((F("Particle subscribe failed")));
+    ErrorHandler(3, 2, true); // does not return from this call
+  }
+  if (!Particle.publish("PixelNutResponse", "PixelNut! is online"))
+  {
+    DBGOUT((F("Particle publish failed")));
+    ErrorHandler(3, 3, true); // does not return from this call
+  }
+
+  #if WEB_SERVER
+  DBGOUT((F("Starting web server...")));
+  webServer.begin();
   #endif
 
   inSetup = false;
@@ -136,7 +153,7 @@ bool Ethernet::sendReply(char *instr)
   }
   else countPublished = 0;
 
-  if (!Particle.publish("response", instr))
+  if (!Particle.publish("PixelNutResponse", instr))
   {
     DBGOUT((F("Particle publish failed")));
     success = false;
@@ -157,14 +174,14 @@ bool Ethernet::control(void)
     return true;
   }
 
-  #if BE_WEB_SERVER
+  #if WEB_SERVER
   uint32_t thetime = pixelNutSupport.getMsecs();
 
-  if (thetime > nextime) // callbacks every 
+  if (thetime > nextime) // callbacks every second
   {
     if (webClient.connected() && webClient.available())
     {
-      DBGOUT((F("Web is connected!!")));
+      //DBGOUT((F("Web is connected!!")));
 
       webClient.print("<html><body>PixelNut! Time: ");
       webClient.print(millis()/1000);
@@ -179,19 +196,17 @@ bool Ethernet::control(void)
   }
   #endif
 
-  if (havecmd)
-  {
-    strcpy(cmdStr, usercmd);
-    havecmd = false;
+  if (!havecmd) return false;
 
-    DBGOUT((F("Web --> \"%s\""), cmdStr));
-    if (pAppCmd->execCmd()) CheckExecCmd();
+  strcpy(cmdStr, usercmd);
+  havecmd = false;
 
-    return true;
-  }
+  DBGOUT((F("Web --> \"%s\""), cmdStr));
+  if (pAppCmd->execCmd()) CheckExecCmd();
 
-  return false;  // allow for alternative command input
+  return true;
 };
 
+#endif // defined(SPARK)
 #endif // ETHERNET_COMM
 //========================================================================================

@@ -13,6 +13,11 @@ See license.txt for the terms of this license.
 #define DBG(x) x
 #define DBGOUT(x) MsgFormat x
 
+#if defined(SPARK)
+#undef F
+#define F(x) x
+#endif
+
 // debug output string must be longer than pattern strings and any debug format string
 #define MAXLEN_FMTSTR (STRLEN_PATTERNS + 20)
 #define MAXLEN_DBGSTR (STRLEN_PATTERNS + 70)
@@ -20,6 +25,17 @@ See license.txt for the terms of this license.
 char fmtstr[MAXLEN_FMTSTR];   // holds debug format string
 char outstr[MAXLEN_DBGSTR];   // holds debug output string
 
+#if defined(SPARK)
+void MsgFormat(const char *fmtstr, ...)
+{
+  va_list va;
+  va_start(va, fmtstr);
+  vsnprintf(outstr, MAXLEN_DBGSTR, fmtstr, va);
+  va_end(va);
+
+  Serial.println(outstr);
+}
+#else
 void MsgFormat(const __FlashStringHelper *str_in_code, ...)
 {
   strcpy_P(fmtstr, (char *)str_in_code);
@@ -31,6 +47,7 @@ void MsgFormat(const __FlashStringHelper *str_in_code, ...)
 
   Serial.println(outstr);
 }
+#endif
 
 void SetupDebugInterface(void)
 {
@@ -41,7 +58,7 @@ void SetupDebugInterface(void)
 
   #if defined(SPARK)
   // on Windows only: user should have serial terminal closed first,
-  // then start running this, and then press a key to continue
+  // then start running this, and then open terminal and press a key
   while (!Serial.available()) BlinkStatusLED(1,0);
 
   #else // !SPARK
