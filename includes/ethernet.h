@@ -12,6 +12,8 @@ See license.txt for the terms of this license.
 #if ETHERNET_COMM
 #if defined(SPARK)
 
+#define SPARK_SUBNAME_DEVICE  "particle/device/name"
+
 #if WEB_SERVER
 TCPServer webServer = TCPServer(80);
 TCPClient webClient;
@@ -38,26 +40,31 @@ public:
   bool havecmd;
   char usercmd[STRLEN_PATTERNS];
   uint16_t update_counter;
-  uint32_t timePublished;
-  byte countPublished;
+uint32_t timePublished;
+byte countPublished;
 
-  #if WEB_SERVER
-  uint32_t inctime = 1000; // 1 second checks for incoming messages
-  uint32_t nextime = 0;
-  #endif
+#if WEB_SERVER
+uint32_t inctime = 1000; // 1 second checks for incoming messages
+uint32_t nextime = 0;
+#endif
 
 //private:
 
-  void handler(const char *name, const char *data)
+void handler(const char *name, const char *data)
+{
+  if (!strcmp(name, "PixelNutCommand"))
   {
-    if (!strcmp(name, "PixelNutCommand"))
-    {
-      DBGOUT((F("Particle cmd: %s"), data));
-      strcpy(usercmd, data);
-      havecmd = true;
-    }
-    DBG( else DBGOUT((F("Subscribe: name=%s data=%s"), name, data)); )
+    DBGOUT((F("Particle cmd: %s"), data));
+    strcpy(usercmd, data);
+    havecmd = true;
   }
+  else if (!strcmp(name, SPARK_SUBNAME_DEVICE))
+  {
+    DBGOUT((F("Saving device name: %s"), data));
+    FlashSetName((char*)data);
+  }
+  DBG(else DBGOUT((F("Subscribe: name=%s data=%s"), name, data));)
+}
 };
 Ethernet ethernet;
 
@@ -79,7 +86,7 @@ void Ethernet::setup(void)
   Time.timeStr().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
   DBGOUT((F("  Time=%s"), cmdStr));
 
-  #if !USE_SOFTAP
+#if !USE_SOFTAP
   DBGOUT((F("Waiting for connection...")));
   Particle.connect();
 
@@ -87,7 +94,7 @@ void Ethernet::setup(void)
   while (!Particle.connected())
   {
     Particle.process();
-    BlinkStatusLED(1,0);
+    BlinkStatusLED(1, 0);
     if (millis() > tout) break;
   }
   if (!WiFi.ready())
@@ -97,31 +104,45 @@ void Ethernet::setup(void)
   }
   DBGOUT((F("...network found")));
 
-  #if DEBUG_OUTPUT
+#if DEBUG_OUTPUT
   Serial.print("LocalIP: "); Serial.println(WiFi.localIP());
   Serial.print("Subnet:  "); Serial.println(WiFi.subnetMask());
   Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
   Serial.print("SSID:    "); Serial.println(WiFi.SSID());
+  /*
   if (WiFi.hasCredentials())
   {
     WiFiAccessPoint ap[5];
     int count = WiFi.getCredentials(ap, 5);
     DBGOUT((F("Credentials=%d"), count));
     for (int i = 0; i < count; i++)
-        DBGOUT((F("  %d) SSID: %s"), i+1, ap[i].ssid));
+    DBGOUT((F("  %d) SSID: %s"), i+1, ap[i].ssid));
   }
-  #endif
-  #endif
+  */
+#endif
+#endif
 
   if (!Particle.subscribe("PixelNutCommand", &Ethernet::handler, this))
   {
     DBGOUT((F("Particle subscribe failed")));
     ErrorHandler(3, 2, true); // does not return from this call
   }
-  if (!Particle.publish("PixelNutResponse", "PixelNut! is online"))
+  if (!Particle.publish("PixelNutResponse", "PixelNut! is online", 60, PRIVATE))
   {
     DBGOUT((F("Particle publish failed")));
     ErrorHandler(3, 3, true); // does not return from this call
+  }
+
+  char flashname[MAXLEN_DEVICE_NAME+1];
+  FlashGetName(flashname);
+  if (!flashname[0])
+  {
+    if (!Particle.subscribe(SPARK_SUBNAME_DEVICE, &Ethernet::handler, this) ||
+        !Particle.publish(SPARK_SUBNAME_DEVICE))
+    {
+      DBGOUT((F("Retrieving device name failed")));
+      ErrorHandler(3, 4, true); // does not return from this call
+    }
   }
 
   #if WEB_SERVER

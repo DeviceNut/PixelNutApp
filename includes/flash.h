@@ -59,7 +59,7 @@ void FlashSetProperties(void) {}
 #define FLASHOFF_DEVICE_NAME    0
 #define FLASHOFF_SEGMENT_DATA   MAXLEN_DEVICE_NAME
 #define FLASHOFF_PATTERN_START  (FLASHOFF_SEGMENT_DATA + (SEGMENT_COUNT * FLASH_SEG_LENGTH))
-#define FLASHOFF_PATTERN_END    (FLASHOFF_PATTERN_START + (STRLEN_PATTERNS * STRAND_COUNT))
+#define FLASHOFF_PATTERN_END    (FLASHOFF_PATTERN_START + (STRAND_COUNT * STRLEN_PATTERNS))
 
 #if (FLASHOFF_PATTERN_END > EEPROM_BYTES)
 #error("Not enough flash space to store external pattern string(s)");
@@ -176,7 +176,7 @@ void FlashStartup(void)
 void FlashFormat(void)
 {
   #if EEPROM_FORMAT
-  for (int i = 0; i < EEPROM_BYTES; ++i) SetFlashValue(i, 0);
+  for (int i = 0; i < EEPROM_BYTES; ++i) EEPROM.write(i, 0);
   DBGOUT((F("Cleared %d bytes of EEPROM"), EEPROM_BYTES));
   ErrorHandler(1, 0, true);
   #endif
