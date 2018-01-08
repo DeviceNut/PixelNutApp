@@ -59,7 +59,7 @@ void SetupDebugInterface(void)
   #if defined(SPARK)
   // on Windows only: user should have serial terminal closed first,
   // then start running this, and then open terminal and press a key
-  while (!Serial.available()) BlinkStatusLED(1,0);
+  while (!Serial.available()) BlinkStatusLED(0, 1);
 
   #else // !SPARK
   {

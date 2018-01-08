@@ -178,7 +178,7 @@ void FlashFormat(void)
   #if EEPROM_FORMAT
   for (int i = 0; i < EEPROM_BYTES; ++i) EEPROM.write(i, 0);
   DBGOUT((F("Cleared %d bytes of EEPROM"), EEPROM_BYTES));
-  ErrorHandler(1, 0, true);
+  ErrorHandler(0, 1, true);
   #endif
 }
 
