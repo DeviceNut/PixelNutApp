@@ -193,7 +193,7 @@ static void CommandHandler(const char *name, const char *data)
   DBG(else DBGOUT((F("Subscribe: name=%s data=%s"), name, data));)
 }
 
-static void ConnectToCloud(void)
+static bool ConnectToCloud(void)
 {
   timePublished = pixelNutSupport.getMsecs();
   countPublished = 0;
@@ -201,10 +201,30 @@ static void ConnectToCloud(void)
 
   DBGOUT((F("Connecting to network...")));
   Particle.connect();
+
+  int count = 0;
+  uint32_t time = millis() + 1000;
   while (!WiFi.ready())
   {
-    Particle.process(); // don't need this since have system thread
+    Particle.process();   // don't need this since have system thread
     BlinkStatusLED(1, 0); // connecting to cloud with local WiFi
+
+    if (millis() > time)  // timeout: bad credentials?
+    {
+      if (++count >= 10)
+      {
+        if (!WiFi.clearCredentials())
+        {
+          DBGOUT((F("Failed to clear WiFi credentials")));
+          // what else can we do here?
+        }
+
+        EEPROM.write(FLASHOFF_PATTERN_END, 1);
+        DBGOUT((F("Failed: use Particle App to configure")));
+        return false;
+      }
+      DBGOUT((F("...waiting to connect")));
+    }
   }
 
   #if DEBUG_OUTPUT
@@ -238,6 +258,7 @@ static void ConnectToCloud(void)
   }
 
   DBGOUT((F("Connected to Particle Cloud")));
+  return true;
 }
 
 static void SetupDevice(void)
@@ -253,45 +274,47 @@ static void SetupDevice(void)
   //    connect to and be controlled from the internet.
   //    (createWiFi = false, doSoftAP = false)
 
-  createWiFi = EEPROM.read(FLASHOFF_PATTERN_END) == 0;
-  if (createWiFi) doSoftAP = true;
-  else doSoftAP = !WiFi.hasCredentials();
-
-  FlashGetName(deviceNameFlash);
-  haveUserCmd = false;
-
-  if (doSoftAP)
+  do
   {
-    if ((deviceNameFlash[0] != 'P') || (deviceNameFlash[1] != '!'))
+    createWiFi = EEPROM.read(FLASHOFF_PATTERN_END) == 0;
+    if (createWiFi) doSoftAP = true;
+    else doSoftAP = !WiFi.hasCredentials();
+
+    FlashGetName(deviceNameFlash);
+    haveUserCmd = false;
+
+    if (doSoftAP)
     {
-      System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, "P!MyDevice");
-      System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, "!");
-    }
-
-    DBGOUT((F("Setting SoftAP:  P!mode=%s..."), (createWiFi ? "true" : "false")));
-    if (!WiFi.listening()) WiFi.listen(); // put into SoftAP mode if not already
-
-    if (createWiFi) return; // use PixelNutCtrl application
-
-    uint32_t time = millis() + 1000;
-    while(true)
-    {
-      if (millis() > time)
+      if ((deviceNameFlash[0] != 'P') || (deviceNameFlash[1] != '!'))
       {
-        BlinkStatusLED(0, 2); // connect with browser to set SSID
-        
-        //DBGOUT((F("Listening=%d"), WiFi.listening()));
-        //DBGOUT((F("Connecting=%d"), WiFi.connecting()));
-        if (!WiFi.listening() && !WiFi.connecting())
-          break;
+        System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, "P!MyDevice");
+        System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, "!");
+      }
 
-        Particle.process();
-        time = millis() + 1000;
+      DBGOUT((F("Setting SoftAP:  P!mode=%s..."), (createWiFi ? "true" : "false")));
+      if (!WiFi.listening()) WiFi.listen(); // put into SoftAP mode if not already
+
+      if (createWiFi) return; // use PixelNutCtrl application
+
+      uint32_t time = millis() + 1000;
+      while(true)
+      {
+        if (millis() > time)
+        {
+          BlinkStatusLED(0, 2); // connect with browser to set SSID
+        
+          //DBGOUT((F("Listening=%d"), WiFi.listening()));
+          //DBGOUT((F("Connecting=%d"), WiFi.connecting()));
+          if (!WiFi.listening() && !WiFi.connecting())
+            break;
+
+          Particle.process();
+          time = millis() + 1000;
+        }
       }
     }
   }
-
-  ConnectToCloud();
+  while (!ConnectToCloud());
 }
 
 void Ethernet::setup(void)
@@ -304,6 +327,7 @@ void Ethernet::setup(void)
   Time.timeStr().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
   DBGOUT((F("  Time=%s"), cmdStr));
 
+  //EEPROM.write(FLASHOFF_PATTERN_END, 0); // force starting in our softAP mode
   SetupDevice();
 }
 
