@@ -57,7 +57,12 @@ void FlashSetProperties(void) {}
 #define FLASH_SEG_FORCE         8 // 2 bytes
 
 #define FLASHOFF_DEVICE_NAME    0
+#if EXTERNAL_COMM
 #define FLASHOFF_SEGMENT_DATA   MAXLEN_DEVICE_NAME
+#else
+#define FLASHOFF_SEGMENT_DATA   0
+#endif
+
 #define FLASHOFF_PATTERN_START  (FLASHOFF_SEGMENT_DATA + (SEGMENT_COUNT * FLASH_SEG_LENGTH))
 #define FLASHOFF_PATTERN_END    (FLASHOFF_PATTERN_START + (STRAND_COUNT * STRLEN_PATTERNS))
 
@@ -85,6 +90,7 @@ void FlashSetSegment(byte seg)
 
 void FlashSetName(char *name)
 {
+  DBGOUT((F("FlashSetName: \"%s\""), name));
   for (int i = 0; i < MAXLEN_DEVICE_NAME; ++i)
     EEPROM.write((FLASHOFF_DEVICE_NAME + i), name[i]);
 }
