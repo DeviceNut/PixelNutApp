@@ -237,6 +237,15 @@ public:
       {
         ++instr; // skip '@'
         instr[MAXLEN_DEVICE_NAME] = 0; // limit length
+
+        // remove trailing spaces
+        int i = strlen(instr)-1;
+        while (i > 0)
+        {
+          if (instr[i] != ' ') break;
+          instr[i--] = 0;
+        }
+
         DBGOUT((F("Seting device name: \"%s\""), instr));
         if (!pCustomCode->setName(instr)) return false;
         break;

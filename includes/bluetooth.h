@@ -50,16 +50,37 @@ void notifyCB(NotifyMessage msgval, char *msgstr)
   DBGOUT((F("Reset completed")));
 }
 
+// return false if failed to set name
+bool setNameBLE(char *name)
+{
+  // 14 chars for command + terminator
+  // + beginning "P!" to name
+  char str[MAXLEN_DEVICE_NAME+2+14+1];
+  strcpy(str, (char*)"AT+GAPDEVNAME=");
+  strcpy((str+14), "P!");
+  strcpy((str+16), name);
+
+  DBGOUT((F("SetName: %s"), str));
+  if (!bfruit.sendCmdStr(str, NULL))
+  {
+    DBGOUT((F("BLE set name failed")));
+    return false;
+  }
+  return true;
+}
+
 // response is in cmdStr
 void getNameCB(void)
 {
-  char flashname[MAXLEN_DEVICE_NAME+1];
-  FlashGetName(flashname);
-
-  if (flashname[0] && strcmp(flashname, cmdStr))
+  if (strcmp(cmdStr, "OK")) // ignore this
   {
-    DBGOUT((F("Resetting device name: %s"), flashname));
-    bluetooth.setName(flashname);
+    DBGOUT((F("BLE DevName: \"%s\""), cmdStr));
+
+    char flashname[MAXLEN_DEVICE_NAME+1];
+    FlashGetName(flashname);
+
+    if (flashname[0] && ((strlen(cmdStr) < 2) || strcmp(flashname, cmdStr+2)))
+      setNameBLE(flashname);
   }
 }
 
@@ -84,25 +105,6 @@ void Bluetooth::setup(void)
   }
 
   inSetup = false;
-}
-
-// return false if failed to set name
-bool setNameBLE(char *name)
-{
-  // 14 chars for command + terminator
-  // + beginning "P!" to name
-  char str[MAXLEN_DEVICE_NAME+2+14+1];
-  strcpy(str, (char*)"AT+GAPDEVNAME=");
-  strcpy((str+14), "P!");
-  strcpy((str+16), name);
-
-  DBGOUT((F("SetName: %s"), str));
-  if (!bfruit.sendCmdStr(str, NULL))
-  {
-    DBGOUT((F("BLE set name failed")));
-    return false;
-  }
-  return true;
 }
 
 // return false if failed to set name

@@ -1,4 +1,4 @@
-// PixelNutApp Bluetooth Communications
+// PixelNutApp Ethernet Communications
 //
 // Uses global variables: 'pixelNutSupport', 'cmdStr', 'pAppCmd'.
 // Calls global routines: 'CheckExecCmd', 'ErrorHandler'.
@@ -69,97 +69,65 @@ static const char indexpage[] = "<!DOCTYPE html><html><head><meta name='viewport
 
 void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* body, Writer* result, void* reserved)
 {
-    DBGOUT((F("SoftAP(%d): URL=%s"), createWiFi, url));
+  DBGOUT((F("SoftAP(%d): URL=%s"), createWiFi, url));
 
-    if (createWiFi)
+  if (createWiFi)
+  {
+    if (!strcmp(url, "/index") || !strcmp(url, "/index.html"))
     {
-      if (!strcmp(url, "/index") || !strcmp(url, "/index.html"))
-      {
-          cb(cbArg, 0, 200, "text/html", nullptr);
-          result->write(indexpage);
-          return;
-      }
-      else if (!strcmp(url, "/info"))
-      {
-          cb(cbArg, 0, 200, "text/plain", nullptr);
+      cb(cbArg, 0, 200, "text/html", nullptr);
+      result->write(indexpage);
+    }
+    else if (!strcmp(url, "/command"))
+    {
+      cb(cbArg, 0, 200, "text/plain", nullptr);
 
+      if (body->bytes_left)
+      {
+        char *data = body->fetch_as_string();
+        //DBGOUT((F("Cmd=\"%s\""), data));
+
+        if (*data == '?')
+        {
           htmlReplyString[0] = 0;
-          strcpy(cmdStr, "?");
+          strcpy(cmdStr, data);
           pAppCmd->execCmd();
-
           result->write(htmlReplyString);
-          return;
-      }
-
-      #if (SEGMENT_COUNT > 1)
-      else if (!strcmp(url, "/segments"))
-      {
-          cb(cbArg, 0, 200, "text/plain", nullptr);
-
-          htmlReplyString[0] = 0;
-          strcpy(cmdStr, "?S");
-          pAppCmd->execCmd();
-
-          result->write(htmlReplyString);
-          return;
-      }
-      #endif
-
-      #if CUSTOM_PATTERNS
-      else if (!strcmp(url, "/patterns"))
-      {
-          cb(cbArg, 0, 200, "text/plain", nullptr);
-
-          htmlReplyString[0] = 0;
-          strcpy(cmdStr, "?P");
-          pAppCmd->execCmd();
-
-          result->write(htmlReplyString);
-          return;
-      }
-      #endif
-
-      else if (!strcmp(url, "/command"))
-      {
-          cb(cbArg, 0, 200, "text/plain", nullptr);
-
-          if (body->bytes_left)
-          {
-            char *data = body->fetch_as_string();
-            //DBGOUT((F("Cmd=\"%s\""), data));
-            strcpy(userCmdStr, data);
-            haveUserCmd = true;
-            free(data);
-          }
-
+        }
+        else
+        {
+          strcpy(userCmdStr, data);
+          haveUserCmd = true;
+          free(data);
           result->write("ok");
-          return;
+        }
       }
     }
-    else
+    else cb(cbArg, 0, 404, nullptr, nullptr);
+  }
+  else
+  {
+    int8_t idx = 0;
+    for (;;idx++)
     {
-      int8_t idx = 0;
-      for (;;idx++)
+      Page& p = myPages[idx];
+      if (!p.url)
       {
-          Page& p = myPages[idx];
-          if (!p.url)
-          {
-              idx = -1;
-              break;
-          }
-          else if (strcmp(url, p.url)==0)
-            break;
+        idx = -1;
+        break;
       }
-
-      if (idx != -1)
-      {
-          cb(cbArg, 0, 200, myPages[idx].mime_type, nullptr);
-          result->write(myPages[idx].data);
-          return;
-      }
+      else if (strcmp(url, p.url)==0)
+        break;
     }
 
-    cb(cbArg, 0, 404, nullptr, nullptr);
+    if (idx != -1)
+    {
+      cb(cbArg, 0, 200, myPages[idx].mime_type, nullptr);
+      result->write(myPages[idx].data);
+      return;
+    }
+    else cb(cbArg, 0, 404, nullptr, nullptr);
+  }
 }
 
 // Private network IP address: http://192.168.0.1
@@ -378,21 +346,8 @@ bool Ethernet::sendReply(char *instr)
   return success;
 }
 
-// return true if have command input
-bool Ethernet::control(void)
+static void ProcessCmd(void)
 {
-  // check if already have command input
-  if (cmdStr[0] != 0)
-  {
-    DBGOUT((F("Web: have input=\"%s\""), cmdStr));
-    return true;
-  }
-
-  if (!haveUserCmd) return false;
-  strcpy(cmdStr, userCmdStr);
-  userCmdStr[0] = 0;
-  haveUserCmd = false;
-
   DBGOUT((F("Web --> \"%s\""), cmdStr));
 
   if (!strncmp(cmdStr, "*wifi*", 6))
@@ -459,8 +414,31 @@ bool Ethernet::control(void)
     }
   }
   else if (pAppCmd->execCmd()) CheckExecCmd();
+}
 
-  cmdStr[0] = 0; // clear command
+// return true if have command input
+bool Ethernet::control(void)
+{
+  // check if already have command input
+  if (cmdStr[0] != 0)
+  {
+    DBGOUT((F("Web: have input=\"%s\""), cmdStr));
+    return true;
+  }
+
+  if (!haveUserCmd) return false;
+
+  char *cmd = strtok(userCmdStr, "\n"); // separate cmds by newlines
+  while (cmd != NULL)
+  {
+    strcpy(cmdStr, cmd);
+    ProcessCmd();
+    cmd = strtok(NULL, "\n");
+  }
+
+  haveUserCmd = false;
+  userCmdStr[0] = 0;
+  cmdStr[0] = 0;
 
   return false;
 };
