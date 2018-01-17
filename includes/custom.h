@@ -13,10 +13,10 @@ public:
   // called during setup()
   virtual void setup(void) {}
   
-  // return true if have command input
+  // return true if handling commands externally
   virtual bool control(void)
   {
-    return (cmdStr[0] != 0); // true if already have command
+    return false; // check physical controls
   }
 
   // called in loop() if have new pattern to display

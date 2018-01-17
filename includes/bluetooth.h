@@ -142,16 +142,9 @@ static void ResponseCB(void)
   if (pAppCmd->execCmd()) CheckExecCmd();
 }
 
-// return true if have command input
+// return true if handling commands externally
 bool Bluetooth::control(void)
 {
-  // check if already have command input
-  if (cmdStr[0] != 0)
-  {
-    DBGOUT((F("BLE: have input=\"%s\""), cmdStr));
-    return true;
-  }
-
   if (msecsConnect < pixelNutSupport.getMsecs())
   {
     //DBGOUT((F("BLE: check for connection...")));
@@ -168,10 +161,9 @@ bool Bluetooth::control(void)
     {
       DBGOUT((F("BLE read data failed")));
     }
-    if (cmdStr[0]) return true; // have command
   }
 
-  return false;  // allow for alternative command input
+  return false;  // allow for physical controls
 };
 
 #endif // BLUETOOTH_COMM
