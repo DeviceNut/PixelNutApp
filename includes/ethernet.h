@@ -54,11 +54,6 @@ Page myPages[] =
 static bool doSoftAP;
 static bool createWiFi;
 
-static bool haveUserCmd;
-static char userCmdStr[STRLEN_PATTERNS];
-
-static char deviceNameFlash[MAXLEN_DEVICE_NAME+1];
-
 static uint16_t update_counter;
 static uint32_t timePublished;
 static byte countPublished;
@@ -66,6 +61,9 @@ static byte countPublished;
 static char htmlReplyString[1000]; // long enough for maximum ?, ?S, ?P output strings
 
 static const char indexpage[] = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1'><title>PixelNut!</title></head><body><h1>Hello from PixelNut!</h1></body></html>";
+
+static bool ConnectToCloud(void);
+static void CmdSequence(const char *data);
 
 void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* body, Writer* result, void* reserved)
 {
@@ -96,13 +94,15 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
         }
         else
         {
-          strcpy(userCmdStr, data);
-          haveUserCmd = true;
+          CmdSequence(data);
           free(data);
           result->write("ok");
         }
       }
     }
+    //else if (!strcmp(url, "/generate_204")) 
+    //  cb(cbArg, 0, 204, nullptr, nullptr);
+
     else cb(cbArg, 0, 404, nullptr, nullptr);
   }
   else
@@ -133,100 +133,16 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
 // Private network IP address: http://192.168.0.1
 STARTUP(softap_set_application_page_handler(httpHandler, nullptr));
 
-class Ethernet : public CustomCode
+static void SetDeviceName(void)
 {
-public:
+  char name[MAXLEN_DEVICE_NAME+3];
+  strcpy(name, "P!");
+  FlashGetName(name+2);
+  if (name[2] == 0) strcat(name, "MyDevice");
 
-  void setup(void);
-  bool setName(char *name);
-  bool sendReply(char *instr);
-  bool control(void);
-
-};
-Ethernet ethernet;
-
-static void CommandHandler(const char *name, const char *data)
-{
-  if (!strcmp(name, "PixelNutCommand"))
-  {
-    //DBGOUT((F("Particle cmd: %s"), data));
-    strcpy(userCmdStr, data);
-    haveUserCmd = true;
-  }
-  else if (!strcmp(name, SPARK_SUBNAME_DEVICE))
-  {
-    DBGOUT((F("Saving device name: %s"), data));
-    FlashSetName((char*)data);
-  }
-  DBG(else DBGOUT((F("Subscribe: name=%s data=%s"), name, data));)
-}
-
-static bool ConnectToCloud(void)
-{
-  timePublished = pixelNutSupport.getMsecs();
-  countPublished = 0;
-  update_counter = 0;
-
-  DBGOUT((F("Connecting to network...")));
-  Particle.connect();
-
-  int count = 0;
-  uint32_t time = millis() + 1000;
-  while (!WiFi.ready())
-  {
-    Particle.process();   // don't need this since have system thread
-    BlinkStatusLED(1, 0); // connecting to cloud with local WiFi
-
-    if (millis() > time)  // timeout: bad credentials?
-    {
-      if (++count >= 10)
-      {
-        if (!WiFi.clearCredentials())
-        {
-          DBGOUT((F("Failed to clear WiFi credentials")));
-          // what else can we do here?
-        }
-
-        EEPROM.write(FLASHOFF_PATTERN_END, 1);
-        DBGOUT((F("Failed: use Particle App to configure")));
-        return false;
-      }
-      DBGOUT((F("...waiting to connect")));
-    }
-  }
-
-  #if DEBUG_OUTPUT
-  Serial.print("  SSID:    "); Serial.println(WiFi.SSID());
-  Serial.print("  LocalIP: "); Serial.println(WiFi.localIP());
-  //Serial.print("  Subnet:  "); Serial.println(WiFi.subnetMask());
-  //Serial.print("  Gateway: "); Serial.println(WiFi.gatewayIP());
-  #endif
-
-  DBGOUT((F("Setting up Pub/Sub...")));
-
-  if (!Particle.subscribe("PixelNutCommand", CommandHandler))
-  {
-    DBGOUT((F("Particle subscribe failed")));
-    ErrorHandler(3, 1, true); // does not return from this call
-  }
-  if (!Particle.publish("PixelNutResponse", "PixelNut! is online", 60, PRIVATE))
-  {
-    DBGOUT((F("Particle publish failed")));
-    ErrorHandler(3, 2, true); // does not return from this call
-  }
-
-  if (deviceNameFlash[0] == 0)
-  {
-    if (!Particle.subscribe(SPARK_SUBNAME_DEVICE, CommandHandler) ||
-        !Particle.publish(SPARK_SUBNAME_DEVICE))
-    {
-      DBGOUT((F("Retrieving device name failed")));
-      ErrorHandler(3, 3, true); // does not return from this call
-    }
-  }
-
-  DBGOUT((F("Connected to Particle Cloud")));
-  return true;
+  DBGOUT((F("SoftAP name: \"%s\""), name));
+  System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, name);
+  System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, "!");
 }
 
 static void SetupDevice(void)
@@ -248,16 +164,9 @@ static void SetupDevice(void)
     if (createWiFi) doSoftAP = true;
     else doSoftAP = !WiFi.hasCredentials();
 
-    FlashGetName(deviceNameFlash);
-    haveUserCmd = false;
-
     if (doSoftAP)
     {
-      if ((deviceNameFlash[0] != 'P') || (deviceNameFlash[1] != '!'))
-      {
-        System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, "P!MyDevice");
-        System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, "!");
-      }
+      SetDeviceName();
 
       DBGOUT((F("Setting SoftAP:  P!mode=%s..."), (createWiFi ? "true" : "false")));
       if (!WiFi.listening()) WiFi.listen(); // put into SoftAP mode if not already
@@ -285,65 +194,13 @@ static void SetupDevice(void)
   while (!ConnectToCloud());
 }
 
-void Ethernet::setup(void)
+static void RestartDevice(void)
 {
-  DBGOUT((F("Particle Photon:")));
-  DBGOUT((F("  Version=%s"), System.version().c_str()));
-  System.deviceID().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
-  DBGOUT((F("  DeviceID=%s"), cmdStr));
-  DBGOUT((F("  Memory=%d free bytes"), System.freeMemory()));
-  Time.timeStr().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
-  DBGOUT((F("  Time=%s"), cmdStr));
+  WiFi.listen(false); // turn off listening mode
+  delay(2000); // pause 2 seconds to let settle
 
-  //EEPROM.write(FLASHOFF_PATTERN_END, 0); // force starting in our softAP mode
-  SetupDevice();
-}
-
-// return false if failed to set name
-bool Ethernet::setName(char *name)
-{
-  if (!strcmp(name, "SSID"))
-  {
-    DBGOUT((F("Device => user config")));
-    EEPROM.write(FLASHOFF_PATTERN_END, 1);
-  }
-  else FlashSetName((char*)name);
-
-  return true;
-}
-
-// return false if failed to send message
-bool Ethernet::sendReply(char *instr)
-{
-  DBGOUT((F("Web <-- \"%s\""), instr));
-  bool success = true;
-
-  if (createWiFi)
-  {
-    strcat(htmlReplyString, instr);
-    strcat(htmlReplyString, "\r\n");
-  }
-  else
-  {
-    // can only publish 4 at once, then once a second
-    uint32_t msecs = (pixelNutSupport.getMsecs() - timePublished);
-    if (msecs < 1000)
-    {
-      if (++countPublished >= 4)
-        delay(1000 - msecs);
-    }
-    else countPublished = 0;
-
-    if (!Particle.publish("PixelNutResponse", instr))
-    {
-      DBGOUT((F("Particle publish failed")));
-      success = false;
-    }
-
-    timePublished = pixelNutSupport.getMsecs();
-  }
-
-  return success;
+  SetupDevice(); // restart setup process
+  BlinkStatusLED(2, 0); // indicate success
 }
 
 static void ProcessCmd(void)
@@ -404,43 +261,203 @@ static void ProcessCmd(void)
       EEPROM.write(FLASHOFF_PATTERN_END, 0); // use own SoftAP mode
     }
 
-    if (newmode)
-    {
-      WiFi.listen(false); // turn off listening mode
-      delay(2000); // pause 2 seconds to let settle
-
-      SetupDevice(); // restart setup process
-      BlinkStatusLED(2, 0); // indicate success
-    }
+    if (newmode) RestartDevice();
   }
   else if (pAppCmd->execCmd()) CheckExecCmd();
 }
 
-// return true if have command input
+static void CmdSequence(const char *data)
+{
+  const char *p = data;
+  while (*p)
+  {
+    int i = 0;
+    while (*p && (*p != '\n'))
+      cmdStr[i++] = *p++;
+
+    cmdStr[i] = 0;
+    if (*p == '\n') ++p;
+
+    if (i > 0) ProcessCmd();
+  }
+}
+
+static void CommandHandler(const char *name, const char *data)
+{
+  if (!strcmp(name, "PixelNutCommand"))
+    CmdSequence(data);
+
+  else if (!strcmp(name, SPARK_SUBNAME_DEVICE))
+  {
+    DBGOUT((F("Saving device name: %s"), data));
+    FlashSetName((char*)data);
+  }
+  DBG(else DBGOUT((F("Subscribe: name=%s data=%s"), name, data));)
+}
+
+static bool ConnectToCloud(void)
+{
+  timePublished = pixelNutSupport.getMsecs();
+  countPublished = 0;
+  update_counter = 0;
+
+  DBGOUT((F("Connecting to network...")));
+  Particle.connect();
+
+  int count = 0;
+  uint32_t time = millis() + 1000;
+  while (!WiFi.ready())
+  {
+    Particle.process();   // don't need this since have system thread
+    BlinkStatusLED(1, 0); // connecting to cloud with local WiFi
+
+    if (millis() > time)  // timeout: bad credentials?
+    {
+      if (++count >= 10)
+      {
+        if (!WiFi.clearCredentials())
+        {
+          DBGOUT((F("Failed to clear WiFi credentials")));
+          // what else can we do here?
+        }
+
+        EEPROM.write(FLASHOFF_PATTERN_END, 1);
+        DBGOUT((F("Failed: use Particle App to configure")));
+        return false;
+      }
+      DBGOUT((F("...waiting to connect")));
+    }
+  }
+
+  #if DEBUG_OUTPUT
+  Serial.print("  SSID:    "); Serial.println(WiFi.SSID());
+  Serial.print("  LocalIP: "); Serial.println(WiFi.localIP());
+  //Serial.print("  Subnet:  "); Serial.println(WiFi.subnetMask());
+  //Serial.print("  Gateway: "); Serial.println(WiFi.gatewayIP());
+  #endif
+
+  DBGOUT((F("Setting up Pub/Sub...")));
+
+  if (!Particle.subscribe("PixelNutCommand", CommandHandler))
+  {
+    DBGOUT((F("Particle subscribe failed")));
+    ErrorHandler(3, 1, true); // does not return from this call
+  }
+
+  if (!Particle.publish("PixelNutResponse", "PixelNut! is online", 60, PRIVATE))
+  {
+    DBGOUT((F("Particle publish failed")));
+    ErrorHandler(3, 2, true); // does not return from this call
+  }
+
+  /*
+  if (!Particle.subscribe(SPARK_SUBNAME_DEVICE, CommandHandler) ||
+      !Particle.publish(SPARK_SUBNAME_DEVICE))
+  {
+    DBGOUT((F("Retrieving device name failed")));
+    ErrorHandler(3, 3, true); // does not return from this call
+  }
+  */
+
+  DBGOUT((F("Connected to Particle Cloud")));
+  return true;
+}
+
+class Ethernet : public CustomCode
+{
+public:
+
+  void setup(void);
+  bool setName(char *name);
+  bool sendReply(char *instr);
+  bool control(void);
+
+};
+Ethernet ethernet;
+
+void Ethernet::setup(void)
+{
+  DBGOUT((F("Particle Photon:")));
+  DBGOUT((F("  Version=%s"), System.version().c_str()));
+  System.deviceID().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
+  DBGOUT((F("  DeviceID=%s"), cmdStr));
+  DBGOUT((F("  Memory=%d free bytes"), System.freeMemory()));
+  Time.timeStr().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
+  DBGOUT((F("  Time=%s"), cmdStr));
+
+  //EEPROM.write(FLASHOFF_PATTERN_END, 0); // force starting in our softAP mode
+  SetupDevice();
+}
+
+// return false if failed to set name
+bool Ethernet::setName(char *name)
+{
+  if (!strcmp(name, "*wifi*"))
+  {
+    DBGOUT((F("Device => user config")));
+    EEPROM.write(FLASHOFF_PATTERN_END, 1);
+    WiFi.clearCredentials();
+    RestartDevice();
+  }
+  else
+  {
+    FlashSetName((char*)name);
+    SetDeviceName();
+    /*
+    System.reset(); // reboot for name to take effect
+    // because the following doesn't work:
+    if (WiFi.listening()) // if in SoftAP mode
+    {
+      DBGOUT((F("Resetting SoftAP mode...")));
+      WiFi.listen(); // turn off
+      delay(1000);   // wait 1 second
+      WiFi.listen(); // turn back on
+    }
+    */
+    // Note: restart device for name change to take effect
+  }
+  return true;
+}
+
+// return false if failed to send message
+bool Ethernet::sendReply(char *instr)
+{
+  DBGOUT((F("Web <-- \"%s\""), instr));
+  bool success = true;
+
+  if (createWiFi)
+  {
+    strcat(htmlReplyString, instr);
+    strcat(htmlReplyString, "\r\n");
+  }
+  else
+  {
+    // can only publish 4 at once, then once a second
+    uint32_t msecs = (pixelNutSupport.getMsecs() - timePublished);
+    if (msecs < 1000)
+    {
+      if (++countPublished >= 4)
+        delay(1000 - msecs);
+    }
+    else countPublished = 0;
+
+    if (!Particle.publish("PixelNutResponse", instr))
+    {
+      DBGOUT((F("Particle publish failed")));
+      success = false;
+    }
+
+    timePublished = pixelNutSupport.getMsecs();
+  }
+
+  return success;
+}
+
+// return true if handling commands externally
 bool Ethernet::control(void)
 {
-  // check if already have command input
-  if (cmdStr[0] != 0)
-  {
-    DBGOUT((F("Web: have input=\"%s\""), cmdStr));
-    return true;
-  }
-
-  if (!haveUserCmd) return false;
-
-  char *cmd = strtok(userCmdStr, "\n"); // separate cmds by newlines
-  while (cmd != NULL)
-  {
-    strcpy(cmdStr, cmd);
-    ProcessCmd();
-    cmd = strtok(NULL, "\n");
-  }
-
-  haveUserCmd = false;
-  userCmdStr[0] = 0;
-  cmdStr[0] = 0;
-
-  return false;
+  return true; // ignore cmdStr: used asynchronously
+  // this means cannot support physical controls
 };
 
 #endif // defined(SPARK)
