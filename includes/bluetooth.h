@@ -13,8 +13,8 @@ See license.txt for the terms of this license.
 
 BluefruitStrs bfruit(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
 
-extern void CheckExecCmd();   // defined in main.h
-extern AppCommands *pAppCmd;  // pointer to current instance
+extern void CheckExecCmd(char *instr); // defined in main.h
+extern AppCommands *pAppCmd;           // pointer to current instance
 
 #define MSECS_CHECK_CONNECT   1000    // check for connection every second
 
@@ -139,7 +139,7 @@ bool Bluetooth::sendReply(char *instr)
 static void ResponseCB(void)
 {
   DBGOUT((F("BLE --> \"%s\""), cmdStr));
-  if (pAppCmd->execCmd()) CheckExecCmd();
+  if (pAppCmd->execCmd(cmdStr)) CheckExecCmd(cmdStr);
 }
 
 // return true if handling commands externally

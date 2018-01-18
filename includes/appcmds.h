@@ -32,7 +32,7 @@ public:
         {
           curPattern = atoi(instr);
           FlashSetPattern(curPattern);
-          GetCurPattern();
+          GetCurPattern(instr);
           useCmdStr = true;
         }
         else if (isalpha(instr[0])) // have engine command
@@ -83,10 +83,10 @@ public:
           DBGOUT((F("Patterns:  %d"), codePatterns));
           for (int i = 0; i < codePatterns; ++i)
           {
-            strcpy_P(cmdStr, customPatterns[i]);
+            strcpy_P(instr, customPatterns[i]);
             if (!pCustomCode->sendReply((char*)customPnames[i]) ||
                 !pCustomCode->sendReply((char*)customPhelp[i])  ||
-                !pCustomCode->sendReply(cmdStr))
+                !pCustomCode->sendReply(instr))
                 return false;
           }
           break;
@@ -247,9 +247,9 @@ public:
     return true;
   }
 
-  bool execCmd(void)
+  bool execCmd(char *cmdstr)
   {
-    char *instr = cmdStr;
+    char *instr = cmdstr;
 
     if (saveStrIndex < 0) instr = SkipSpaces(instr); // skip leading spaces
     // else need those separating spaces while in sequence
@@ -259,7 +259,7 @@ public:
 
     //DBGOUT((F("ExecCmd: success=%d douse=%d"), success, useCmdStr));
     
-    if (!useCmdStr) cmdStr[0] = 0; // avoid executing this
+    if (!useCmdStr) cmdstr[0] = 0; // avoid executing this
     if (!success) ErrorHandler(4, 1, false);
 
     return useCmdStr;

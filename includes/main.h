@@ -16,21 +16,21 @@ See license.txt for the terms of this license.
 
 #if !MAIN_OVERRIDE
 
-void CheckExecCmd()
+void CheckExecCmd(char *instr)
 {
-  if (cmdStr[0]) // if have new command for engine
+  if (instr[0]) // if have new command for engine
   {
-    DBGOUT((F("Exec: \"%s\""), cmdStr));
+    DBGOUT((F("Exec: \"%s\""), instr));
 
-    engineStatus = pPixelNutEngine->execCmdStr(cmdStr);
-    cmdStr[0] = 0; // must clear command string after finished
-
+    engineStatus = pPixelNutEngine->execCmdStr(instr);
     if (engineStatus != PixelNutEngine::Status_Success)
     {
       DBGOUT((F("CmdErr: %d"), engineStatus));
       ErrorHandler(2, engineStatus, false); // blink for error and continue
     }
     else pCustomCode->display();
+
+    instr[0] = 0; // must clear command string after finished
   }
 }
 
@@ -92,9 +92,9 @@ void setup()
   SetupTriggerControls();
   SetupPatternControls();
 
-  CheckForPatterns();   // read internal patterns (if any) and current pattern number
-  GetCurPattern();      // get pattern string cooresponding that that pattern number
-  CheckExecCmd();       // load that pattern into the engine: ready to be displayed
+  CheckForPatterns();     // read internal patterns (if any) and current pattern number
+  GetCurPattern(cmdStr);  // get pattern string cooresponding that that pattern number
+  CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
 
   BlinkStatusLED(0, 1); // indicate success
   DBGOUT((F("** Setup complete **")));
@@ -115,7 +115,7 @@ void loop()
     CheckTriggerControls();
     CheckPatternControls();
 
-    CheckExecCmd(); // load any new pattern into the engine
+    CheckExecCmd(cmdStr); // load any new pattern into the engine
   }
 
   // if enabled: display new pixel values if anything has changed

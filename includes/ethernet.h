@@ -1,6 +1,6 @@
 // PixelNutApp Ethernet Communications
 //
-// Uses global variables: 'pixelNutSupport', 'cmdStr', 'pAppCmd'.
+// Uses global variables: 'pixelNutSupport', 'pAppCmd'.
 // Calls global routines: 'CheckExecCmd', 'ErrorHandler'.
 //========================================================================================
 /*
@@ -17,8 +17,8 @@ See license.txt for the terms of this license.
 SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
-extern void CheckExecCmd();   // defined in main.h
-extern AppCommands *pAppCmd;  // pointer to current instance
+extern void CheckExecCmd(char *instr); // defined in main.h
+extern AppCommands *pAppCmd;           // pointer to current instance
 
 #define SPARK_SUBNAME_DEVICE  "particle/device/name"
 
@@ -88,22 +88,28 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
         if (*data == '?')
         {
           htmlReplyString[0] = 0;
-          strcpy(cmdStr, data);
-          pAppCmd->execCmd();
+          pAppCmd->execCmd(data);
           result->write(htmlReplyString);
         }
         else
         {
           CmdSequence(data);
-          free(data);
           result->write("ok");
         }
+
+        free(data);
       }
     }
-    //else if (!strcmp(url, "/generate_204")) 
-    //  cb(cbArg, 0, 204, nullptr, nullptr);
-
-    else cb(cbArg, 0, 404, nullptr, nullptr);
+    else if (!strcmp(url, "/generate_204"))
+    {
+      cb(cbArg, 0, 204, nullptr, nullptr);
+      result->write("");
+    }
+    else
+    {
+      cb(cbArg, 0, 404, nullptr, nullptr);
+      result->write("");
+    }
   }
   else
   {
@@ -116,7 +122,7 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
         idx = -1;
         break;
       }
-      else if (strcmp(url, p.url)==0)
+      else if (strcmp(url, p.url) == 0)
         break;
     }
 
@@ -126,7 +132,11 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
       result->write(myPages[idx].data);
       return;
     }
-    else cb(cbArg, 0, 404, nullptr, nullptr);
+    else
+    {
+      cb(cbArg, 0, 404, nullptr, nullptr);
+      result->write("");
+    }
   }
 }
 
@@ -142,7 +152,7 @@ static void SetDeviceName(void)
 
   DBGOUT((F("SoftAP name: \"%s\""), name));
   System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, name);
-  System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, "!");
+  System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, "!   ");
 }
 
 static void SetupDevice(void)
@@ -158,11 +168,13 @@ static void SetupDevice(void)
   //    connect to and be controlled from the internet.
   //    (createWiFi = false, doSoftAP = false)
 
+  DBGOUT((F("Setup device...")));
   do
   {
     createWiFi = EEPROM.read(FLASHOFF_PATTERN_END) == 0;
     if (createWiFi) doSoftAP = true;
     else doSoftAP = !WiFi.hasCredentials();
+    DBGOUT((F("CreateWiFi=%d SoftAP=%d"), createWiFi, doSoftAP));
 
     if (doSoftAP)
     {
@@ -173,10 +185,10 @@ static void SetupDevice(void)
 
       if (createWiFi) return; // use PixelNutCtrl application
 
-      uint32_t time = millis() + 1000;
+      uint32_t time = millis();
       while(true)
       {
-        if (millis() > time)
+        if ((millis() - time) > 1000)
         {
           BlinkStatusLED(0, 2); // connect with browser to set SSID
         
@@ -186,7 +198,7 @@ static void SetupDevice(void)
             break;
 
           Particle.process();
-          time = millis() + 1000;
+          time = millis();
         }
       }
     }
@@ -196,22 +208,26 @@ static void SetupDevice(void)
 
 static void RestartDevice(void)
 {
-  WiFi.listen(false); // turn off listening mode
-  delay(2000); // pause 2 seconds to let settle
+  // this doesn't work: WiFi.hasCredentials() hangs then reboots
+  //DBGOUT((F("Restart device...")));
+  //WiFi.listen(false);   // turn off listening mode
+  //SetupDevice();        // restart setup process
+  //BlinkStatusLED(2, 0); // indicate success
 
-  SetupDevice(); // restart setup process
-  BlinkStatusLED(2, 0); // indicate success
+  DBGOUT((F("Rebooting!!!")));
+  delay(1000);
+  System.reset(); // just reboot right away
 }
 
-static void ProcessCmd(void)
+static void ProcessCmd(char *instr)
 {
-  DBGOUT((F("Web --> \"%s\""), cmdStr));
+  DBGOUT((F("Web --> \"%s\""), instr));
 
-  if (!strncmp(cmdStr, "*wifi*", 6))
+  if (!strncmp(instr, "*wifi*", 6))
   {
     char ssid[32];
     char pass[32];
-    char *str = cmdStr+6;
+    char *str = instr+6;
     bool newmode = true;
 
     int i = 0;
@@ -263,26 +279,26 @@ static void ProcessCmd(void)
 
     if (newmode) RestartDevice();
   }
-  else if (pAppCmd->execCmd()) CheckExecCmd();
+  else if (pAppCmd->execCmd(instr)) CheckExecCmd(instr);
 }
 
 static void CmdSequence(const char *data)
 {
-  const char *p = data;
-  while (*p)
+  char cmdstr[STRLEN_PATTERNS];
+  while (*data)
   {
     int i = 0;
-    while (*p && (*p != '\n'))
-      cmdStr[i++] = *p++;
+    while (*data && (*data != '\n'))
+      cmdstr[i++] = *data++;
 
-    cmdStr[i] = 0;
-    if (*p == '\n') ++p;
+    cmdstr[i] = 0;
+    if (*data == '\n') ++data;
 
-    if (i > 0) ProcessCmd();
+    if (i > 0) ProcessCmd(cmdstr);
   }
 }
 
-static void CommandHandler(const char *name, const char *data)
+static void cmdHandler(const char *name, const char *data)
 {
   if (!strcmp(name, "PixelNutCommand"))
     CmdSequence(data);
@@ -305,13 +321,13 @@ static bool ConnectToCloud(void)
   Particle.connect();
 
   int count = 0;
-  uint32_t time = millis() + 1000;
+  uint32_t time = millis();
   while (!WiFi.ready())
   {
     Particle.process();   // don't need this since have system thread
     BlinkStatusLED(1, 0); // connecting to cloud with local WiFi
 
-    if (millis() > time)  // timeout: bad credentials?
+    if ((millis() - time) > 1000)  // timeout: bad credentials?
     {
       if (++count >= 10)
       {
@@ -325,7 +341,9 @@ static bool ConnectToCloud(void)
         DBGOUT((F("Failed: use Particle App to configure")));
         return false;
       }
+
       DBGOUT((F("...waiting to connect")));
+      time = millis();
     }
   }
 
@@ -338,7 +356,7 @@ static bool ConnectToCloud(void)
 
   DBGOUT((F("Setting up Pub/Sub...")));
 
-  if (!Particle.subscribe("PixelNutCommand", CommandHandler))
+  if (!Particle.subscribe("PixelNutCommand", cmdHandler))
   {
     DBGOUT((F("Particle subscribe failed")));
     ErrorHandler(3, 1, true); // does not return from this call
@@ -351,7 +369,7 @@ static bool ConnectToCloud(void)
   }
 
   /*
-  if (!Particle.subscribe(SPARK_SUBNAME_DEVICE, CommandHandler) ||
+  if (!Particle.subscribe(SPARK_SUBNAME_DEVICE, cmdHandler) ||
       !Particle.publish(SPARK_SUBNAME_DEVICE))
   {
     DBGOUT((F("Retrieving device name failed")));
@@ -377,15 +395,16 @@ Ethernet ethernet;
 
 void Ethernet::setup(void)
 {
+  byte instr[100];
   DBGOUT((F("Particle Photon:")));
   DBGOUT((F("  Version=%s"), System.version().c_str()));
-  System.deviceID().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
-  DBGOUT((F("  DeviceID=%s"), cmdStr));
+  System.deviceID().getBytes(instr, 100);
+  DBGOUT((F("  DeviceID=%s"), instr));
   DBGOUT((F("  Memory=%d free bytes"), System.freeMemory()));
-  Time.timeStr().getBytes((byte*)cmdStr, STRLEN_PATTERNS);
-  DBGOUT((F("  Time=%s"), cmdStr));
+  Time.timeStr().getBytes(instr, 100);
+  DBGOUT((F("  Time=%s"), instr));
 
-  //EEPROM.write(FLASHOFF_PATTERN_END, 0); // force starting in our softAP mode
+  EEPROM.write(FLASHOFF_PATTERN_END, 0); // force starting in our softAP mode FIXME
   SetupDevice();
 }
 
@@ -403,18 +422,7 @@ bool Ethernet::setName(char *name)
   {
     FlashSetName((char*)name);
     SetDeviceName();
-    /*
-    System.reset(); // reboot for name to take effect
-    // because the following doesn't work:
-    if (WiFi.listening()) // if in SoftAP mode
-    {
-      DBGOUT((F("Resetting SoftAP mode...")));
-      WiFi.listen(); // turn off
-      delay(1000);   // wait 1 second
-      WiFi.listen(); // turn back on
-    }
-    */
-    // Note: restart device for name change to take effect
+    // must restart device for name change to take effect
   }
   return true;
 }
@@ -437,7 +445,7 @@ bool Ethernet::sendReply(char *instr)
     if (msecs < 1000)
     {
       if (++countPublished >= 4)
-        delay(1000 - msecs);
+        delay(1000 - msecs); // TODO replace with waiting loop?
     }
     else countPublished = 0;
 
@@ -456,8 +464,7 @@ bool Ethernet::sendReply(char *instr)
 // return true if handling commands externally
 bool Ethernet::control(void)
 {
-  return true; // ignore cmdStr: used asynchronously
-  // this means cannot support physical controls
+  return false;  // allow for physical controls
 };
 
 #endif // defined(SPARK)

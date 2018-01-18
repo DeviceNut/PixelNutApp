@@ -45,24 +45,24 @@ void CheckForPatterns(void)
   DBGOUT((F("Starting pattern = #%d"), curPattern));
 }
 
-void GetCurPattern(void)
+void GetCurPattern(char *instr)
 {
   // check for an internal pattern first
   if ((curPattern > 0) && (curPattern <= codePatterns))
   {
     DBGOUT((F("Copying pattern = #%d"), curPattern));
-    strcpy_P(cmdStr, customPatterns[curPattern-1]);
+    strcpy_P(instr, customPatterns[curPattern-1]);
   }
   #if EXTERNAL_COMM
   // else retrieve pattern from flash for current segment
-  else FlashGetStr(cmdStr);
+  else FlashGetStr(instr);
   #else
-  else cmdStr[0] = 0;
+  else instr[0] = 0;
   #endif
 
-  if (cmdStr[0])
+  if (instr[0])
   {
-    DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(cmdStr)));
+    DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(instr)));
     pPixelNutEngine->popPluginStack(); // clear stack to prepare for new cmds
   }
 }
@@ -73,7 +73,7 @@ void GetNextPattern(void)
   if (++curPattern > codePatterns)
     curPattern = 1;
 
-  GetCurPattern();
+  GetCurPattern(cmdStr);
 }
 
 void GetPrevPattern(void)
@@ -82,7 +82,7 @@ void GetPrevPattern(void)
   if (curPattern <= 1) curPattern = codePatterns;
   else --curPattern;
 
-  GetCurPattern();
+  GetCurPattern(cmdStr);
 }
 
 #else // !CUSTOM_PATTERNS
@@ -92,10 +92,10 @@ void CheckForPatterns(void)
   curPattern = FlashGetPattern();
 }
 
-void GetCurPattern(void)
+void GetCurPattern(char *instr)
 {
-  FlashGetStr(cmdStr);
-  DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(cmdStr)));
+  FlashGetStr(instr);
+  DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(instr)));
 }
 
 #endif // CUSTOM_PATTERNS
