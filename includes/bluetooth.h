@@ -16,7 +16,7 @@ BluefruitStrs bfruit(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
 extern void CheckExecCmd(char *instr); // defined in main.h
 extern AppCommands *pAppCmd;           // pointer to current instance
 
-#define MSECS_CHECK_CONNECT   1000    // check for connection every second
+#define MSECS_CHECK_CONNECT   500     // check for connection every 1/2 second
 
 class Bluetooth : public CustomCode
 {
@@ -87,8 +87,9 @@ void getNameCB(void)
   {
     char c = name[i];
     if (!isalpha(c) && !isdigit(c) &&
-        (c != ' ') && (c != '#') &&
-        (c != '!') && (c != '$') &&
+        (c != ' ') && (c != '-') &&
+        (c != '!') && (c != '#') &&
+        (c != '$') && (c != '%') &&
         (c != '&') && (c != '*'))
     {
       badname = true;
@@ -104,7 +105,7 @@ void getNameCB(void)
   // and there isn't what looks like a good BLE name,
   // then reset to a generic name, so that the user
   // can be able to find it and rename it in the app
-  if ((badname || !name[0]) && !goodble)
+  if (badname && !goodble)
   {
     strcpy(name, "MyDevice");
     setNameBLE(name);
@@ -171,7 +172,7 @@ bool Bluetooth::sendReply(char *instr)
   }
 
   delay(100); // hack to prevent data overflow with bluefruit
-  msecsConnect = pixelNutSupport.getMsecs() + MSECS_CHECK_CONNECT;
+  msecsConnect = pixelNutSupport.getMsecs();
 
   return success;
 }
@@ -185,13 +186,13 @@ static void ResponseCB(void)
 // return true if handling commands externally
 bool Bluetooth::control(void)
 {
-  if (msecsConnect < pixelNutSupport.getMsecs())
+  if ((pixelNutSupport.getMsecs() - msecsConnect) > MSECS_CHECK_CONNECT)
   {
     //DBGOUT((F("BLE: check for connection...")));
     isConnected = bfruit.isConnected();
     // NOTE: immediately sending data causes failures
 
-    msecsConnect = pixelNutSupport.getMsecs() + MSECS_CHECK_CONNECT;
+    msecsConnect = pixelNutSupport.getMsecs();
   }
 
   if (isConnected)
