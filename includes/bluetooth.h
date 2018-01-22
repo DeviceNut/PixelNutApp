@@ -76,53 +76,8 @@ void getNameCB(void)
 
   DBGOUT((F("BLE DevName: \"%s\""), cmdStr));
 
-  bool badname = false;
-  char name[MAXLEN_DEVICE_NAME+1];
-
-  FlashGetName(name);
-  int len = strlen(name);
-
-  if (len < 2) badname = true;
-  else for (int i = 0; i < len; ++i)
-  {
-    char c = name[i];
-    if (!isalpha(c) && !isdigit(c) &&
-        (c != ' ') && (c != '-') &&
-        (c != '!') && (c != '#') &&
-        (c != '$') && (c != '%') &&
-        (c != '&') && (c != '*'))
-    {
-      badname = true;
-      break;
-    }
-  }
-
-  bool goodble = ((strlen(cmdStr) >= 4) &&
-                  (cmdStr[0] == 'P')    &&
-                  (cmdStr[1] == '!'));
-
-  // if the name stored in flash is invalid or empty,
-  // and there isn't what looks like a good BLE name,
-  // then reset to a generic name, so that the user
-  // can be able to find it and rename it in the app
-  if (badname && !goodble)
-  {
-    strcpy(name, "MyDevice");
-    setNameBLE(name);
-    FlashSetName(name);
-  }
-  // else if there's a good BLE name but not a
-  // good flash name, override the flash name
-  else if (badname && goodble)
-    FlashSetName(cmdStr+2);
-
-  // otherwise if there isn't a good BLE name or the
-  // name stored in flash doesn't match it, then just
-  // reset the BLE name. (This is done because the BLE
-  // name in certain Adafruit's devices sometimes gets
-  // reset to "Adafruit Bluefruit LE" for some reason.)
-  else if (!goodble || strcmp(name, cmdStr+2))
-    setNameBLE(name);
+  if (pAppCmd->setDeviceName(cmdStr))
+    setNameBLE(cmdStr);
 }
 
 // does not return if fail because NotifyCB gets

@@ -38,7 +38,7 @@ void MsgFormat(const char *fmtstr, ...)
 #else
 void MsgFormat(const __FlashStringHelper *str_in_code, ...)
 {
-  strcpy_P(fmtstr, (char *)str_in_code);
+  strcpy_P(fmtstr, (char*)str_in_code);
 
   va_list va;
   va_start(va, str_in_code);

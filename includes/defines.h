@@ -22,14 +22,8 @@ See license.txt for the terms of this license.
 #define USE_SPI                 1           // which uses SPI
 #endif
 
-#if USE_SPI
-#if defined(SPARK)
-SPI.setDataMode(SPI_MODE0);
-SPI.setBitOrder(MSBFIRST);
-SPI.setClockSpeed(4000000);
-#else
+#if USE_SPI && !defined(SPARK)
 #include <SPI.h>
-#endif
 #endif
 
 #if !defined(STRAND_COUNT)

@@ -145,13 +145,15 @@ STARTUP(softap_set_application_page_handler(httpHandler, nullptr));
 
 static void SetDeviceName(void)
 {
-  char name[MAXLEN_DEVICE_NAME+3];
-  strcpy(name, "P!");
-  FlashGetName(name+2);
-  if (name[2] == 0) strcat(name, "MyDevice");
-
-  DBGOUT((F("SoftAP name: \"%s\""), name));
-  System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, name);
+  char devname[MAXLEN_DEVICE_NAME+1];
+  devname[0] = 0;
+  pAppCmd->setDeviceName(devname);
+  char netname[MAXLEN_DEVICE_NAME+3];
+  strcpy(netname, "P!");
+  strcat(netname, devname);
+  
+  DBGOUT((F("SoftAP name: \"%s\""), netname));
+  System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, netname);
   System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, "!   ");
 }
 
@@ -404,7 +406,7 @@ void Ethernet::setup(void)
   Time.timeStr().getBytes(instr, 100);
   DBGOUT((F("  Time=%s"), instr));
 
-  EEPROM.write(FLASHOFF_PATTERN_END, 0); // force starting in our softAP mode FIXME
+  //EEPROM.write(FLASHOFF_PATTERN_END, 0); // force starting in our softAP mode
   SetupDevice();
 }
 
@@ -422,7 +424,7 @@ bool Ethernet::setName(char *name)
   {
     FlashSetName((char*)name);
     SetDeviceName();
-    // must restart device for name change to take effect
+    // FIXME: must restart device for name change to take effect
   }
   return true;
 }
