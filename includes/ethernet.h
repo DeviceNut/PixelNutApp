@@ -1,7 +1,7 @@
 // PixelNutApp Ethernet Communications
 //
 // Uses global variables: 'pixelNutSupport', 'pAppCmd'.
-// Calls global routines: 'CheckExecCmd', 'ErrorHandler'.
+// Calls global routines: 'CheckExecCmd', 'ErrorHandler', 'BlinkStatusLED'.
 //========================================================================================
 /*
 Copyright (c) 2015-2018, Greg de Valois

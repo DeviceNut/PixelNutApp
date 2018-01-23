@@ -305,14 +305,14 @@ public:
     // else if there's a good BLE name but not a
     // good flash name, override the flash name
     else if (badname && goodble)
-      FlashSetName(cmdStr+2);
+      FlashSetName(devstr+2);
 
     // otherwise if there isn't a good BLE name or the
     // name stored in flash doesn't match it, then just
     // reset the BLE name. (This is done because the BLE
     // name in certain Adafruit's devices sometimes gets
     // reset to "Adafruit Bluefruit LE" for some reason.)
-    else if (!goodble || strcmp(name, cmdStr+2))
+    else if (!goodble || strcmp(name, devstr+2))
     {
       strcpy(devstr, name);
       return true;

@@ -49,7 +49,8 @@ void setup()
   pNeoPixels->show(pPixelData, pixelBytes);
 
   #if EEPROM_FORMAT
-  FlashFormat();
+  FlashFormat(); // format entire EEPROM
+  ErrorHandler(0, 1, true);
   #endif
 
   if (pPixelNutEngine->pDrawPixels == NULL)
