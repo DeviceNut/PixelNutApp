@@ -42,12 +42,13 @@ Bluetooth bluetooth;
 void notifyCB(NotifyMessage msgval, char *msgstr)
 {
   DBGOUT((F("Bluetooth Notification %d: %s"), msgval, msgstr));
-  ErrorHandler(3, msgval, bluetooth.inSetup); // hangs here if in setup
 
   DBGOUT((F("Resetting BLE controller...")));
   bfruit.reset(); // hardware reset, this clears cmdStr[] too
   bluetooth.isConnected = false;
   DBGOUT((F("Reset completed")));
+
+  ErrorHandler(3, msgval, bluetooth.inSetup); // hangs here if in setup
 }
 
 // return false if failed to set name
