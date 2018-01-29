@@ -37,6 +37,10 @@ void FlashSetForce(short force) {}
 short FlashGetForce(void) { return 0; }
 void FlashSetProperties(void) {}
 
+#if EXTERNAL_COMM
+#error("Must have EEPROM to use external communications")
+#endif
+
 #else
 
 #if !defined(SPARK)

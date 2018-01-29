@@ -3,16 +3,15 @@
 // Uses global variables: 'pPixelNutEngine', 'pCustomCode', 'pNeoPixels', 'pPixelBytes',
 //                        'pixelBytes', 'engineStatus', 'doUpdate'.
 //
-// Calls common global control/command functions.
+// Calls global functions: 'SetupLEDs', 'SetupDebugInterface', 'ErrorHandler',
+//                         'BlinkStatusLED', 'FlashFormat', 'FlashStartup',
+//                         'CheckForPatterns', 'GetCurPattern', and all
+//                         'Setup<>Controls' and 'Check<>Controls' calls.
 /*
 Copyright (c) 2015-2017, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
-
-#if (EXTERNAL_COMM && (EEPROM_BYTES == 0))
-#error("Must have EEPROM to use external communications")
-#endif
 
 #if !MAIN_OVERRIDE
 
@@ -78,8 +77,8 @@ void setup()
   DBGOUT((F("  CUSTOM_PATTERNS   = %d"), CUSTOM_PATTERNS));
   DBGOUT((F("  BASIC_PATTERNS    = %d"), BASIC_PATTERNS));
   DBGOUT((F("  STRLEN_PATTERNS   = %d"), STRLEN_PATTERNS));
-  DBGOUT((F("  NUM_PLUGIN_LAYERS = %d"), NUM_PLUGIN_LAYERS));
   DBGOUT((F("  NUM_PLUGIN_TRACKS = %d"), NUM_PLUGIN_TRACKS));
+  DBGOUT((F("  NUM_PLUGIN_LAYERS = %d"), NUM_PLUGIN_LAYERS));
   DBGOUT((F("  EEPROM_FREE_BYTES = %d"), EEPROM_FREE_BYTES));
 
   pCustomCode->setup(); // custom initialization here
@@ -94,7 +93,7 @@ void setup()
   SetupPatternControls();
 
   CheckForPatterns();     // read internal patterns (if any) and current pattern number
-  GetCurPattern(cmdStr);  // get pattern string cooresponding that that pattern number
+  GetCurPattern(cmdStr);  // get pattern string corresponding that that pattern number
   CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
 
   BlinkStatusLED(0, 1); // indicate success
