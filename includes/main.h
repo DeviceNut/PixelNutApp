@@ -1,7 +1,7 @@
 // PixelNutApp Main Setup and Loop Routines
 //
-// Uses global variables: 'pPixelNutEngine', 'pCustomCode', 'pNeoPixels', 'pPixelBytes',
-//                        'pixelBytes', 'engineStatus', 'doUpdate'.
+// Uses global variables: 'pPixelNutEngine', 'pCustomCode', 'pNeoPixels',
+//                        'pPixelBytes', 'doUpdate'.
 //
 // Calls global functions: 'SetupLEDs', 'SetupDebugInterface', 'ErrorHandler',
 //                         'BlinkStatusLED', 'FlashFormat', 'FlashStartup',
@@ -15,19 +15,28 @@ See license.txt for the terms of this license.
 
 #if !MAIN_OVERRIDE
 
+#if !NEOPIXELS_OVERRIDE
+void ShowPixels(void)
+{
+  pNeoPixels->show(pPixelData, pixelBytes);
+}
+#else
+extern void ShowPixels(void);
+#endif
+
 void CheckExecCmd(char *instr)
 {
   if (instr[0]) // if have new command for engine
   {
     DBGOUT((F("Exec: \"%s\""), instr));
 
-    engineStatus = pPixelNutEngine->execCmdStr(instr);
-    if (engineStatus != PixelNutEngine::Status_Success)
+    PixelNutEngine::Status status = pPixelNutEngine->execCmdStr(instr);
+    if (status != PixelNutEngine::Status_Success)
     {
-      DBGOUT((F("CmdErr: %d"), engineStatus));
-      ErrorHandler(2, engineStatus, false); // blink for error and continue
+      DBGOUT((F("CmdErr: %d"), status));
+      ErrorHandler(2, status, false); // blink for error and continue
     }
-    else pCustomCode->display();
+    else pCustomCode->pattern();
 
     instr[0] = 0; // must clear command string after finished
   }
@@ -45,10 +54,11 @@ void setup()
 
   // turn off all pixels
   memset(pPixelData, 0, pixelBytes);
-  pNeoPixels->show(pPixelData, pixelBytes);
+  ShowPixels();
 
   #if EEPROM_FORMAT
   FlashFormat(); // format entire EEPROM
+  pCustomCode->flash(); // custom flash handling
   ErrorHandler(0, 1, true);
   #endif
 
@@ -60,10 +70,6 @@ void setup()
 
   #if EXTERNAL_COMM
   FlashStartup(); // get saved settings from flash
-  #endif
-
-  #if USE_SPI
-  SPI.begin();    // initialize SPI library
   #endif
 
   DBGOUT((F("Configuration Settings:")));
@@ -79,6 +85,8 @@ void setup()
   DBGOUT((F("  STRLEN_PATTERNS   = %d"), STRLEN_PATTERNS));
   DBGOUT((F("  NUM_PLUGIN_TRACKS = %d"), NUM_PLUGIN_TRACKS));
   DBGOUT((F("  NUM_PLUGIN_LAYERS = %d"), NUM_PLUGIN_LAYERS));
+  DBGOUT((F("  EE_PATTERN_START  = %d"), FLASHOFF_PATTERN_START));
+  DBGOUT((F("  EE_PATTERN_END    = %d"), FLASHOFF_PATTERN_END));
   DBGOUT((F("  EEPROM_FREE_BYTES = %d"), EEPROM_FREE_BYTES));
 
   pCustomCode->setup(); // custom initialization here
@@ -104,7 +112,7 @@ void setup()
 
 void loop()
 {
-  if (!pCustomCode->control())
+  if (!pCustomCode->loop())
   {
     // check physical controls for changes
     CheckBrightControls();
@@ -114,13 +122,11 @@ void loop()
     CheckCountControls();
     CheckTriggerControls();
     CheckPatternControls();
-
-    CheckExecCmd(cmdStr); // load any new pattern into the engine
   }
+  CheckExecCmd(cmdStr); // load any new pattern into the engine
 
   // if enabled: display new pixel values if anything has changed
-  if (doUpdate && pPixelNutEngine->updateEffects())
-    pNeoPixels->show(pPixelData, pixelBytes);
+  if (doUpdate && pPixelNutEngine->updateEffects()) ShowPixels();
 }
 
 #endif

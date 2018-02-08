@@ -67,11 +67,18 @@ void FlashSetProperties(void) {}
 #define FLASHOFF_SEGMENT_DATA   0
 #endif
 
+#if EXTERN_PATTERNS
+#define FLASHLEN_PATTERN        STRLEN_PATTERNS
+#else
+#define FLASHLEN_PATTERN        0
+#warning("Not reserving space in EEPROM for patterns")
+#endif
+
 #define FLASHOFF_PATTERN_START  (FLASHOFF_SEGMENT_DATA + (SEGMENT_COUNT * FLASH_SEG_LENGTH))
-#define FLASHOFF_PATTERN_END    (FLASHOFF_PATTERN_START + (STRAND_COUNT * STRLEN_PATTERNS))
+#define FLASHOFF_PATTERN_END    (FLASHOFF_PATTERN_START + (STRAND_COUNT * FLASHLEN_PATTERN))
 
 #if (FLASHOFF_PATTERN_END > EEPROM_BYTES)
-#error("Not enough flash space to store external pattern string(s)");
+#error("Not enough flash space to store external pattern strings");
 #endif
 
 #define EEPROM_FREE_START  FLASHOFF_PATTERN_END
@@ -110,7 +117,7 @@ void FlashGetName(char *name)
 
 void FlashSetStr(char *str, int offset)
 {
-  DBGOUT((F("FlashSetStr(@%d): \"%s\""), (strOffset + offset), str));
+  DBGOUT((F("FlashSetStr(@%d): \"%s\" (len=%d)"), (strOffset + offset), str, strlen(str)));
   for (int i = 0; ; ++i)
   {
     if ((strOffset + offset + i) >= EEPROM_BYTES) break; // prevent overrun
@@ -129,7 +136,7 @@ void FlashGetStr(char *str)
     else str[i] = EEPROM.read(strOffset + i);
     if (!str[i]) break;
   }
-  DBGOUT((F("FlashGetStr(@%d): \"%s\""), strOffset, str));
+  DBGOUT((F("FlashGetStr(@%d): \"%s\" (len=%d)"), strOffset, str, strlen(str)));
 }
 
 void FlashSetBright() { SetFlashValue(FLASH_SEG_BRIGHTNESS, pPixelNutEngine->getMaxBrightness());   }

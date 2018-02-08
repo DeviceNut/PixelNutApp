@@ -11,6 +11,8 @@ See license.txt for the terms of this license.
 
 #if BLUETOOTH_COMM
 
+#include <SPI.h>
+
 BluefruitStrs bfruit(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
 
 extern void CheckExecCmd(char *instr); // defined in main.h
@@ -23,7 +25,7 @@ class Bluetooth : public CustomCode
 public:
 
   void setup(void);
-  bool control(void);
+  bool loop(void);
 
   bool setName(char *name);
   bool sendReply(char *instr);
@@ -140,7 +142,7 @@ static void ResponseCB(void)
 }
 
 // return true if handling commands externally
-bool Bluetooth::control(void)
+bool Bluetooth::loop(void)
 {
   if ((pixelNutSupport.getMsecs() - msecsConnect) > MSECS_CHECK_CONNECT)
   {

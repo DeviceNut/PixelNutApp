@@ -78,7 +78,7 @@ class CustomCodeX : public Bluetooth
 {
 public:
 
-  void display(void) // called if have new pattern to display
+  void pattern(void) // called if have new pattern in engine
   {
     // must update properties for all segments
     for (int i = 1; i <= SEGMENT_COUNT; ++i)

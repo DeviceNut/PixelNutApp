@@ -9,21 +9,28 @@ See license.txt for the terms of this license.
 
 #define MAXLEN_DEVICE_NAME      16          // maxlen for device name
 
+#if !defined(NEOPIXELS_OVERRIDE)
+#define NEOPIXELS_OVERRIDE      0           // use neopixels by default
+#endif
+
 #if !defined(FEATURE_BITS)
 #define FEATURE_BITS            0           // extended feature bits
+#endif
+
+#if BLUETOOTH_COMM
+#define EXTERNAL_COMM           1           // external communications using bluetooth
 #endif
 
 #if ETHERNET_COMM
 #define EXTERNAL_COMM           1           // external communications using ethernet
 #endif
 
-#if BLUETOOTH_COMM
-#define EXTERNAL_COMM           1           // external communications using bluetooth
-#define USE_SPI                 1           // which uses SPI
+#if !defined(EXTERNAL_COMM)
+#define EXTERNAL_COMM           0
 #endif
 
-#if USE_SPI && !defined(SPARK)
-#include <SPI.h>
+#if !defined(USE_WIFI_DIRECT)
+#define USE_WIFI_DIRECT         0           // connect to Particle Cloud
 #endif
 
 #if !defined(STRAND_COUNT)
@@ -42,17 +49,16 @@ See license.txt for the terms of this license.
 #define PIXENGINE_OVERRIDE      1           // must extend engine class
 #define APPCMDS_OVERRIDE        1           // must extend appcmds class
 #define CUSTOM_OVERRIDE         1           // must extend custom class
-
 #elif EXTERNAL_COMM
 #define CUSTOM_OVERRIDE         1           // must extend for bluetooth/ethernet
 #endif
 
-#if !defined(EXTERNAL_COMM)
-#define EXTERNAL_COMM           0
-#endif
-
 #if !defined(CUSTOM_PATTERNS) // MUST use internal patterns if no external client
 #define CUSTOM_PATTERNS         !EXTERNAL_COMM
+#endif
+
+#if !defined(EXTERN_PATTERNS)
+#define EXTERN_PATTERNS         1           // use external (client) patterns
 #endif
 
 #if !defined(BASIC_PATTERNS)

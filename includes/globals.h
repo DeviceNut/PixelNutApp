@@ -24,13 +24,13 @@ extern const char* const customPhelp[];
 short pixelBytes = (PIXEL_COUNT*3);         // number of bytes to store pixels
 byte pixelArray[PIXEL_COUNT*3];             // static allocation of pixel strip
 byte *pPixelData = pixelArray;
+#endif
 
+#if !NEOPIXELS_OVERRIDE
 NeoPixelShow neoPixels = NeoPixelShow(DPIN_PIXELS);
 NeoPixelShow *pNeoPixels = &neoPixels;
-
 PixelValOrder pixorder = {1,0,2}; // mapping of (RGB) to (GRB) for WS8218B
 PixelNutSupport pixelNutSupport = PixelNutSupport((GetMsecsTime)millis, &pixorder);
-PixelNutEngine::Status engineStatus; // status from command execution
 #endif
 
 #if !PIXENGINE_OVERRIDE

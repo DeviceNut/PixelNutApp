@@ -128,7 +128,10 @@ public:
         DBGOUT((F("  NumPatterns: %d"), codePatterns));         // number of custom patterns
         AddNumToStr(outstr, codePatterns);
 
-        #if BASIC_PATTERNS
+        #if !EXTERN_PATTERNS
+        DBGOUT((F("  Features:    %d"), FEATURE_BITS | 0x01));  // cannot use external patterns
+        AddNumToStr(outstr, FEATURE_BITS | 0x01);
+        #elif BASIC_PATTERNS
         DBGOUT((F("  Features:    %d"), FEATURE_BITS | 0x02));  // cannot use advanced patterns
         AddNumToStr(outstr, FEATURE_BITS | 0x02);
         #else

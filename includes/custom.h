@@ -10,17 +10,22 @@ class CustomCode
 {
 public:
 
+  #if EEPROM_FORMAT
+  virtual void flash(void) {}
+  #endif
+
   // called during setup()
   virtual void setup(void) {}
   
-  // return true if handling commands externally
-  virtual bool control(void)
+  // called during loop()
+  virtual bool loop(void)
   {
+    // return true if handling commands externally
     return false; // check physical controls
   }
 
-  // called in loop() if have new pattern to display
-  virtual void display(void) {}
+  // called in loop() if have new pattern in engine
+  virtual void pattern(void) {}
 
   // override for external communications
   virtual bool setName(char *name) { return false; }
