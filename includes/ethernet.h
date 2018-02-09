@@ -23,6 +23,10 @@ extern void CheckExecCmd(char *instr); // defined in main.h
 extern AppCommands *pAppCmd;           // pointer to current instance
 
 #define SPARK_SUBNAME_DEVICE  "particle/device/name"
+#define SPARK_SUBNAME_IPADDR  "particle/device/ip"
+
+#define PNUT_PUBLISH_BEACON   "PixelNutBeacon"
+#define PNUT_NAME_PUBLISH     "PixelNutResponse"
 
 static const char index_html[] = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1'><title>Setup your device</title><link rel='stylesheet' type='text/css' href='style.css'></head><body><h1>Connect me to your WiFi!</h1><h3>My device ID:</h3><input type=text id='device-id' size='25' value='' disabled/><button type='button' class='input-helper' id='copy-button'>Copy</button><div id='scan-div'><h3>Scan for visible WiFi networks</h3><button id='scan-button' type='button'>Scan</button></div><div id='networks-div'></div><div id='connect-div' style='display: none'><p>Don't see your network? Move me closer to your router, then re-scan.</p><form id='connect-form'><input type='password' id='password' size='25' placeholder='password'/><button type='button' class='input-helper' id='show-button'>Show</button><button type='submit' id='connect-button'>Connect</button></form></div><script src='rsa-utils/jsbn_1.js'></script><script src='rsa-utils/jsbn_2.js'></script><script src='rsa-utils/prng4.js'></script><script src='rsa-utils/rng.js'></script><script src='rsa-utils/rsa.js'></script><script src='script.js'></script></body></html>";
 static const char style_css[]  = "html{height:100%;margin:auto;background-color:white}body{box-sizing:border-box;min-height:100%;padding:20px;background-color:#1aabe0;font-family:'Lucida Sans Unicode','Lucida Grande',sans-serif;font-weight:normal;color:white;margin-top:0;margin-left:auto;margin-right:auto;margin-bottom:0;max-width:400px;text-align:center;border:1px solid #6e6e70;border-radius:4px}div{margin-top:25px;margin-bottom:25px}h1{margin-top:25px;margin-bottom:25px}button{border-color:#1c75be;background-color:#1c75be;color:white;border-radius:5px;height:30px;font-size:15px;font-weight:bold}button.input-helper{background-color:#bebebe;border-color:#bebebe;color:#6e6e70;margin-left:3px}button:disabled{background-color:#bebebe;border-color:#bebebe;color:white}input[type='text'],input[type='password']{background-color:white;color:#6e6e70;border-color:white;border-radius:5px;height:25px;text-align:center;font-size:15px}input:disabled{background-color:#bebebe;border-color:#bebebe}input[type='radio']{position:relative;bottom:-0.33em;margin:0;border:0;height:1.5em;width:15%}label{padding-top:7px;padding-bottom:7px;padding-left:5%;display:inline-block;width:80%;text-align:left}input[type='radio']:checked+label{font-weight:bold;color:#1c75be}.scanning-error{font-weight:bold;text-align:center}.radio-div{box-sizing:border-box;margin:2px;margin-left:auto;margin-right:auto;background-color:white;color:#6e6e70;border:1px solid #6e6e70;border-radius:3px;width:100%;padding:5px}#networks-div{margin-left:auto;margin-right:auto;text-align:left}#device-id{text-align:center}#scan-button{min-width:100px}#connect-button{display:block;min-width:100px;margin-top:10px;margin-left:auto;margin-right:auto;margin-bottom:20px}#password{margin-top:20px;margin-bottom:10px}";
@@ -56,10 +60,11 @@ Page myPages[] =
 static bool doSoftAP;
 static bool createWiFi;
 
-static uint16_t update_counter;
 static uint32_t timePublished;
 static byte countPublished;
 
+static byte deviceID[100];         // holds device ID as assigned by Particle
+static char ipAddress[16] = {0};   // holds IP address as string: AAA.BBB.CCC.DDD
 static char htmlReplyString[1000]; // long enough for maximum ?, ?S, ?P output strings
 
 static const char indexpage[] = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1'><title>PixelNut!</title></head><body><h1>PixelNut!</h1></body></html>";
@@ -67,11 +72,14 @@ static const char indexpage[] = "<!DOCTYPE html><html><head><meta name='viewport
 static bool ConnectToCloud(void);
 static void CmdSequence(const char *data);
 
+static void SendBeacon(void);
+Timer timer(3000, SendBeacon);
+
 void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* body, Writer* result, void* reserved)
 {
   DBGOUT((F("SoftAP(%d): URL=%s"), createWiFi, url));
 
-  if (createWiFi)
+  if (createWiFi) // used by PixelNutCtrl application
   {
     // put up home page (just shows string: 'PixelNut!')
     if (!strcmp(url, "/index") || !strcmp(url, "/index.html"))
@@ -115,7 +123,7 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
       result->write("");
     }
   }
-  else
+  else // used by the Particle mobile application
   {
     int8_t idx = 0;
     for (;;idx++)
@@ -226,107 +234,153 @@ static void RestartDevice(void)
   System.reset(); // just reboot right away
 }
 
-static void ProcessCmd(char *instr)
+static void SetSSID(char *str)
 {
-  DBGOUT((F("Web --> \"%s\""), instr));
+  char ssid[32];
+  char pass[32];
+  bool newmode = true;
 
-  // special command to load/clear WiFi credentials
-  if (!strncmp(instr, "*wifi*", 6))
+  int i = 0;
+  while (*str == ' ') ++str; // skip spaces
+  while(*str)
   {
-    char ssid[32];
-    char pass[32];
-    char *str = instr+6;
-    bool newmode = true;
-
-    int i = 0;
-    while (*str == ' ') ++str; // skip spaces
-    while(*str)
-    {
-      if (*str == ' ') break;
-      ssid[i++] = *str++;
-    }
-    ssid[i] = 0;
-
-    i = 0; // reset index for pass
-    while (*str == ' ') ++str; // skip spaces
-    while(*str)
-    {
-      if (*str == ' ') break;
-      pass[i++] = *str++;
-    }
-    pass[i] = 0;
-
-    if (ssid[0] != 0)
-    {
-      DBGOUT((F("WiFi credentials: ssid=%s pass=%s"), ssid, pass));
-      WiFi.setCredentials(ssid, pass);
-      /*
-      WiFiAccessPoint ap[5];
-      int found = WiFi.getCredentials(ap, 5);
-      for (int i = 0; i < found; i++)
-      {
-          Serial.print(i);
-          Serial.print(") SSID=");
-          Serial.println(ap[i].ssid);
-      }
-      */
-
-      EEPROM.write(FLASHOFF_PATTERN_END, !WIFI_DIRECT_ON); // connect to cloud
-    }
-    else if (!WiFi.clearCredentials())
-    {
-      DBGOUT((F("Failed to clear WiFi credentials")));
-      ErrorHandler(3, 4, false);
-      newmode = false;
-    }
-    else
-    {
-      DBGOUT((F("WiFi credentials cleared")));
-      EEPROM.write(FLASHOFF_PATTERN_END, WIFI_DIRECT_ON); // use own SoftAP mode
-    }
-
-    if (newmode) RestartDevice();
+    if (*str == ' ') break;
+    ssid[i++] = *str++;
   }
-  // this is where PixelNut commands get processed
-  else if (pAppCmd->execCmd(instr)) CheckExecCmd(instr);
+  ssid[i] = 0;
+
+  i = 0; // reset index for pass
+  while (*str == ' ') ++str; // skip spaces
+  while(*str)
+  {
+    if (*str == ' ') break;
+    pass[i++] = *str++;
+  }
+  pass[i] = 0;
+
+  if (ssid[0] != 0)
+  {
+    DBGOUT((F("WiFi credentials: ssid=%s pass=%s"), ssid, pass));
+    WiFi.setCredentials(ssid, pass);
+    /*
+    WiFiAccessPoint ap[5];
+    int found = WiFi.getCredentials(ap, 5);
+    for (int i = 0; i < found; i++)
+    {
+        Serial.print(i);
+        Serial.print(") SSID=");
+        Serial.println(ap[i].ssid);
+    }
+    */
+
+    EEPROM.write(FLASHOFF_PATTERN_END, !WIFI_DIRECT_ON); // connect to cloud
+  }
+  else if (!WiFi.clearCredentials())
+  {
+    DBGOUT((F("Failed to clear WiFi credentials")));
+    ErrorHandler(3, 1, false);
+    newmode = false;
+  }
+  else
+  {
+    DBGOUT((F("WiFi credentials cleared")));
+    EEPROM.write(FLASHOFF_PATTERN_END, WIFI_DIRECT_ON); // use own SoftAP mode
+  }
+
+  if (newmode) RestartDevice();
 }
 
 // splits command sequence (as defined by newline chars)
 // into separate strings to be individually processed
 static void CmdSequence(const char *data)
 {
-  char cmdstr[STRLEN_PATTERNS];
+  char instr[STRLEN_PATTERNS];
   while (*data)
   {
     int i = 0;
     while (*data && (*data != '\n'))
-      cmdstr[i++] = *data++;
+      instr[i++] = *data++;
 
-    cmdstr[i] = 0;
+    instr[i] = 0;
     if (*data == '\n') ++data;
 
-    if (i > 0) ProcessCmd(cmdstr);
+    if (i > 0)
+    {
+      DBGOUT((F("Web --> \"%s\""), instr));
+
+      // special command to load/clear WiFi credentials
+      if (!strncmp(instr, "*wifi*", 6)) SetSSID(instr+6);
+
+      else if (!strcmp(instr, "*bstart*"))
+      {
+        if (!timer.isActive()) timer.start();
+      }
+      else if (!strcmp(instr, "*bstop*"))
+      {
+        if (timer.isActive()) timer.stop();
+      }
+
+      // this is where PixelNut commands get processed
+      else if (pAppCmd->execCmd(instr)) CheckExecCmd(instr);
+    }
   }
+}
+
+static void SendBeacon(void)
+{
+  char outstr[100];
+  sprintf(outstr, "IP=%s ID=%s", ipAddress, deviceID);
+
+  if (!Particle.publish(PNUT_PUBLISH_BEACON, outstr, 60, PRIVATE))
+  {
+    DBGOUT((F("Particle publish failed")));
+    ErrorHandler(3, 2, false);
+  }
+
+  DBGOUT((F("Published: %s"), outstr));
 }
 
 static void cmdHandler(const char *name, const char *data)
 {
-  if (!strcmp(name, "PixelNutCommand"))
-    CmdSequence(data);
+  //DBGOUT((F("CloudCallback: name=%s data=%s"), name, data));
 
-  else if (!strcmp(name, SPARK_SUBNAME_DEVICE))
+  if (*data) // have some data
   {
-    DBGOUT((F("Saving device name: \"%s\""), data));
-    FlashSetName((char*)data);
+    if (!strcmp(name, "PixelNutCommand"))
+    {
+      CmdSequence(data);
+      return;
+    }
+    else if (!strcmp(name, SPARK_SUBNAME_IPADDR))
+    {
+      if (strlen(data) <= 15) // insure string isn't too long
+      {
+        strcpy(ipAddress, data);
+        //DBGOUT((F("Found IP address: %s"), ipAddress));
+        SendBeacon();
+        timer.start();
+      }
+      else ErrorHandler(3, 3, true); // does not return from this call
+
+      return;
+    }
+    /*
+    else if (!strcmp(name, SPARK_SUBNAME_DEVICE))
+    {
+      DBGOUT((F("Saving device name: \"%s\""), data));
+      FlashSetName((char*)data);
+      return;
+    }
+    */
   }
-  DBG(else DBGOUT((F("Subscribe: name=%s data=%s"), name, data));)
+
+  DBGOUT((F("Subscribe: name=%s data=%s"), name, data));
 }
 
 static bool ConnectToCloud(void)
 {
   timePublished = pixelNutSupport.getMsecs();
   countPublished = 0;
-  update_counter = 0;
 
   DBGOUT((F("Connecting to network...")));
   Particle.connect();
@@ -367,16 +421,17 @@ static bool ConnectToCloud(void)
 
   DBGOUT((F("Setting up Pub/Sub...")));
 
-  if (!Particle.subscribe("PixelNutCommand", cmdHandler)) //, MY_DEVICES))
+  if (!Particle.subscribe("PixelNutCommand", cmdHandler, MY_DEVICES))
   {
     DBGOUT((F("Particle subscribe failed")));
-    ErrorHandler(3, 1, true); // does not return from this call
+    ErrorHandler(3, 3, true); // does not return from this call
   }
 
-  if (!Particle.publish("PixelNutResponse", "PixelNut! is online", 60, PRIVATE))
+  if (!Particle.subscribe(SPARK_SUBNAME_IPADDR, cmdHandler) ||
+      !Particle.publish(SPARK_SUBNAME_IPADDR))
   {
-    DBGOUT((F("Particle publish failed")));
-    ErrorHandler(3, 2, true); // does not return from this call
+    DBGOUT((F("Retrieving IP address failed")));
+    ErrorHandler(3, 3, true); // does not return from this call
   }
 
   /*
@@ -412,8 +467,8 @@ public:
     byte instr[100];
     DBGOUT((F("Particle Photon:")));
     DBGOUT((F("  Version=%s"), System.version().c_str()));
-    System.deviceID().getBytes(instr, 100);
-    DBGOUT((F("  DeviceID=%s"), instr));
+    System.deviceID().getBytes(deviceID, 100);
+    DBGOUT((F("  DeviceID=%s"), deviceID));
     DBGOUT((F("  Memory=%d free bytes"), System.freeMemory()));
     Time.timeStr().getBytes(instr, 100);
     DBGOUT((F("  Time=%s"), instr));
@@ -421,7 +476,7 @@ public:
     SetupDevice();
   }
 
-  // For use by PixelNutCtrl application
+  // used by PixelNutCtrl application only
   // return false if failed to set name
   bool setName(char *name)
   {
@@ -441,19 +496,18 @@ public:
     return true;
   }
 
-  // For use by PixelNutCtrl application
   // return false if failed to send message
   bool sendReply(char *instr)
   {
     DBGOUT((F("Web <-- \"%s\""), instr));
     bool success = true;
 
-    if (createWiFi)
+    if (createWiFi) // used by PixelNutCtrl application
     {
       strcat(htmlReplyString, instr);
       strcat(htmlReplyString, "\r\n");
     }
-    else
+    else // used when connected to the Particle Cloud
     {
       // can only publish 4 at once, then once a second
       uint32_t msecs = (pixelNutSupport.getMsecs() - timePublished);
@@ -464,7 +518,7 @@ public:
       }
       else countPublished = 0;
 
-      if (!Particle.publish("PixelNutResponse", instr, 60, PRIVATE))
+      if (!Particle.publish(PNUT_NAME_PUBLISH, instr, 60, PRIVATE))
       {
         DBGOUT((F("Particle publish failed")));
         success = false;
