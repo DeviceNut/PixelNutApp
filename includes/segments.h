@@ -74,7 +74,11 @@ public:
 AppCommandsX appCmdX; // extended class instance
 AppCommands *pAppCmd = &appCmdX;
 
+#if BLUETOOTH_COMM
 class CustomCodeX : public Bluetooth
+#else
+class CustomCodeX : public Ethernet
+#endif
 {
 public:
 

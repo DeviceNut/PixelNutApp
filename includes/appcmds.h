@@ -57,8 +57,6 @@ public:
           if (!pCustomCode->sendReply((char*)SEGMENT_INFO)) return false;
 
           char outstr[100];
-          outstr[0] = 0;
-
           for (int i = 1; i <= SEGMENT_COUNT; ++i)
           {
             FlashSetSegment(i);
