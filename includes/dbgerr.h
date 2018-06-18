@@ -57,19 +57,18 @@ void SetupDebugInterface(void)
   Serial.begin(115200); // MATCH THIS BAUD RATE <<<
 
   #if defined(SPARK)
+  // wait up to 15 secs for serial window
+  uint32_t tout = millis() + 15000;
   // on Windows only: user should have serial terminal closed first,
   // then start running this, and then open terminal and press a key
-  while (!Serial.available()) BlinkStatusLED(0, 1);
-
+  while (!Serial.available()) if (millis() > tout) break; else BlinkStatusLED(0, 1);
   #else // !SPARK
-  {
-    // wait up to 5 secs for serial window
-    uint32_t tout = millis() + 5000;
-    while (!Serial) if (millis() > tout) break;
-  }
+  // wait up to 5 secs for serial window
+  uint32_t tout = millis() + 5000;
+  while (!Serial) if (millis() > tout) break;
   #endif
 
-  // wait a little, then send sign-on message
+  // wait a tad longer, then send sign-on message
   delay(10);
   DBGOUT((F(DEBUG_SIGNON)));
 }
