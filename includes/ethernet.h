@@ -20,6 +20,15 @@ extern AppCommands *pAppCmd;           // pointer to current instance
 SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
+// Blink patterns (long, short):
+// 0,1  Fast repeats: waiting for debugger
+// 0,1  Just once: startup was successful
+// 0,2  Waiting for network configuration
+// 0,3  EEPROM format finished
+// 1,0  Connecting to cloud
+// 1,0  Sending Beacon message
+// else repeating error message
+
 #define FLASHOFF_PARTICLE_MODE    FLASHOFF_PATTERN_END
 #define PARTICLE_MODE_WIFI        0   // value in flash to start in our own SoftAP mode, for use with the PixelNutCtrl application
 #define PARTICLE_MODE_CLOUD       1   // value in flash to connect to Particle Cloud if have credentials, use in SoftAP mode but serve webpage below to be used by Particle application
@@ -32,7 +41,7 @@ typedef void (*PubHandler)(const char *name, const char *data); // handler for f
 #define PARTICLE_SUBNAME_IPADDR   "particle/device/ip"
 
 #define PNUT_SUBNAME_DEVCMD_PFX   "PnutCmd"               // prefix for events targeting specific device
-#define PNUT_SUBNAME_PRODCMD      "PixelNutCommand"       // name of event that reaches every PixelNut device
+#define PNUT_SUBNAME_PRODCMD      "PixelNutCommand"       // name of event that reaches every PixelNut device (only in debug)
 #define PNUT_PUBNAME_BEACON       "PixelNutBeacon"        // name of event broadcast from devices when unattached
 #define PNUT_FUNNAME_BEACON       "Beacon"                // name of function to enable/disable the beacon
 #define PNUT_FUNNAME_SETSSID      "SetSSID"               // name of function to set/clear WiFi SSID/PWD
@@ -79,7 +88,7 @@ static bool createWiFi;
 
 static char deviceID[100];          // holds device ID as assigned by Particle
 static char ipAddress[16] = {0};    // holds IP address as string: AAA.BBB.CCC.DDD
-static char replyString[1000];      // long enough for maximum ?, ?S, ?P output strings
+static char dataString[1000];       // long enough for maximum ?, ?S, ?P output strings
 
 static char vstrConfigInfo[100];    // holds configuration string for variable PNUT_VARNAME_CONFIGINFO
 #if (SEGMENT_COUNT > 1)
@@ -120,9 +129,9 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
 
         if (*data == '?') // single command to retrive info
         {
-          replyString[0] = 0;
-          pAppCmd->execCmd(data);
-          result->write(replyString);
+          dataString[0] = 0;
+          pAppCmd->execCmd((char*)"?");
+          result->write(dataString);
         }
         else // process (multiple) command(s)
         {
@@ -182,7 +191,6 @@ static void RestartDevice(void)
   //DBGOUT((F("Restart device...")));
   //WiFi.listen(false);   // turn off listening mode
   //SetupDevice();        // restart setup process
-  //BlinkStatusLED(2, 0); // indicate success
 
   DBGOUT((F("Rebooting!!!")));
   delay(1000);
@@ -342,18 +350,24 @@ static void cmdHandler(const char *name, const char *data)
 {
   if (*data) // have some data
   {
-    if (!strcmp(name, PNUT_SUBNAME_PRODCMD))
+    if (!strncmp(name, PNUT_SUBNAME_DEVCMD_PFX, strlen(PNUT_SUBNAME_DEVCMD_PFX)))
     {
-      DBGOUT((F("Product Command: %s"), data));
+      DBGOUT((F("Device Command: %s"), data));
 
+      strcpy(dataString, data);
       // this is where PixelNut commands get processed
-      if (pAppCmd->execCmd((char*)data)) CheckExecCmd((char*)data);
+      if (pAppCmd->execCmd(dataString)) CheckExecCmd(dataString);
     }
-    else if (!strncmp(name, PNUT_SUBNAME_DEVCMD_PFX, strlen(PNUT_SUBNAME_DEVCMD_PFX)))
+    #if DEBUG_OUTPUT
+    else if (!strcmp(name, PNUT_SUBNAME_PRODCMD))
     {
+      DBGOUT((F("Global Command: %s"), data));
+
+      strcpy(dataString, data);
       // this is where PixelNut commands get processed
-      if (pAppCmd->execCmd((char*)data)) CheckExecCmd((char*)data);
+      if (pAppCmd->execCmd(dataString)) CheckExecCmd(dataString);
     }
+    #endif
     else { DBGOUT((F("CmdHandler: unknown name=%s"), name)); }
   }
   else { DBGOUT((F("CmdHandler: empty data, name=%s"), name)); }
@@ -473,25 +487,27 @@ static bool ConnectToCloud(void)
 
   char cmdname[100];
   sprintf(cmdname, "%s-%s", PNUT_SUBNAME_DEVCMD_PFX, deviceID);
-
   Subscribe(cmdname, cmdHandler);
+
+  #if DEBUG_OUTPUT
   Subscribe((char*)PNUT_SUBNAME_PRODCMD, cmdHandler);
+  #endif
 
   SetFunction((char*)PNUT_FUNNAME_BEACON,  funBeacon);
   SetFunction((char*)PNUT_FUNNAME_SETSSID, funSetSSID);
   SetFunction((char*)PNUT_FUNNAME_RESTART, funRestart);
 
   segmentCount = 0;
-  replyString[0] = 0;
+  dataString[0] = 0;
   pAppCmd->execCmd((char*)"?"); // get main configuration strings
-  strcpy(vstrConfigInfo, replyString);
+  strcpy(vstrConfigInfo, dataString);
   SetVariable((char*)PNUT_VARNAME_CONFIGINFO, vstrConfigInfo);
 
   #if (SEGMENT_COUNT > 1)
   segStrFirst = true;
   for (segmentCount = 1; segmentCount <= SEGMENT_COUNT; ++segmentCount)
   {
-    replyString[0] = 0;
+    dataString[0] = 0;
     pAppCmd->execCmd((char*)"?S"); // get segment configuration strings
   }
   segStrFirst = true; // reset in case can switch modes without reboot
@@ -557,10 +573,10 @@ static void SetupDevice(void)
       uint32_t time = millis();
       while(true)
       {
+        BlinkStatusLED(0, 2); // connect with browser to set SSID
+
         if ((millis() - time) > 1000)
         {
-          BlinkStatusLED(0, 2); // connect with browser to set SSID
-        
           //DBGOUT((F("Listening=%d"), WiFi.listening()));
           //DBGOUT((F("Connecting=%d"), WiFi.connecting()));
           if (!WiFi.listening() && !WiFi.connecting())
@@ -625,14 +641,14 @@ public:
 
   // used by both the PixelNutCtrl application and
   // when connected to the Particle Cloud to retrieve
-  // information strings from PixelNut application
+  // information strings from the PixelNut application
   bool sendReply(char *instr)
   {
     if (segmentCount == 0)
     {
       DBGOUT((F("ReplyStr: \"%s\""), instr));
-      strcat(replyString, instr);
-      strcat(replyString, "\r\n");
+      strcat(dataString, instr);
+      strcat(dataString, "\r\n");
     }
 
     #if (SEGMENT_COUNT > 1)
@@ -642,7 +658,6 @@ public:
       segStrFirst = false;
     }
     else strcpy(vstrSegsVals[segmentCount-1], instr);
-
     #endif
 
     return true; // this cannot fail
