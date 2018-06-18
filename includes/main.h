@@ -59,7 +59,7 @@ void setup()
   #if EEPROM_FORMAT
   FlashFormat(); // format entire EEPROM
   pCustomCode->flash(); // custom flash handling
-  ErrorHandler(0, 1, true);
+  ErrorHandler(0, 2, true);
   #endif
 
   if (pPixelNutEngine->pDrawPixels == NULL)
@@ -89,9 +89,6 @@ void setup()
   DBGOUT((F("  EE_PATTERN_END    = %d"), FLASHOFF_PATTERN_END));
   DBGOUT((F("  EEPROM_FREE_BYTES = %d"), EEPROM_FREE_BYTES));
 
-  pCustomCode->setup(); // custom initialization here
-  // this is where the external communications are setup
-
   SetupBrightControls();
   SetupDelayControls();
   SetupEModeControls();
@@ -101,6 +98,8 @@ void setup()
   SetupPatternControls();
 
   CheckForPatterns();     // read internal patterns (if any) and current pattern number
+  pCustomCode->setup();   // custom initialization here (external communications setup)
+
   GetCurPattern(cmdStr);  // get pattern string corresponding that that pattern number
   CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
 
