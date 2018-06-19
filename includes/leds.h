@@ -49,6 +49,7 @@ void BlinkStatusLED(uint16_t slow, uint16_t fast)
       TURN_OFF;
       delay(250);
     }
+
     if (fast) delay(250);
   }
 
@@ -57,12 +58,13 @@ void BlinkStatusLED(uint16_t slow, uint16_t fast)
     for (int i = 0; i < fast; ++i)
     {
       TURN_ON;
-      delay(150);
+      delay(200);
       TURN_OFF;
       delay(250);
     }
-    delay(250);
   }
+
+  delay(250);
   #endif
 }
 

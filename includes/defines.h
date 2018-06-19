@@ -26,7 +26,7 @@ See license.txt for the terms of this license.
 #endif
 
 #if !defined(EXTERNAL_COMM)
-#define EXTERNAL_COMM           0
+#define EXTERNAL_COMM           0           // default setting: no external client
 #endif
 
 #if !defined(USE_WIFI_DIRECT)

@@ -103,7 +103,7 @@ void setup()
   GetCurPattern(cmdStr);  // get pattern string corresponding that that pattern number
   CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
 
-  BlinkStatusLED(0, 1); // indicate success
+  BlinkStatusLED(0, 2); // indicate success
   DBGOUT((F("** Setup complete **")));
 }
 
