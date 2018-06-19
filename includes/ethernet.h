@@ -22,7 +22,7 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 
 // Blink patterns (long, short):
 // 0,1  Fast repeats: waiting for debugger
-// 0,1  Just once: startup was successful
+// 0,2  Just once: startup was successful
 // 0,2  Waiting for network configuration
 // 0,3  EEPROM format finished
 // 1,0  Connecting to cloud
@@ -32,7 +32,7 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 #define FLASHOFF_PARTICLE_MODE    FLASHOFF_PATTERN_END
 #define PARTICLE_MODE_WIFI        0   // value in flash to start in our own SoftAP mode, for use with the PixelNutCtrl application
 #define PARTICLE_MODE_CLOUD       1   // value in flash to connect to Particle Cloud if have credentials, use in SoftAP mode but serve webpage below to be used by Particle application
-#define PARTICLE_MODE_BEACON      2   // connect to Particle Cloud and broadcast beacon, cleared after customer attaches to device through PixelNut website (www.pixelnut.io)
+#define PARTICLE_MODE_BEACON      2   // connect to Particle Cloud and broadcast beacon, cleared after customer claims ownership of device through PixelNut website (www.pixelnut.io)
 
 typedef int  (*FunHandler)(String arg);                         // handler for subscribe event
 typedef void (*PubHandler)(const char *name, const char *data); // handler for function calls
@@ -206,7 +206,7 @@ static bool ClearWiFiCredentials(bool failstop)
   }
 
   DBGOUT((F("Failed to clear WiFi credentials")));
-  ErrorHandler(3, 2, failstop); // does not return if failstop=true
+  ErrorHandler(3, 3, failstop); // does not return if failstop=true
   return false;
 }
 
@@ -295,7 +295,7 @@ static void SendBeacon(void)
   if (!Particle.publish(PNUT_PUBNAME_BEACON, outstr, 60, PRIVATE))
   {
     DBGOUT((F("Particle publish(Beacon) failed")));
-    ErrorHandler(3, 3, false);
+    ErrorHandler(3, 1, false);
   }
   else
   {
@@ -340,11 +340,13 @@ static int funSetSSID(String funstr)
   return 0;
 }
 
+#if DEBUG_OUTPUT
 static int funRestart(String funstr)
 {
   RestartDevice();
   return 0;
 }
+#endif
 
 static void cmdHandler(const char *name, const char *data)
 {
@@ -354,7 +356,7 @@ static void cmdHandler(const char *name, const char *data)
     {
       DBGOUT((F("Device Command: %s"), data));
 
-      strcpy(dataString, data);
+      strcpy(dataString, data); // MUST save to local storage
       // this is where PixelNut commands get processed
       if (pAppCmd->execCmd(dataString)) CheckExecCmd(dataString);
     }
@@ -363,7 +365,7 @@ static void cmdHandler(const char *name, const char *data)
     {
       DBGOUT((F("Global Command: %s"), data));
 
-      strcpy(dataString, data);
+      strcpy(dataString, data); // MUST save to local storage
       // this is where PixelNut commands get processed
       if (pAppCmd->execCmd(dataString)) CheckExecCmd(dataString);
     }
@@ -380,7 +382,7 @@ static void sparkHandler(const char *name, const char *data)
     if (*data && (strlen(data) <= 15)) // insure string isn't too short/long
     {
       strcpy(ipAddress, data);
-      //DBGOUT((F("Found IP address: %s"), ipAddress));
+      DBGOUT((F("Found IP address: %s"), ipAddress));
 
       if (EEPROM.read(FLASHOFF_PARTICLE_MODE) == PARTICLE_MODE_BEACON)
         timerBeacon.start();
@@ -388,7 +390,7 @@ static void sparkHandler(const char *name, const char *data)
     else // NOTE: have seen this be garbage the first time powered up FIXME: must retry
     {
       DBGOUT((F("Invalid IP address: %s"), data));
-      ErrorHandler(3, 1, true); // does not return from this call
+      ErrorHandler(3, 2, true); // does not return from this call
     }
   }
   /*
@@ -440,7 +442,7 @@ static bool ConnectToCloud(void)
   uint32_t time = millis();
   while (!WiFi.ready())
   {
-    Particle.process();   // don't need this since have system thread
+    //Particle.process();   // don't need this since have system thread
     BlinkStatusLED(1, 0); // connecting to cloud with local network
 
     if ((millis() - time) > 1000)  // timeout: bad credentials?
@@ -495,7 +497,10 @@ static bool ConnectToCloud(void)
 
   SetFunction((char*)PNUT_FUNNAME_BEACON,  funBeacon);
   SetFunction((char*)PNUT_FUNNAME_SETSSID, funSetSSID);
+
+  #if DEBUG_OUTPUT
   SetFunction((char*)PNUT_FUNNAME_RESTART, funRestart);
+  #endif
 
   segmentCount = 0;
   dataString[0] = 0;
