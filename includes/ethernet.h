@@ -153,7 +153,7 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
       result->write("");
     }
   }
-  else // used by the Particle mobile application
+  else // used by the Particle application
   {
     int8_t idx = 0;
     for (;;idx++)
@@ -443,7 +443,7 @@ static bool ConnectToCloud(void)
   while (!WiFi.ready())
   {
     //Particle.process();   // don't need this since have system thread
-    BlinkStatusLED(1, 0); // connecting to cloud with local network
+    BlinkStatusLED(1, 0);   // connecting to cloud with local network
 
     if ((millis() - time) > 1000)  // timeout: bad credentials?
     {
@@ -587,7 +587,7 @@ static void SetupDevice(void)
           if (!WiFi.listening() && !WiFi.connecting())
             break;
 
-          Particle.process();
+          Particle.process();   // don't need this since have system thread?
           time = millis();
         }
       }

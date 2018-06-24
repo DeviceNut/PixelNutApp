@@ -61,7 +61,11 @@ void SetupDebugInterface(void)
   uint32_t tout = millis() + 15000;
   // on Windows only: user should have serial terminal closed first,
   // then start running this, and then open terminal and press a key
-  while (!Serial.available()) if (millis() > tout) break; else BlinkStatusLED(0, 1);
+  while (!Serial.available())
+  {
+    if (millis() > tout) break;
+    BlinkStatusLED(0, 1);
+  }
   #else // !SPARK
   // wait up to 5 secs for serial window
   uint32_t tout = millis() + 5000;
