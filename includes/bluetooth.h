@@ -16,7 +16,6 @@ See license.txt for the terms of this license.
 BluefruitStrs bfruit(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
 
 extern void CheckExecCmd(char *instr); // defined in main.h
-extern AppCommands *pAppCmd;           // pointer to current instance
 
 #define MSECS_CHECK_CONNECT   500     // check for connection every 1/2 second
 
@@ -53,15 +52,70 @@ void notifyCB(NotifyMessage msgval, char *msgstr)
   ErrorHandler(3, msgval, bluetooth.inSetup); // hangs here if in setup
 }
 
+static bool CheckDevName(char *devstr)
+{
+  bool badname = false;
+  char name[MAXLEN_DEVICE_NAME+1];
+
+  FlashGetName(name);
+  int len = strlen(name);
+
+  if (len < 2) badname = true;
+  else for (int i = 0; i < len; ++i)
+  {
+    char c = name[i];
+    if (!isalpha(c) && !isdigit(c) &&
+          (c != ' ') && (c != '-')  &&
+          (c != '!') && (c != '#')  &&
+          (c != '$') && (c != '%')  &&
+          (c != '&') && (c != '*'))
+    {
+      badname = true;
+      break;
+    }
+  }
+
+  bool goodble = (strlen(devstr) > PREFIX_LEN_DEVNAME) &&
+                  !strncmp(devstr, PREFIX_DEVICE_NAME, PREFIX_LEN_DEVNAME);
+
+  // if the name stored in flash is invalid or empty,
+  // and there isn't what looks like a good BLE name,
+  // then reset to a generic name, so that the user
+  // can be able to find it and rename it in the app
+  if (badname && !goodble)
+  {
+    strcpy(devstr, DEFAULT_DEVICE_NAME);
+    FlashSetName(devstr);
+    return true;
+  }
+  // else if there's a good BLE name but not a
+  // good flash name, override the flash name
+  else if (badname && goodble)
+    FlashSetName(devstr + PREFIX_LEN_DEVNAME);
+
+  // otherwise if there isn't a good BLE name or the
+  // name stored in flash doesn't match it, then just
+  // reset the BLE name. (This is done because the BLE
+  // name in certain Adafruit's devices sometimes gets
+  // reset to "Adafruit Bluefruit LE" for some reason.)
+  else if (!goodble || strcmp(name, devstr + PREFIX_LEN_DEVNAME))
+  {
+    strcpy(devstr, name);
+    return true;
+  }
+  
+  return false;
+}
+
 // return false if failed to set name
 bool setNameBLE(char *name)
 {
   // 14 chars for command + terminator
-  // + beginning "P!" to name
-  char str[MAXLEN_DEVICE_NAME+2+14+1];
+  // + beginning prefix to name
+  char str[MAXLEN_DEVICE_NAME+PREFIX_LEN_DEVNAME+14+1];
   strcpy(str, (char*)"AT+GAPDEVNAME=");
-  strcpy((str+14), "P!");
-  strcpy((str+16), name);
+  strcpy((str+14), PREFIX_DEVICE_NAME);
+  strcpy((str+14+PREFIX_LEN_DEVNAME), name);
 
   DBGOUT((F("Setting BLE name: %s"), str));
   if (!bfruit.sendCmdStr(str, NULL))
@@ -79,7 +133,7 @@ void getNameCB(void)
 
   DBGOUT((F("BLE DevName: \"%s\""), cmdStr));
 
-  if (pAppCmd->setDeviceName(cmdStr))
+  if (CheckDevName(cmdStr))
     setNameBLE(cmdStr);
 }
 
