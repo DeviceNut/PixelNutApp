@@ -20,9 +20,8 @@ SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 // Blink patterns (long, short):
-// 0,1  Fast repeats: waiting for debugger
-// 0,2  Just once: startup was successful
-// 0,2  Waiting for network configuration
+// 0,1  waiting for debugger
+// 0,2  once: startup successful
 // 0,3  EEPROM format finished
 // 1,0  Connecting to cloud
 // 2,0  Sending Beacon message
@@ -41,11 +40,12 @@ typedef void (*PubHandler)(const char *name, const char *data); // handler for f
 #define PNUT_SUBNAME_DEVCMD_PFX   "PnutCmd"               // prefix for events targeting specific device
 #define PNUT_SUBNAME_PRODCMD      "PixelNutCommand"       // name of event that reaches every PixelNut device (only in debug)
 #define PNUT_PUBNAME_BEACON       "PixelNutBeacon"        // name of event broadcast from devices when unattached
-#define PNUT_FUNNAME_SOFTAP       "SoftAP"                // name of function to set startup mode
 #define PNUT_FUNNAME_BEACON       "Beacon"                // name of function to enable/disable the beacon
-#define PNUT_FUNNAME_NETWORK      "Network"               // name of function to set/clear WiFi SSID/PWD
-#define PNUT_FUNNAME_RESTART      "Restart"               // name of function to cause device reboot
+//#define PNUT_FUNNAME_SOFTAP       "SoftAP"                // name of function to set startup mode
+//#define PNUT_FUNNAME_NETWORK      "Network"               // name of function to set/clear WiFi SSID/PWD
+//#define PNUT_FUNNAME_RESTART      "Restart"               // name of function to cause device reboot
 
+#define PNUT_VARNAME_NETWORKS     "Networks"              // name of variable with list of configured network SSIDs
 #define PNUT_VARNAME_CONFIGINFO   "ConfigInfo"            // name of variable with configuration info
 #define PNUT_VARNAME_SEGINFO      "SegInfo"               // name of variable with segment offsets/lengths
 #define PNUT_VARNAME_SEGVALS_PFX  "SegVals"               // prefix for variables with segment property values
@@ -79,23 +79,35 @@ Page myPages[] =
      { nullptr }
 };
 
-static char deviceID[100];          // holds device ID as assigned by Particle
-static char ipAddress[16] = {0};    // holds IP address as string: AAA.BBB.CCC.DDD
-static char dataString[1000];       // long enough for maximum ?, ?S, ?P output strings
+  /*
+  DBGOUT((F("WLAN_SEC_UNSEC=%d"), WLAN_SEC_UNSEC));
+  DBGOUT((F("WLAN_SEC_WEP=%d"), WLAN_SEC_WEP));
+  DBGOUT((F("WLAN_SEC_WPA=%d"), WLAN_SEC_WPA));
+  DBGOUT((F("WLAN_SEC_WPA2=%d"), WLAN_SEC_WPA2));
+  DBGOUT((F("WLAN_CIPHER_AES=%d"), WLAN_CIPHER_AES));
+  DBGOUT((F("WLAN_CIPHER_TKIP=%d"), WLAN_CIPHER_TKIP));
+  */
 
-static char vstrConfigInfo[100];    // holds configuration string for variable PNUT_VARNAME_CONFIGINFO
+static char deviceID[100];                    // holds device ID as assigned by Particle
+static char ipAddress[16] = {0};              // holds IP address as string: AAA.BBB.CCC.DDD
+static char dataString[1000];                 // long enough for maximum ?, ?S, ?P output strings
+static char cmdString[STRLEN_PATTERNS];       // long enough for maximum PixelNut command
+
+static char vstrNetworks[200];                // holds list of network SSID names for variable PNUT_VARNAME_NETWORKS
+static char vstrConfigInfo[100];              // holds configuration string for variable PNUT_VARNAME_CONFIGINFO
 #if (SEGMENT_COUNT > 1)
-static char vstrSegsInfo[100];      // holds segment string for variable PNUT_VARNAME_SEGINFO
+static char vstrSegsInfo[100];                // holds segment string for variable PNUT_VARNAME_SEGINFO
 static char vstrSegsVals[SEGMENT_COUNT][100]; // holds segment strings for variables with prefix PNUT_VARNAME_SEGINFO_PFX
-static bool segStrFirst = true;     // false after first segment info string is retrieved
+static bool segStrFirst = true;               // false after first segment info string is retrieved
 #endif
-static short segmentCount = 0;      // nonzero for state of retrieving segment info strings
+static short segmentCount = 0;                // nonzero for state of retrieving segment info strings
 
 static void SendBeacon(void);
 Timer timerBeacon(3000, SendBeacon);
 static int beaconCounter = 0;
 
-static void SetupCloud(void);
+static boolean SetupCloud(void);
+
 static void ProcessCmd(char *cmdstr);
 
 void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* body, Writer* result, void* reserved)
@@ -121,22 +133,22 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
       }
       else // process (multiple) command(s)
       {
+        result->write("ok"); // ACK first to insure response
+
         // splits command sequence (as defined by newline chars)
         // into separate strings to be individually processed
-        char instr[STRLEN_PATTERNS];
         char *p = data;
         while (*p)
         {
           int i = 0;
           while (*p && (*p != '\n'))
-            instr[i++] = *p++;
+            cmdString[i++] = *p++;
 
-          instr[i] = 0;
+          cmdString[i] = 0;
           if (*p == '\n') ++p;
 
-          if (i > 0) ProcessCmd(instr);
+          if (i > 0) ProcessCmd(cmdString);
         }
-        result->write("ok");
       }
 
       free(data);
@@ -177,7 +189,6 @@ STARTUP(softap_set_application_page_handler(httpHandler, nullptr));
 static void RestartDevice(void)
 {
   DBGOUT((F("Rebooting!")));
-  delay(1000);
   System.reset(); // just reboot right away
 }
 
@@ -247,7 +258,7 @@ static char* SetNetwork(char *str)
   pass[i] = 0;
 
   DBGOUT((F("WiFi credentials: ssid=%s pass=%s"), ssid, pass));
-  if (!WiFi.setCredentials(ssid, pass))
+  if (!WiFi.setCredentials(ssid, pass, WLAN_SEC_WPA2, WLAN_CIPHER_AES))
   {
     DBGOUT((F("Failed to set WiFi credentials")));
     ErrorHandler(3, 3, false);
@@ -288,7 +299,7 @@ static void ProcessCmd(char *cmdstr)
 
     while (*p)
     {
-      switch (*p)
+      switch (toupper(*p))
       {
         default:
         {
@@ -303,11 +314,23 @@ static void ProcessCmd(char *cmdstr)
         }
         case 'C': // connect to Cloud
         {
+          ++p; // skip over command
+
           if (!WiFi.listening())
           {
             DBGOUT((F("Already connected to the Cloud!")));
+            Particle.disconnect();
+            WiFi.disconnect();
+            //break;
+          }
+
+          WiFi.listen(false);
+          if (WiFi.listening())
+          {
+            DBGOUT((F("Failed to turn off SoftAP mode!")));
             break;
           }
+
           SetupCloud();
           break;
         }
@@ -325,6 +348,7 @@ static void ProcessCmd(char *cmdstr)
         }
         case 'R': // Reboot
         {
+          ++p; // skip over command
           RestartDevice();
           break;
         }
@@ -338,22 +362,23 @@ static void ProcessCmd(char *cmdstr)
 
       if (p == NULL) break;
       p = pAppCmd->skipSpaces(p);
-      DBGOUT((F("Next: \"%s\""), p));
+      //DBGOUT((F("Next: \"%s\""), p));
     }
   }
   // where all other PixelNut commands get processed
   else if (pAppCmd->execCmd(cmdstr)) CheckExecCmd(cmdstr);
 }
 
-static int funSoftAP(String funstr)
-{
-  SetSoftAP(funstr.toInt());
-  return 1;
-}
-
 static int funBeacon(String funstr)
 {
   SetBeacon(funstr.toInt());
+  return 1;
+}
+
+/*
+static int funSoftAP(String funstr)
+{
+  SetSoftAP(funstr.toInt());
   return 1;
 }
 
@@ -367,9 +392,11 @@ static int funNetwork(String funstr)
 
 static int funRestart(String funstr)
 {
-  RestartDevice();
+  //RestartDevice();
+  timerRestart.start();
   return 1;
 }
+*/
 
 static void cmdHandler(const char *name, const char *data)
 {
@@ -378,15 +405,15 @@ static void cmdHandler(const char *name, const char *data)
     if (!strncmp(name, PNUT_SUBNAME_DEVCMD_PFX, strlen(PNUT_SUBNAME_DEVCMD_PFX)))
     {
       DBGOUT((F("Device Command: \"%s\""), data));
-      strcpy(dataString, data); // MUST save to local storage
-      ProcessCmd(dataString);
+      strcpy(cmdString, data); // MUST save to local storage
+      ProcessCmd(cmdString);
     }
     #if DEBUG_OUTPUT
     else if (!strcmp(name, PNUT_SUBNAME_PRODCMD))
     {
       DBGOUT((F("Global Command: \"%s\""), data));
-      strcpy(dataString, data); // MUST save to local storage
-      ProcessCmd(dataString);
+      strcpy(cmdString, data); // MUST save to local storage
+      ProcessCmd(cmdString);
     }
     #endif
     else { DBGOUT((F("CmdHandler: unknown name=%s"), name)); }
@@ -461,49 +488,71 @@ static void SetVariable(const char *name, char *varstr)
   }
 }
 
-static void SetupCloud(void)
+static boolean SetupCloud(void)
 {
   DBGOUT((F("---------------------------------------")));
   DBGOUT((F("Setup Cloud:")));
 
-  Particle.connect(); // MUST preceed following wait:
+  DBGOUT((F("WiFi.connect()")));
+  WiFi.connect();
+  DBGOUT((F("WiFi.connect()")));
 
+  int count = 0;
   uint32_t time = millis();
   while (!WiFi.ready()) // waiting for IP assignment
   {
+    //DBGOUT((F("Particle.process()")));
+    //Particle.process();
+    //DBGOUT((F("Particle.process()")));
+
     BlinkStatusLED(1, 0);
 
     if ((millis() - time) > 1000)
     {
+      if (++count > 15) // timeout after 15 seconds
+      {
+        DBGOUT((F("Failed to connect: use SoftAP")));
+        return false;
+      }
+
       DBGOUT((F("Waiting for connection...")));
       time = millis();
     }
   }
 
-  #if DEBUG_OUTPUT
-  WiFiAccessPoint ap[5];
-  int found = WiFi.getCredentials(ap, 5);
-  for (int i = 0; i < found; i++)
-  {
-      Serial.print(i+1);
-      Serial.print(") SSID=");
-      Serial.print(ap[i].ssid);
-      if (!strcmp(ap[i].ssid, WiFi.SSID()))
-      {
-        Serial.print(" <<");
-        Serial.println();
-        Serial.print(">> LocalIP: ");
-        Serial.print(WiFi.localIP());
-      }
-      Serial.println();
-  }
-  //Serial.print("  SSID:    "); Serial.println(WiFi.SSID());
-  //Serial.print("  LocalIP: "); Serial.println(WiFi.localIP());
-  //Serial.print("  Subnet:  "); Serial.println(WiFi.subnetMask());
-  //Serial.print("  Gateway: "); Serial.println(WiFi.gatewayIP());
-  #endif
+  delay(2000);
 
+  DBGOUT((F("Particle.connect()")));
+  Particle.connect();
+  DBGOUT((F("Particle.connect()")));
+
+  delay(2000);
+
+    DBGOUT((F("Particle.process()")));
+    Particle.process();
+    DBGOUT((F("Particle.process()")));
+
+  delay(2000);
+
+    DBGOUT((F("Particle.process()")));
+    Particle.process();
+    DBGOUT((F("Particle.process()")));
+
+  delay(2000);
+
+    DBGOUT((F("Particle.process()")));
+    Particle.process();
+    DBGOUT((F("Particle.process()")));
+
+  Serial.print("SSID:    "); Serial.println(WiFi.SSID());
+  Serial.print("RSSI:    "); Serial.println(WiFi.RSSI());
+  Serial.print("LocalIP: "); Serial.println(WiFi.localIP());
+  //Serial.print("Subnet:  "); Serial.println(WiFi.subnetMask());
+  //Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
+
+  DBGOUT((F("Subscribe()")));
   Subscribe(PARTICLE_SUBNAME_IPADDR, sparkHandler);
+  DBGOUT((F("Publish()")));
   Publish(PARTICLE_SUBNAME_IPADDR);
 
   /*
@@ -511,26 +560,31 @@ static void SetupCloud(void)
   Publish(PARTICLE_SUBNAME_DEVICE);
   */
 
+  DBGOUT((F("Subscribe()")));
   char cmdname[100];
   sprintf(cmdname, "%s-%s", PNUT_SUBNAME_DEVCMD_PFX, deviceID);
   Subscribe(cmdname, cmdHandler);
 
+  DBGOUT((F("Subscribe()")));
   #if DEBUG_OUTPUT
   Subscribe(PNUT_SUBNAME_PRODCMD, cmdHandler);
   #endif
 
-  SetFunction(PNUT_FUNNAME_SOFTAP,    funSoftAP);
+  DBGOUT((F("SetFunction()")));
   SetFunction(PNUT_FUNNAME_BEACON,    funBeacon);
-  SetFunction(PNUT_FUNNAME_NETWORK,   funNetwork);
-  SetFunction(PNUT_FUNNAME_RESTART,   funRestart);
+  //SetFunction(PNUT_FUNNAME_SOFTAP,    funSoftAP);
+  //SetFunction(PNUT_FUNNAME_NETWORK,   funNetwork);
+  //SetFunction(PNUT_FUNNAME_RESTART,   funRestart);
 
   DBGOUT((F("Device Configuration:")));
+
+  SetVariable(PNUT_VARNAME_NETWORKS, vstrNetworks);
 
   segmentCount = 0;
   dataString[0] = 0;
   pAppCmd->execCmd((char*)"?"); // get main configuration strings
   strcpy(vstrConfigInfo, dataString);
-  SetVariable((char*)PNUT_VARNAME_CONFIGINFO, vstrConfigInfo);
+  SetVariable(PNUT_VARNAME_CONFIGINFO, vstrConfigInfo);
 
   #if (SEGMENT_COUNT > 1)
   segStrFirst = true;
@@ -551,46 +605,7 @@ static void SetupCloud(void)
   #endif
 
   DBGOUT((F("---------------------------------------")));
-}
-
-static void SetupDevice(void)
-{
-  char name[MAXLEN_DEVICE_NAME+1];
-  FlashGetName(name);
-
-  int softap = EEPROM.read(FLASHOFF_PARTICLE_MODE) & PARTICLE_MODE_SOFTAP_BIT;
-  DBGOUT((F("Starting Mode: %s"), (softap ? "SoftAP" : "Cloud")));
-
-  WiFi.on(); // make sure it's on
-  if (!WiFi.hasCredentials())
-  {
-    softap = true;
-    DBGOUT((F("No WiFi credentials: use SoftAP")));
-  }
-
-  if (softap)
-  {
-    if (!WiFi.listening()) WiFi.listen(); // put into SoftAP mode if not already
-
-    /*
-    uint32_t time = millis();
-    while (!WiFi.connecting()) // waiting for valid network configuration
-    {
-      BlinkStatusLED(0, 2);
-
-      if ((millis() - time) > 3000)
-      {
-        DBGOUT((F("Waiting for network...")));
-        time = millis();
-      }
-    }
-    */
-
-    DBGOUT((F("---------------------------------------")));
-    return;
-  }
-
-  SetupCloud();
+  return true;
 }
 
 class Ethernet : public CustomCode
@@ -613,8 +628,9 @@ public:
   // Entry point on bootup for all modes of operation
   void setup(void)
   {
-    byte instr[100];
     DBGOUT((F("---------------------------------------")));
+
+    byte instr[100];
     DBGOUT((F("Particle Photon:")));
     DBGOUT((F("  Version=%s"), System.version().c_str()));
     System.deviceID().toCharArray(deviceID, 100);
@@ -623,8 +639,36 @@ public:
     Time.timeStr().getBytes(instr, 100);
     DBGOUT((F("  Time=%s"), instr));
 
-    //setName("P!Photon");
-    SetupDevice();
+    WiFi.on(); // make sure it's on
+
+    vstrNetworks[0] = 0;
+    WiFiAccessPoint ap[5];
+    int found = WiFi.getCredentials(ap, 5);
+    for (int i = 0; i < found; i++)
+    {
+      DBGOUT((F("%d) SSID=%s (%d,%d)"), i+1, ap[i].ssid, ap[i].security, ap[i].cipher));
+      strcat(vstrNetworks, ap[i].ssid);
+      strcat(vstrNetworks, " ");
+    }
+
+    char name[MAXLEN_DEVICE_NAME+1];
+    FlashGetName(name);
+
+    int softap = EEPROM.read(FLASHOFF_PARTICLE_MODE) & PARTICLE_MODE_SOFTAP_BIT;
+    DBGOUT((F("Starting Mode: %s"), (softap ? "SoftAP" : "Cloud")));
+
+    if (!WiFi.hasCredentials())
+    {
+      softap = true;
+      DBGOUT((F("No WiFi credentials: use SoftAP")));
+    }
+
+    if (softap || !SetupCloud())
+    {
+      if (!WiFi.listening()) WiFi.listen(); // put into SoftAP mode if not already
+
+      DBGOUT((F("---------------------------------------")));
+    }
   }
 
   // used by PixelNutCtrl application only
@@ -662,7 +706,7 @@ public:
   {
     if (segmentCount == 0)
     {
-      DBGOUT((F("ReplyStr: \"%s\""), instr));
+      //DBGOUT((F("ReplyStr: \"%s\""), instr));
       strcat(dataString, instr);
       strcat(dataString, "\r\n");
     }
@@ -677,6 +721,17 @@ public:
     #endif
 
     return true; // this cannot fail
+  }
+
+  uint32_t looptime = 0;
+  bool loop()
+  {
+    if ((millis() - looptime) > 2000)
+    {
+      DBGOUT((F("Loop...")));
+      looptime = millis();
+    }
+    return false; // have physical controls
   }
 };
 Ethernet ethernet;
