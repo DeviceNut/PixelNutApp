@@ -37,7 +37,7 @@ static void SetNewDelay(void)
   SetDelayOffset( delay_presets[delay_pos] );
 }
 
-static void CheckDelayButton(void)
+static void CheckDelay(void)
 {
   if (bc_delay.CheckForChange() != UIDeviceButton::Retcode_NoChange)
   {
@@ -46,7 +46,7 @@ static void CheckDelayButton(void)
   }
 }
 
-static void SetupDelayButton(void)
+static void SetupDelay(void)
 {
   // can adjust button settings here...
 
@@ -64,13 +64,13 @@ UIDeviceAnalog pc_delay(APIN_DELAY_POT, -DELAY_RANGE, DELAY_RANGE);
 UIDeviceAnalog pc_delay(APIN_DELAY_POT, DELAY_RANGE, -DELAY_RANGE);
 #endif
 
-static void CheckDelayPot(void)
+static void CheckDelay(void)
 {
   if (pc_delay.CheckForChange())
     SetDelayOffset( pc_delay.newValue );
 }
 
-static void SetupDelayPot(void)
+static void SetupDelay(void)
 {
   DBGOUT((F("Delay: range=%d offset=%d msecs"), DELAY_RANGE, DELAY_OFFSET));
   SetDelayOffset( pc_delay.newValue );
@@ -82,20 +82,16 @@ static void SetupDelayPot(void)
 // initialize controls
 void SetupDelayControls(void)
 {
-  #if defined(DPIN_DELAY_BUTTON)
-  SetupDelayButton();
-  #elif defined(APIN_DELAY_POT)
-  SetupDelayPot();
+  #if defined(DPIN_DELAY_BUTTON) || defined(APIN_DELAY_POT)
+  SetupDelay();
   #endif
 }
 
 // called every control loop
 void CheckDelayControls(void)
 {
-  #if defined(DPIN_DELAY_BUTTON)
-  CheckDelayButton();
-  #elif defined(APIN_DELAY_POT)
-  CheckDelayPot();
+  #if defined(DPIN_DELAY_BUTTON) || defined(APIN_DELAY_POT)
+  CheckDelay();
   #endif
 }
 
