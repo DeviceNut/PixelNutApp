@@ -7,7 +7,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#define DEFAULT_DEVICE_NAME     "MyDevice"
+#define DEFAULT_DEVICE_NAME     "PixelNutDevice"
 #define MAXLEN_DEVICE_NAME      16          // maxlen for device name
 #define PREFIX_DEVICE_NAME      "P!"        // for name to be recognized
 #define PREFIX_LEN_DEVNAME      2           // length of this prefix

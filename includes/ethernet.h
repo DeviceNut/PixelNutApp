@@ -37,6 +37,8 @@ PRODUCT_VERSION(1);
 typedef int  (*FunHandler)(String arg);                         // handler for subscribe event
 typedef void (*PubHandler)(const char *name, const char *data); // handler for function calls
 
+#define POSTFIX_DEVNAME           "--!P"                  // postfix on device name
+
 #define PARTICLE_SUBNAME_IPADDR   "particle/device/ip"
 //#define PARTICLE_SUBNAME_DEVICE   "particle/device/name"
 
@@ -223,6 +225,21 @@ static void SetBeacon(int count)
   else { DBGOUT((F("Beacon: no change"))); }
 }
 
+static void SaveNetworkNames(void)
+{
+  vstrNetworks[0] = 0;
+  WiFiAccessPoint ap[5];
+
+  int found = WiFi.getCredentials(ap, 5);
+
+  for (int i = 0; i < found; i++)
+  {
+    DBGOUT((F("%d) SSID=%s (%d,%d)"), i+1, ap[i].ssid, ap[i].security, ap[i].cipher));
+    strcat(vstrNetworks, ap[i].ssid);
+    strcat(vstrNetworks, " ");
+  }
+}
+
 static char* SetNetwork(char *str)
 {
   char ssid[32];
@@ -247,6 +264,7 @@ static char* SetNetwork(char *str)
     }
 
     DBGOUT((F("All WiFi credentials cleared")));
+    SaveNetworkNames(); // should be empty string
     return str;
   }
 
@@ -260,6 +278,9 @@ static char* SetNetwork(char *str)
   pass[i] = 0;
 
   DBGOUT((F("WiFi credentials: ssid=%s pass=%s"), ssid, pass));
+
+  // FIXME: when to use other parameters?
+  // BUG: doesn't seem to work on known good networks sometimes!
   if (!WiFi.setCredentials(ssid, pass)) //, WLAN_SEC_WPA2, WLAN_CIPHER_AES))
   {
     DBGOUT((F("Failed to set WiFi credentials")));
@@ -267,6 +288,7 @@ static char* SetNetwork(char *str)
     return NULL;
   }
 
+  SaveNetworkNames(); // save new network names
   return str;
 }
 
@@ -314,6 +336,10 @@ static void ProcessCmd(char *cmdstr)
           p = pAppCmd->skipNumber(p+1);
           break;
         }
+        /*
+        // BUG: doesn't work: make bug report!
+        // (hangs in SetupCloud() after connecting and returning 0 for localIP
+        //
         case 'C': // connect to Cloud
         {
           ++p; // skip over command
@@ -321,9 +347,7 @@ static void ProcessCmd(char *cmdstr)
           if (!WiFi.listening())
           {
             DBGOUT((F("Already connected to the Cloud!")));
-            Particle.disconnect();
-            WiFi.disconnect();
-            //break;
+            break;
           }
 
           WiFi.listen(false);
@@ -341,6 +365,7 @@ static void ProcessCmd(char *cmdstr)
 
           break;
         }
+        */
         case 'B': // set Beacon counter
         {
           int count = atoi(p+1);
@@ -525,9 +550,7 @@ static boolean SetupCloud(void)
     return false;
   }
 
-  DBGOUT((F("Subscribe()")));
   Subscribe(PARTICLE_SUBNAME_IPADDR, sparkHandler);
-  DBGOUT((F("Publish()")));
   Publish(PARTICLE_SUBNAME_IPADDR);
 
   /*
@@ -611,16 +634,7 @@ public:
     DBGOUT((F("  Time=%s"), instr));
 
     WiFi.on(); // make sure it's on
-
-    vstrNetworks[0] = 0;
-    WiFiAccessPoint ap[5];
-    int found = WiFi.getCredentials(ap, 5);
-    for (int i = 0; i < found; i++)
-    {
-      DBGOUT((F("%d) SSID=%s (%d,%d)"), i+1, ap[i].ssid, ap[i].security, ap[i].cipher));
-      strcat(vstrNetworks, ap[i].ssid);
-      strcat(vstrNetworks, " ");
-    }
+    SaveNetworkNames(); // save network names
 
     char name[MAXLEN_DEVICE_NAME+1];
     FlashGetName(name);
@@ -665,7 +679,7 @@ public:
   
       DBGOUT((F("PixelNut SoftAP name: \"%s\""), devname));
       System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, devname);
-      System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, "!   ");
+      System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, POSTFIX_DEVNAME);
     }
     return true;
   }
@@ -695,6 +709,8 @@ public:
   }
 
   /*
+  // checks for system thread looping
+  //
   uint32_t looptime = 0;
   bool loop()
   {
