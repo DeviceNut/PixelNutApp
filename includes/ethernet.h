@@ -111,6 +111,8 @@ static void ScanForNetworks(void);
 static boolean SetupCloud(void);
 static void ProcessCmd(char *cmdstr, Writer* result);
 
+static uint32_t rebootTime = 0;
+
 void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* body, Writer* result, void* reserved)
 {
   // endpoint for command execution used by PixelNut application
@@ -179,7 +181,7 @@ STARTUP(softap_set_application_page_handler(httpHandler, nullptr));
 static void RestartDevice(void)
 {
   DBGOUT((F("Rebooting!")));
-  System.reset(); // just reboot right away
+  System.reset(); // this never returns
 }
 
 static void SetSoftAP(boolean enable)
@@ -257,12 +259,12 @@ static void SaveNetworkNames(void)
     {
       strcat(vstrNetworks, " ");
       strcat(vstrNetworks, WLAN_Security_Strs[ap.security]);
-    }
 
-    if (ap.cipher > 0)
-    {
-      strcat(vstrNetworks, " ");
-      strcat(vstrNetworks, WLAN_Cipher_Strs[ap.cipher]);
+      if (ap.cipher > 0)
+      {
+        strcat(vstrNetworks, " ");
+        strcat(vstrNetworks, WLAN_Cipher_Strs[ap.cipher]);
+      }
     }
 
     strcat(vstrNetworks, "\n");
@@ -312,6 +314,9 @@ static char* SetNetwork(char *str)
     pass[i++] = *str++;
   }
   pass[i] = 0;
+
+  // special placeholder for empty passphrase
+  if (!strcmp(pass, "*")) pass[0] = 0;
 
   i = 0;
   str = pAppCmd->skipSpaces(str);
@@ -420,11 +425,9 @@ static void ProcessCmd(char *cmdstr, Writer* result)
           p = pAppCmd->skipNumber(p+1);
           break;
         }
-        // BUG: doesn't work: make bug report!
-        // (hangs in SetupCloud() after connecting and returning 0 for localIP
-        //
         case 'C': // connect to Cloud
         {
+          // BUG: doesn't work: make bug report!
           ++p; // skip over command
 
           if (!WiFi.listening())
@@ -466,8 +469,8 @@ static void ProcessCmd(char *cmdstr, Writer* result)
         case 'R': // Reboot
         {
           ++p; // skip over command
-          if (result) result->write("ok");
-          RestartDevice(); // never returns
+          if (result) rebootTime = millis(); // wait for response
+          else RestartDevice(); // never returns
           break;
         }
       }
@@ -508,11 +511,8 @@ static void ProcessCmd(char *cmdstr, Writer* result)
     if (result) result->write(dataString);
     return; // avoid writing result again
   }
-  else // where all other PixelNut commands get processed
-  {
-    if (pAppCmd->execCmd(cmdstr)) CheckExecCmd(cmdstr);
-    else success = false;
-  }
+  // where all other PixelNut commands get processed
+  else if (pAppCmd->execCmd(cmdstr)) CheckExecCmd(cmdstr);
 
   if (result) result->write(success? "ok" : "failed");
 }
@@ -855,20 +855,17 @@ public:
     return true; // this cannot fail
   }
 
-  /*
-  // checks for system thread looping
-  //
-  uint32_t looptime = 0;
   bool loop()
   {
-    if ((millis() - looptime) > 2000)
+    if (rebootTime > 0) // waiting to reboot
     {
-      DBGOUT((F("Loop...")));
-      looptime = millis();
+      if ((millis() - rebootTime) > 1000)
+        RestartDevice(); // never returns
     }
-    return false; // have physical controls
+
+    return false; // check physical controls
   }
-  */
+
 };
 Ethernet ethernet;
 
