@@ -24,8 +24,8 @@ See license.txt for the terms of this license.
 #define EXTERNAL_COMM           1           // external communications using bluetooth
 #endif
 
-#if ETHERNET_COMM
-#define EXTERNAL_COMM           1           // external communications using ethernet
+#if WIFI_COMM
+#define EXTERNAL_COMM           1           // external communications using wifi
 #endif
 
 #if !defined(EXTERNAL_COMM)

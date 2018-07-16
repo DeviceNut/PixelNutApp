@@ -1,4 +1,4 @@
-// PixelNutApp Ethernet Communications
+// PixelNutApp WiFi Communications
 //
 // Uses global variables: 'pixelNutSupport', 'pAppCmd'.
 // Calls global routines: 'CheckExecCmd', 'ErrorHandler', 'BlinkStatusLED'.
@@ -9,7 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if ETHERNET_COMM
+#if WIFI_COMM
 #if defined(SPARK)
 
 extern void CheckExecCmd(char *instr); // defined in main.h
@@ -102,6 +102,12 @@ static char vstrSegsVals[SEGMENT_COUNT][100]; // holds segment strings for varia
 static bool segStrFirst = true;               // false after first segment info string is retrieved
 #endif
 static short segmentCount = 0;                // nonzero for state of retrieving segment info strings
+
+#if USE_PARTICLE_NAME
+static char* deviceName = PREFIX_DEVICE_NAME "Photon"; // needed to be recognized by Particle (after prefix removed)
+#else
+static char* deviceName = DEFAULT_DEVICE_NAME;
+#endif
 
 static void SendBeacon(void);
 Timer timerBeacon(3000, SendBeacon);
@@ -737,14 +743,14 @@ static boolean SetupCloud(void)
   return true;
 }
 
-static void SetParticleName(char *name1, char *name2)
+static void SetNameForSoftAP(char *name1, char *name2)
 {
   DBGOUT((F("SoftAP Name: \"%s\""), name1));
   System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, name1);
   System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, name2);
 }
 
-class Ethernet : public CustomCode
+class WiFiNet : public CustomCode
 {
 public:
 
@@ -752,19 +758,14 @@ public:
   // used to initialize the operating mode according to device configuration
   virtual void flash(void)
   {
-    int bit = (USE_WIFI_DIRECT ? PARTICLE_MODE_SOFTAP_BIT : 0);
+    int bit = (USE_WIFI_SOFTAP ? PARTICLE_MODE_SOFTAP_BIT : 0);
     int val = (bit | PARTICLE_MODE_BEACON_MAX);
     DBGOUT((F("Writing Particle configuration: offset=%d value=%02X"), FLASHOFF_PARTICLE_MODE, val));
     EEPROM.write(FLASHOFF_PARTICLE_MODE, val);
 
-    #if PARTICLE_NAME
-    FlashSetName(PARTICLE_NAME);
-    SetParticleName(PARTICLE_NAME); // set Particle compatible name
-    #else
-    setName(DEFAULT_DEVICE_NAME); // set default device name
-    #endif
+    setName(deviceName); // override device name
 
-    SetNetwork(""); // clear all networks
+    SetNetwork((char*)""); // clear all networks
     #if DEFAULT_WIFI_INFO
     SetNetwork(DEFAULT_WIFI_INFO); // set default network
     #endif
@@ -794,7 +795,7 @@ public:
     int softap = EEPROM.read(FLASHOFF_PARTICLE_MODE) & PARTICLE_MODE_SOFTAP_BIT;
     DBGOUT((F("Starting Mode: %s"), (softap ? "SoftAP" : "Cloud")));
 
-    if (!WiFi.hasCredentials())
+    if (!softap && !WiFi.hasCredentials())
     {
       softap = true;
       DBGOUT((F("No WiFi credentials: use SoftAP")));
@@ -808,17 +809,17 @@ public:
     }
   }
 
-  // used by PixelNutCtrl application only
   bool setName(char *name)
   {
-    // special prefix to allow name to be Particle compatible
+    // if use explicit prefix then don't use in naming
     if (!strncmp(name, PREFIX_DEVICE_NAME, PREFIX_LEN_DEVNAME))
     {
       name += PREFIX_LEN_DEVNAME;
       FlashSetName((char*)name);
-      SetParticleName(name, (char*)"");
+
+      SetNameForSoftAP(name, (char*)"");
     }
-    else
+    else // else add special prefix here
     {
       FlashSetName((char*)name);
 
@@ -826,7 +827,7 @@ public:
       strcpy(devname, PREFIX_DEVICE_NAME);
       strcat(devname, name);
   
-      SetParticleName(devname, (char*)POSTFIX_DEVNAME);
+      SetNameForSoftAP(devname, (char*)POSTFIX_DEVNAME);
     }
     return true;
   }
@@ -867,8 +868,8 @@ public:
   }
 
 };
-Ethernet ethernet;
+WiFiNet wifinet;
 
 #endif // defined(SPARK)
-#endif // ETHERNET_COMM
+#endif // WIFI_COMM
 //========================================================================================
