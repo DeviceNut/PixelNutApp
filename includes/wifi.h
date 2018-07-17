@@ -440,8 +440,17 @@ static void ProcessCmd(char *cmdstr, Writer* result)
         }
         case 'B': // set Beacon counter
         {
-          int count = atoi(p+1);
-          SetBeacon(count);
+          if (!WiFi.listening())
+          {
+            int count = atoi(p+1);
+            SetBeacon(count);
+          }
+          else
+          {
+            DBGOUT((F("Not connected to the Cloud!")));
+            badcmd = true;
+          }
+
           p = pAppCmd->skipNumber(p+1);
           break;
         }
@@ -453,6 +462,7 @@ static void ProcessCmd(char *cmdstr, Writer* result)
           if (!WiFi.listening())
           {
             DBGOUT((F("Already connected to the Cloud!")));
+            badcmd = true;
             break;
           }
 
