@@ -106,10 +106,12 @@ static bool segStrFirst = true;               // false after first segment info 
 #endif
 static short segmentCount = 0;                // nonzero for state of retrieving segment info strings
 
+#if EEPROM_FORMAT
 #if USE_PARTICLE_NAME
-static char* deviceName = PREFIX_DEVICE_NAME "Photon"; // needed to be recognized by Particle (after prefix removed)
+static char* deviceName = (char*)PREFIX_DEVICE_NAME "Photon"; // needed to be recognized by Particle (after prefix removed)
 #else
-static char* deviceName = DEFAULT_DEVICE_NAME;
+static char* deviceName = (char*)DEFAULT_DEVICE_NAME;
+#endif
 #endif
 
 static void SendBeacon(void);
@@ -203,23 +205,23 @@ static void SetSoftAP(boolean enable)
 
 static void SetBeacon(int count)
 {
-  if (!timerBeacon.isActive() && (count > 0))
+  if (count > 0)
   {
     DBGOUT((F("Beacon: count=%d"), count));
     int bit = EEPROM.read(FLASHOFF_PARTICLE_MODE) & PARTICLE_MODE_SOFTAP_BIT;
     EEPROM.write(FLASHOFF_PARTICLE_MODE, (bit | count));
+
     beaconCounter = count;
-    timerBeacon.start();
+    if (!timerBeacon.isActive()) timerBeacon.start();
   }
   else
-  if (timerBeacon.isActive() && !count)
   {
     DBGOUT((F("Beacon: Off")));
     int bit = EEPROM.read(FLASHOFF_PARTICLE_MODE) & PARTICLE_MODE_SOFTAP_BIT;
     EEPROM.write(FLASHOFF_PARTICLE_MODE, bit);
+
     timerBeacon.stop();
   }
-  else { DBGOUT((F("Beacon: no change"))); }
 }
 
 static void ScanForNetworks(void)
@@ -400,10 +402,12 @@ static void SendBeacon(void)
   }
   else
   {
+    --beaconCounter;
+
     DBGOUT((F("Published: %s"), outstr));
     BlinkStatusLED(2, 0); // indicate sending beacon
 
-    if (!--beaconCounter) timerBeacon.stop();
+    if (!beaconCounter) timerBeacon.stop();
   }
 }
 
@@ -434,6 +438,13 @@ static void ProcessCmd(char *cmdstr, Writer* result)
           p = pAppCmd->skipNumber(p+1);
           break;
         }
+        case 'B': // set Beacon counter
+        {
+          int count = atoi(p+1);
+          SetBeacon(count);
+          p = pAppCmd->skipNumber(p+1);
+          break;
+        }
         case 'C': // connect to Cloud
         {
           // BUG: doesn't work: make bug report!
@@ -459,14 +470,6 @@ static void ProcessCmd(char *cmdstr, Writer* result)
             success = false;
           }
 
-          break;
-        }
-        //*/
-        case 'B': // set Beacon counter
-        {
-          int count = atoi(p+1);
-          SetBeacon(count);
-          p = pAppCmd->skipNumber(p+1);
           break;
         }
         case 'N': // add/clear network SSID/PWD values
