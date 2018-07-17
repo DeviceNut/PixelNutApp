@@ -19,8 +19,11 @@ extern void CheckExecCmd(char *instr); // defined in main.h
 SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
-PRODUCT_ID(6876);   // ID for the "PixelNutDevice"
-PRODUCT_VERSION(1);
+#define PARTICLE_PRODUCT_VER 1
+#if PARTICLE_PRODUCT_ID
+PRODUCT_ID(PARTICLE_PRODUCT_ID);
+PRODUCT_VERSION(PARTICLE_PRODUCT_VER);
+#endif
 
 // Blink patterns (long, short):
 // 0,1  waiting for debugger
@@ -249,7 +252,7 @@ static void ScanForNetworks(void)
   }
 }
 
-static void SaveNetworkNames(void)
+static void GetNetworkNames(void)
 {
   vstrNetworks[0] = 0;
 
@@ -273,10 +276,10 @@ static void SaveNetworkNames(void)
       }
     }
 
-    strcat(vstrNetworks, "\n");
+    DBGOUT((F("Networks:")));
+    DBGOUT((F("  %s"), vstrNetworks));
 
-    DBGOUT((F(vstrNetworks)));
-    //DBGOUT((F("%d) SSID=%s (%d,%d,%d)"), i+1, ap.ssid, ap.security, ap.cipher, ap.channel));
+    strcat(vstrNetworks, "\n");
   }
 }
 
@@ -308,7 +311,7 @@ static char* SetNetwork(char *str)
     }
 
     DBGOUT((F("All WiFi credentials cleared")));
-    SaveNetworkNames(); // should be empty string
+    GetNetworkNames(); // should be empty string
     return str;
   }
 
@@ -381,7 +384,7 @@ static char* SetNetwork(char *str)
     return NULL;
   }
 
-  SaveNetworkNames(); // save new network names
+  GetNetworkNames(); // get/save network names
   return str;
 }
 
@@ -679,10 +682,10 @@ static boolean SetupCloud(void)
   }
 
   IPAddress localip = WiFi.localIP();
-  uint32_t *addr = (uint32_t*)&localip;
+  uint8_t *addr = (uint8_t*)&localip;
 
   DBGOUT((F("SSID:    %s"), WiFi.SSID()));
-  DBGOUT((F("RSSI:    %s"), WiFi.RSSI()));
+  DBGOUT((F("RSSI:    %d"), WiFi.RSSI()));
 
   if (*(uint32_t*)&addr == 0)
   {
@@ -786,8 +789,13 @@ public:
     Time.timeStr().getBytes(instr, 100);
     DBGOUT((F("  Time=%s"), instr));
 
+    #if PARTICLE_PRODUCT_ID
+    DBGOUT((F("Product ID:  %d"), PARTICLE_PRODUCT_ID));
+    DBGOUT((F("Product Ver: %d"), PARTICLE_PRODUCT_VER));
+    #endif
+
     WiFi.on(); // make sure it's on
-    SaveNetworkNames(); // save network names
+    GetNetworkNames(); // get/save network names
 
     char name[MAXLEN_DEVICE_NAME+1];
     FlashGetName(name);
