@@ -120,7 +120,7 @@ static int beaconCounter = 0;
 
 static void ScanForNetworks(void);
 static boolean SetupCloud(void);
-static void ProcessCmd(char *cmdstr, Writer* result);
+static bool ProcessCmd(char *cmdstr);
 
 static uint32_t rebootTime = 0;
 
@@ -139,6 +139,9 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
       // splits command sequence (as defined by newline chars)
       // into separate strings to be individually processed
 
+      dataString[0] = 0;
+      bool success = true;
+
       char *p = data;
       while (*p)
       {
@@ -149,8 +152,16 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
         cmdString[i] = 0;
         if (*p == '\n') ++p;
 
-        if (i > 0) ProcessCmd(cmdString, result);
+        if (i > 0)
+        {
+          if (!ProcessCmd(cmdString))
+            success = false;
+        }
       }
+
+      if (!success) result->write("failed");
+      else if (dataString[0]) result->write(dataString);
+      else result->write("ok");
 
       free(data);
     }
@@ -252,6 +263,8 @@ static void ScanForNetworks(void)
       DBGOUT((F("Empty SSID!")));
     }
   }
+
+  if (!found) strcat(dataString, "\n");
 }
 
 static void GetNetworkNames(void)
@@ -280,9 +293,9 @@ static void GetNetworkNames(void)
 
     DBGOUT((F("Networks:")));
     DBGOUT((F("  %s"), vstrNetworks));
-
-    strcat(vstrNetworks, "\n");
   }
+
+  strcat(vstrNetworks, "\n");
 }
 
 static char* SetNetwork(char *str)
@@ -411,7 +424,7 @@ static void SendBeacon(void)
   }
 }
 
-static void ProcessCmd(char *cmdstr, Writer* result)
+static bool ProcessCmd(char *cmdstr)
 {
   DBGOUT((F("Process: \"%s\""), cmdstr));
 
@@ -491,8 +504,7 @@ static void ProcessCmd(char *cmdstr, Writer* result)
         case 'R': // Reboot
         {
           ++p; // skip over command
-          if (result) rebootTime = millis(); // wait for response
-          else RestartDevice(); // never returns
+          rebootTime = millis(); // perform reboot in loop
           break;
         }
       }
@@ -511,8 +523,6 @@ static void ProcessCmd(char *cmdstr, Writer* result)
   }
   else if (*cmdstr == '?') // single command to retrive info
   {
-    dataString[0] = 0;
-
     if (toupper(*(cmdstr+1)) == 'A')
     {
       DBGOUT((F("Retrieving Available Networks")));
@@ -529,14 +539,11 @@ static void ProcessCmd(char *cmdstr, Writer* result)
       DBGOUT((F("Retrieving Configuration: %s"), cmdstr));
       pAppCmd->execCmd(cmdstr);
     }
-
-    if (result) result->write(dataString);
-    return; // avoid writing result again
   }
   // where all other PixelNut commands get processed
   else if (pAppCmd->execCmd(cmdstr)) CheckExecCmd(cmdstr);
 
-  if (result) result->write(success? "ok" : "failed");
+  return success;
 }
 
 static int funBeacon(String funstr)
@@ -565,14 +572,14 @@ static void cmdHandler(const char *name, const char *data)
     {
       DBGOUT((F("Device Command: \"%s\""), data));
       strcpy(cmdString, data); // MUST save to local storage
-      ProcessCmd(cmdString, 0);
+      ProcessCmd(cmdString);
     }
     #if DEBUG_OUTPUT
     else if (!strcmp(name, PNUT_SUBNAME_PRODCMD))
     {
       DBGOUT((F("Global Command: \"%s\""), data));
       strcpy(cmdString, data); // MUST save to local storage
-      ProcessCmd(cmdString, 0);
+      ProcessCmd(cmdString);
     }
     #endif
     else { DBGOUT((F("CmdHandler: unknown name=%s"), name)); }
