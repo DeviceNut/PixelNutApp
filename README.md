@@ -19,9 +19,9 @@ Coming Attractions!
 
 The following are features actively being worked on:
 
-1) Support for additional processors, including ESP32 and the Particle Photon.
+1) Control of WiFi devices with a browser with athentication support using our website (www.pixelnut.io).
 
-2) Support for the communications over commands over WiFi (in addition to the current Bluetooth support).
+2) Advanced pattern creation with both phone app and browser.
 
 3) Support for hardware input devices such as accelerometers, gyroscopes, range finders, microphones, and solar cells.
 
