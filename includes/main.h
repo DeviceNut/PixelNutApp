@@ -59,7 +59,7 @@ void setup()
   #if EEPROM_FORMAT
   FlashFormat(); // format entire EEPROM
   pCustomCode->flash(); // custom flash handling
-  ErrorHandler(0, 2, true);
+  ErrorHandler(0, 3, true);
   #endif
 
   if (pPixelNutEngine->pDrawPixels == NULL)

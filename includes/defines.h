@@ -7,7 +7,10 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
+#define DEFAULT_DEVICE_NAME     "PixelNutDevice"
 #define MAXLEN_DEVICE_NAME      16          // maxlen for device name
+#define PREFIX_DEVICE_NAME      "P!"        // for name to be recognized
+#define PREFIX_LEN_DEVNAME      2           // length of this prefix
 
 #if !defined(NEOPIXELS_OVERRIDE)
 #define NEOPIXELS_OVERRIDE      0           // use neopixels by default
@@ -21,16 +24,12 @@ See license.txt for the terms of this license.
 #define EXTERNAL_COMM           1           // external communications using bluetooth
 #endif
 
-#if ETHERNET_COMM
-#define EXTERNAL_COMM           1           // external communications using ethernet
+#if WIFI_COMM
+#define EXTERNAL_COMM           1           // external communications using wifi
 #endif
 
 #if !defined(EXTERNAL_COMM)
 #define EXTERNAL_COMM           0           // default setting: no external client
-#endif
-
-#if !defined(USE_WIFI_DIRECT)
-#define USE_WIFI_DIRECT         0           // connect to Particle Cloud
 #endif
 
 #if !defined(STRAND_COUNT)

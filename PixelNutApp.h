@@ -15,7 +15,7 @@ See license.txt for the terms of this license.
 #include "includes/flash.h"         // Flash Storage Handling
 #include "includes/select.h"        // Preset Patterns Selection
 #include "includes/appcmds.h"       // Application Commands
-#include "includes/ethernet.h"      // Ethernet Communications
+#include "includes/wifi.h"          // WiFi Communications
 #include "includes/bluetooth.h"     // Bluetooth Communications
 #include "includes/segments.h"      // Logical Segment Support
                                     // Physical Controls:
@@ -38,7 +38,7 @@ See license.txt for the terms of this license.
 #include "flash.h"
 #include "select.h"
 #include "appcmds.h"
-#include "ethernet.h"
+#include "wifi.h"
 #include "bluetooth.h"
 #include "segments.h"
 #include "pattern.h"

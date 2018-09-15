@@ -19,6 +19,8 @@ public:
 
   virtual bool cmdHandler(char *instr)
   {
+    //DBGOUT((F("cmdHandler: \"%s\""), instr));
+
     if (*instr) switch (instr[0])
     {
       default:
@@ -56,7 +58,7 @@ public:
           DBGOUT((F("Segment Info:  %s"), SEGMENT_INFO));
           if (!pCustomCode->sendReply((char*)SEGMENT_INFO)) return false;
 
-          char outstr[100];
+          char outstr[FLASH_SEG_LENGTH * 5]; // max length of each value is 4 + space
           for (int i = 1; i <= SEGMENT_COUNT; ++i)
           {
             FlashSetSegment(i);
@@ -79,12 +81,14 @@ public:
         if (instr[1] == 'P') // about internal patterns
         {
           DBGOUT((F("Patterns:  %d"), codePatterns));
+
+          char outstr[STRLEN_PATTERNS];
           for (int i = 0; i < codePatterns; ++i)
           {
-            strcpy_P(instr, customPatterns[i]);
+            strcpy_P(outstr, customPatterns[i]);
             if (!pCustomCode->sendReply((char*)customPnames[i]) ||
                 !pCustomCode->sendReply((char*)customPhelp[i])  ||
-                !pCustomCode->sendReply(instr))
+                !pCustomCode->sendReply(outstr))
                 return false;
           }
           break;
@@ -215,12 +219,12 @@ public:
         ++instr; // skip past '='
         short hue = atoi(instr);
 
-        instr = SkipNumber(instr); // skip number digits
-        instr = SkipSpaces(instr); // skip leading spaces
+        instr = skipNumber(instr); // skip number digits
+        instr = skipSpaces(instr); // skip leading spaces
         byte wht = atoi(instr);
 
-        instr = SkipNumber(instr); // skip number digits
-        instr = SkipSpaces(instr); // skip leading spaces
+        instr = skipNumber(instr); // skip number digits
+        instr = skipSpaces(instr); // skip leading spaces
         byte cnt = atoi(instr);
 
         FlashSetExterns(hue, wht, cnt);
@@ -252,96 +256,40 @@ public:
   {
     char *instr = cmdstr;
 
-    if (saveStrIndex < 0) instr = SkipSpaces(instr); // skip leading spaces
+    if (saveStrIndex < 0) instr = skipSpaces(instr); // skip leading spaces
     // else need those separating spaces while in sequence
 
     useCmdStr = false;
     bool success = cmdHandler(instr);
 
     //DBGOUT((F("ExecCmd: success=%d douse=%d"), success, useCmdStr));
-    
+
     if (!useCmdStr) cmdstr[0] = 0; // avoid executing this
     if (!success) ErrorHandler(4, 1, false);
 
     return useCmdStr;
   }
 
-  bool setDeviceName(char *devstr)
-  {
-    bool badname = false;
-    char name[MAXLEN_DEVICE_NAME+1];
-
-    FlashGetName(name);
-    int len = strlen(name);
-
-    if (len < 2) badname = true;
-    else for (int i = 0; i < len; ++i)
-    {
-      char c = name[i];
-      if (!isalpha(c) && !isdigit(c) &&
-          (c != ' ') && (c != '-') &&
-          (c != '!') && (c != '#') &&
-          (c != '$') && (c != '%') &&
-          (c != '&') && (c != '*'))
-      {
-        badname = true;
-        break;
-      }
-    }
-
-    bool goodble = ((strlen(devstr) >= 4) &&
-                    (devstr[0] == 'P')    &&
-                    (devstr[1] == '!'));
-
-    // if the name stored in flash is invalid or empty,
-    // and there isn't what looks like a good BLE name,
-    // then reset to a generic name, so that the user
-    // can be able to find it and rename it in the app
-    if (badname && !goodble)
-    {
-      strcpy(devstr, "MyDevice");
-      FlashSetName(devstr);
-      return true;
-    }
-    // else if there's a good BLE name but not a
-    // good flash name, override the flash name
-    else if (badname && goodble)
-      FlashSetName(devstr+2);
-
-    // otherwise if there isn't a good BLE name or the
-    // name stored in flash doesn't match it, then just
-    // reset the BLE name. (This is done because the BLE
-    // name in certain Adafruit's devices sometimes gets
-    // reset to "Adafruit Bluefruit LE" for some reason.)
-    else if (!goodble || strcmp(name, devstr+2))
-    {
-      strcpy(devstr, name);
-      return true;
-    }
-  
-    return false;
-  }
-
   #if (SEGMENT_COUNT > 1)
   byte curSegment = 1; // segment values start at 1
   #endif
 
-protected:
-
-  int16_t saveStrIndex = -1;
-  bool useCmdStr = false;
-
-  char* SkipSpaces(char *instr)
+  char* skipSpaces(char *instr)
   {
     while (*instr == ' ') ++instr;   // skip spaces
     return instr;
   }
 
-  char* SkipNumber(char *instr)
+  char* skipNumber(char *instr)
   {
     while (isdigit(*instr)) ++instr; // skip digits
     return instr;
   }
+
+protected:
+
+  int16_t saveStrIndex = -1;
+  bool useCmdStr = false;
 
   void AddNumToStr(char *outstr, int value)
   {
@@ -354,7 +302,7 @@ protected:
 
 #if !APPCMDS_OVERRIDE
 AppCommands appCmd; // create instance of AppCommands to handle user commands
-AppCommands *pAppCmd = &appCmd; // pointer used in bluetooth.h
+AppCommands *pAppCmd = &appCmd; // pointer used in (bluetooth.h, ethernet.h)
 #else
 extern AppCommands *pAppCmd;
 #endif
