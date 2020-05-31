@@ -19,7 +19,7 @@ Coming Attractions!
 
 The following are features actively being worked on:
 
-1) Control of WiFi devices with a browser with athentication support using our website (www.pixelnut.io).
+1) Control of WiFi devices from a browser using our website (www.pixelnut.io).
 
 2) Advanced pattern creation with both phone app and browser.
 

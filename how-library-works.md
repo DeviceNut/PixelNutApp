@@ -18,7 +18,7 @@ There are two defined classes in this library: 'CustomCode' and 'AppCommands'.
 
 The former doesn't do anything by default, but allows adding custom functionality to the 'setup()' and 'loop()' routines without having to override the entire function, and is in fact used by the bluetooth code in 'bluetooth.h'.
 
-The latter handles communications with an external client when using bluetooth (and will also be used in the future with WiFi). It is called by routines in 'bluetooth.h', and is extended by code in 'segments.h' to provide support for multiple logical segments.
+The latter handles communications with an external client (phone app or browser) when using bluetooth or WiFi. It is called by routines in 'bluetooth.h' or "wifi.h", and is extended by code in 'segments.h' to provide support for multiple logical segments.
 
 
 Main Control Defines
@@ -27,7 +27,7 @@ Here are some of the main #define statements that determine important functional
 
 'PIXEL_COUNT' sets the number of pixels to be displayed, and "PIXEL_OFFSET' shifts the drawing window around the pixel strip.
 
-Applications that use bluetooth must set 'BLUETOOTH_COMM' to 1.
+Applications that use bluetooth must set 'BLUETOOTH_COMM' to 1. Applications that use WiFi must set 'WIFI_COMM' to 1.
 
 'STRLEN_PATTERNS' sets the size of the 'cmdStr' buffer used to hold the pattern strings, and MUST be large enough for the longest effect pattern defined internally, or to receive patterns sent from an external client (over bluetooth).
 
