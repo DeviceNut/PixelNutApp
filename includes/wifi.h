@@ -197,7 +197,6 @@ void httpHandler(const char* url, ResponseCallback* cb, void* cbArg, Reader* bod
   }
 }
 
-// Private network IP address: http://192.168.0.1
 STARTUP(softap_set_application_page_handler(httpHandler, nullptr));
 
 static void RestartDevice(void)

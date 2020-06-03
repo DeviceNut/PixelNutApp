@@ -20,16 +20,20 @@ See license.txt for the terms of this license.
 #define FEATURE_BITS            0           // extended feature bits
 #endif
 
-#if BLUETOOTH_COMM
+#if !defined(BLUETOOTH_COMM)
+#define  BLUETOOTH_COMM         0           // no bluetooth present
+#elif BLUETOOTH_COMM
 #define EXTERNAL_COMM           1           // external communications using bluetooth
 #endif
 
-#if WIFI_COMM
+#if !defined(WIFI_COMM)
+#define  WIFI_COMM              0           // no wifi present
+#elif WIFI_COMM
 #define EXTERNAL_COMM           1           // external communications using wifi
 #endif
 
 #if !defined(EXTERNAL_COMM)
-#define EXTERNAL_COMM           0           // default setting: no external client
+#define EXTERNAL_COMM           0           // no external client present
 #endif
 
 #if !defined(STRAND_COUNT)
@@ -49,19 +53,19 @@ See license.txt for the terms of this license.
 #define APPCMDS_OVERRIDE        1           // must extend appcmds class
 #define CUSTOM_OVERRIDE         1           // must extend custom class
 #elif EXTERNAL_COMM
-#define CUSTOM_OVERRIDE         1           // must extend for bluetooth/ethernet
+#define CUSTOM_OVERRIDE         1           // must extend for communications
 #endif
 
-#if !defined(CUSTOM_PATTERNS) // MUST use internal patterns if no external client
-#define CUSTOM_PATTERNS         !EXTERNAL_COMM
+#if !defined(CUSTOM_PATTERNS)
+#define CUSTOM_PATTERNS         !EXTERNAL_COMM  // MUST use internal patterns if no external client
 #endif
 
 #if !defined(EXTERN_PATTERNS)
-#define EXTERN_PATTERNS         1           // use external (client) patterns
+#define EXTERN_PATTERNS         EXTERNAL_COMM   // use external (client) patterns if possible
 #endif
 
 #if !defined(BASIC_PATTERNS)
-#define BASIC_PATTERNS          0           // patterns/plugins not restricted
+#define BASIC_PATTERNS          0           // use extended patterns
 #endif
 
 #if !defined(CUSTOM_PLUGINS)

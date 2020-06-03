@@ -9,15 +9,15 @@ See license.txt for the terms of this license.
 // required variables:
 char cmdStr[STRLEN_PATTERNS];               // command & pattern string
 byte codePatterns = 0;                      // number of internal patterns
-byte curPattern = 0;                        // current pattern (1..savedPatterns)
+byte curPattern = 0;                        // current pattern (1..codePatterns)
 bool doUpdate = true;                       // false to not update display
 
 #if CUSTOM_PATTERNS
-extern const char* const customPatterns[];
 #if EXTERNAL_COMM
 extern const char* const customPnames[];
 extern const char* const customPhelp[];
 #endif
+extern const char* const customPatterns[];
 #endif
 
 #if !DRAWPIXS_OVERRIDE
