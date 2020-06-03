@@ -37,7 +37,7 @@ void CheckForPatterns(void)
 
   curPattern = FlashGetPattern();
 
-  #if !EXTERNAL_COMM // else client handles it
+  #if !EXTERN_PATTERNS // else client handles it
   if (!curPattern || (curPattern > codePatterns))
     curPattern = 1;
   #endif
@@ -53,7 +53,7 @@ void GetCurPattern(char *instr)
     DBGOUT((F("Copying pattern = #%d"), curPattern));
     strcpy_P(instr, customPatterns[curPattern-1]);
   }
-  #if EXTERNAL_COMM
+  #if EXTERN_PATTERNS
   // else retrieve pattern from flash for current segment
   else FlashGetStr(instr);
   #else
