@@ -2,9 +2,9 @@
 // Customize your effect patterns here.
 
 // adjust these if need more layers/tracks or longer patterns strings:
-#define NUM_PLUGIN_LAYERS       4           // minimum number of plugins that to be combined at once
-#define NUM_PLUGIN_TRACKS       3           // minimum layers that have unique properties (redraw pixels)
-#define STRLEN_PATTERNS         110         // long enough for pattern strings (including ending 0 of string)
+#define NUM_PLUGIN_LAYERS       4           // number of plugins that can be combined at once
+#define NUM_PLUGIN_TRACKS       3           // layers that have unique properties (redraw pixels)
+#define STRLEN_PATTERNS         100         // long enough for pattern strings (including ending 0 of string)
 #define DELAY_RANGE             60          // range of delay values in msecs: match largest "D" command
 
 //********************************************************************************************************************************************
@@ -15,8 +15,8 @@
 // ("W"), or pixel count ("C") properties, or to be externally Triggered (as opposed to using the "A" or "T" commands).
 //********************************************************************************************************************************************
 
-// Note: if the strings are aligned as shown, then to keep within an 109 character length they can't be longer than this ---------------------------------------^
-// For example:                                   "-------------------------------------------------------------------------------------------------------------"
+// Note: if the strings are aligned as shown, then to keep within an 99 character length they can't be longer than this ------------------------------
+// For example:                                   "---------------------------------------------------------------------------------------------------"
 
 // Color hue changes "ripple" down the strip. The colors move through the spectrum, and appear stationary until Triggered.
 // The Force applied changes the amount of color change per pixel. At maximum Force the entire spectrum is displayed again.
