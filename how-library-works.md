@@ -27,19 +27,19 @@ Here are some of the main #define statements that determine important functional
 
 'PIXEL_COUNT' sets the number of pixels to be displayed, and "PIXEL_OFFSET' shifts the drawing window around the pixel strip.
 
-Applications that use bluetooth must set 'BLUETOOTH_COMM' to 1. Applications that use WiFi must set 'WIFI_COMM' to 1.
+Applications that use bluetooth must set 'BLE_COMM' to 1. Applications that use WiFi must set 'WIFI_COMM' to 1.
 
 'STRLEN_PATTERNS' sets the size of the 'cmdStr' buffer used to hold the pattern strings, and MUST be large enough for the longest effect pattern defined internally, or to receive patterns sent from an external client (over bluetooth).
 
 'NUM_PLUGIN_LAYERS' and 'NUM_PLUGIN_TRACKS' set the size of the stacks used in the PixelNutLib Library, and must be at large enough for the effect patterns being used.
 
-'CUSTOM_PATTERNS' is set to 1 when defining internal patterns. Set 'BASIC_PATTERNS' to 1 to restrict the available plugins to the most basic ones to save on code flash space.
+'CUSTOM_PATTERNS' is set to 1 when defining internal patterns (this is the default). Set 'BASIC_PATTERNS' to 1 to restrict the available plugins to the most basic ones to save on code flash space.
 
-'STRAND_COUNT' is set to the number of physically separate pixel strands being used, but supporting this requires additional code in the main application that is not included here, but is needed to provide some basic support for that functionality.
+'STRAND_COUNT' is set to the number of physically separate pixel strands being used (default is 1). Support for more than 1 requires additional code that is not privided here.
 
-'SEGMENT_COUNT' is set to the number of separate segments, whether or not they're on a single strand or not. Using segments on a single strand is fully supported in 'segments.h'. This is used in the SaturnHat example to allow use of pixel rings and a strand connected together on the same output pin.
+'SEGMENT_COUNT' is set to the number of separate segments, whether or not they're on a single strand or not (default is 1). Using segments on a single strand is fully supported in 'segments.h'. This is used in the SaturnHat example to allow use of pixel rings and a strand connected together on the same output pin.
 
-Set 'EEPROM_FORMAT' to 1 once to format the EEPROM storage, then back to 0 to enable the storing of various user settings across power cycles.
+Set 'EEPROM_FORMAT' to 1 once to format (clear to 0) the entire EEPROM area, then back to 0 to enable normal operation: the storing of various user settings across power cycles.
 
 
 Defines for Hardware Controls

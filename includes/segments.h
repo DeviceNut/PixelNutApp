@@ -9,7 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if ((STRAND_COUNT <= 1) && (SEGMENT_COUNT > 1))
+#if (APPCMDS_OVERRIDE && ((STRAND_COUNT <= 1) && (SEGMENT_COUNT > 1)))
 
 class PixelNutEngineX : public PixelNutEngine
 {
@@ -74,10 +74,12 @@ public:
 AppCommandsX appCmdX; // extended class instance
 AppCommands *pAppCmd = &appCmdX;
 
-#if BLUETOOTH_COMM
+#if BLE_COMM
 class CustomCodeX : public Bluetooth
-#else
+#elif WIFI_COMM
 class CustomCodeX : public WiFiNet
+#else
+#error("Multiple logical segments only supported by external client!")
 #endif
 {
 public:
@@ -105,5 +107,5 @@ private:
 CustomCodeX customX;
 CustomCode *pCustomCode = &customX;
 
-#endif
+#endif // (APPCMDS_OVERRIDE && ((STRAND_COUNT <= 1) && (SEGMENT_COUNT > 1)))
 //========================================================================================

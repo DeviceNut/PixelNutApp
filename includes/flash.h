@@ -21,7 +21,7 @@ See license.txt for the terms of this license.
 #else                                                 // disable for unknown processor
 #define EEPROM_BYTES            0
 #endif
-#endif // !defined(EEPROM_BYTES)
+#endif
 
 #if (EEPROM_BYTES <= 0)
 #define EEPROM_FREE_BYTES 0
@@ -71,7 +71,6 @@ void FlashSetProperties(void) {}
 #define FLASHLEN_PATTERN        STRLEN_PATTERNS
 #else
 #define FLASHLEN_PATTERN        0
-#warning("Not reserving space in EEPROM for patterns")
 #endif
 
 #define FLASHOFF_PATTERN_START  (FLASHOFF_SEGMENT_DATA + (SEGMENT_COUNT * FLASH_SEG_LENGTH))

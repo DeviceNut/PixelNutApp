@@ -15,10 +15,27 @@ See license.txt for the terms of this license.
 
 #if !MAIN_OVERRIDE
 
-#if !NEOPIXELS_OVERRIDE
+#if !SHOWPIX_OVERRIDE
 void ShowPixels(void)
 {
-  pNeoPixels->show(pPixelData, pixelBytes);
+  #if PIXELS_APA
+  byte *ptr = pPixelData;
+
+  SPI.beginTransaction(spiSettings);
+
+  // 4 byte start-frame marker
+  for (int i = 0; i < 4; i++) SPI.transfer(0x00);
+
+  for (int i = 0; i < PIXEL_COUNT; ++i)
+  {
+    SPI.transfer(0xFF);
+    for (int j = 0; j < 3; j++) SPI.transfer(*ptr++);
+  }
+
+  SPI.endTransaction();
+  #else
+  pNeoPixels->show(pPixelData, (PIXEL_COUNT*3));
+  #endif
 }
 #else
 extern void ShowPixels(void);
@@ -53,7 +70,7 @@ void setup()
   randomSeed(analogRead(APIN_SEED));
 
   // turn off all pixels
-  memset(pPixelData, 0, pixelBytes);
+  memset(pPixelData, 0, (PIXEL_COUNT*3));
   ShowPixels();
 
   #if EEPROM_FORMAT
@@ -72,6 +89,10 @@ void setup()
   FlashStartup(); // get saved settings from flash
   #endif
 
+  #if (PIXELS_APA && !BLUEFRUIT_BLE)
+  SPI.begin(); // initialize SPI library
+  #endif
+
   DBGOUT((F("Configuration Settings:")));
   #if !EXTERNAL_COMM
   DBGOUT((F("  MAX_BRIGHTNESS    = %d"), MAX_BRIGHTNESS));
@@ -80,10 +101,11 @@ void setup()
   DBGOUT((F("  PIXEL_COUNT       = %d"), PIXEL_COUNT));
   DBGOUT((F("  STRAND_COUNT      = %d"), STRAND_COUNT));
   DBGOUT((F("  SEGMENT_COUNT     = %d"), SEGMENT_COUNT));
+  DBGOUT((F("  STRLEN_PATTERNS   = %d"), STRLEN_PATTERNS));
+  DBGOUT((F("  BASIC_PATTERNS    = %d"), BASIC_PATTERNS));
   DBGOUT((F("  CUSTOM_PATTERNS   = %d"), CUSTOM_PATTERNS));
   DBGOUT((F("  EXTERN_PATTERNS   = %d"), EXTERN_PATTERNS));
-  DBGOUT((F("  BASIC_PATTERNS    = %d"), BASIC_PATTERNS));
-  DBGOUT((F("  STRLEN_PATTERNS   = %d"), STRLEN_PATTERNS));
+  DBGOUT((F("  EXTERNAL_COMM     = %d"), EXTERNAL_COMM));
   DBGOUT((F("  NUM_PLUGIN_TRACKS = %d"), NUM_PLUGIN_TRACKS));
   DBGOUT((F("  NUM_PLUGIN_LAYERS = %d"), NUM_PLUGIN_LAYERS));
   DBGOUT((F("  EE_PATTERN_START  = %d"), FLASHOFF_PATTERN_START));

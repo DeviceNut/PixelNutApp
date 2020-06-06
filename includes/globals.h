@@ -20,18 +20,24 @@ extern const char* const customPhelp[];
 extern const char* const customPatterns[];
 #endif
 
-#if !DRAWPIXS_OVERRIDE
-short pixelBytes = (PIXEL_COUNT*3);         // number of bytes to store pixels
+#if !SHOWPIX_OVERRIDE
 byte pixelArray[PIXEL_COUNT*3];             // static allocation of pixel strip
 byte *pPixelData = pixelArray;
 #endif
 
-#if !NEOPIXELS_OVERRIDE
+#if !SHOWPIX_OVERRIDE && !PIXELS_APA
 NeoPixelShow neoPixels = NeoPixelShow(DPIN_PIXELS);
 NeoPixelShow *pNeoPixels = &neoPixels;
-PixelValOrder pixorder = {1,0,2}; // mapping of (RGB) to (GRB) for WS8218B
-PixelNutSupport pixelNutSupport = PixelNutSupport((GetMsecsTime)millis, &pixorder);
 #endif
+
+#if PIXELS_APA
+#include <SPI.h>
+SPISettings spiSettings(SPI_SETTINGS_FREQ, MSBFIRST, SPI_MODE0);
+PixelValOrder pixorder = {2,1,0}; // mapping of (RGB) to (BRG) for APA102
+#else
+PixelValOrder pixorder = {1,0,2}; // mapping of (RGB) to (GRB) for WS8218B
+#endif
+PixelNutSupport pixelNutSupport = PixelNutSupport((GetMsecsTime)millis, &pixorder);
 
 #if !PIXENGINE_OVERRIDE
 PixelNutEngine pixelNutEngine = PixelNutEngine(pPixelData, PIXEL_COUNT, PIXEL_OFFSET, DIRECTION_UP, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);

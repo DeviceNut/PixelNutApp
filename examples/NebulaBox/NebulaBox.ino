@@ -42,14 +42,14 @@
 #define DPIN_PIXELS             2           // drives output pixel data (@3.3v)
 #define APIN_SEED               A0          // used to seed randomizer
 
-#define BLUETOOTH_COMM          1           // include bluetooth code
+#define STRLEN_PATTERNS         300         // maxlen of pattern strings (including ending 0)
+#define NUM_PLUGIN_LAYERS       16          // number of plugins that can be combined at once
+#define NUM_PLUGIN_TRACKS       8           // layers that have unique properties (redraw pixels)
+
+#define BLUEFRUIT_BLE           1           // include bluefruit bluetooth handling code
 #define BLUEFRUIT_SPI_CS        10          // wire pins for Bluefruit SPI Friend
 #define BLUEFRUIT_SPI_IRQ       9           //  (also connect MOSI, MISO, SCK pins
 #define BLUEFRUIT_SPI_RST       8           //   to pins 11, 12, 13 respectively)
-
-#define STRLEN_PATTERNS         300         // maxlen of pattern strings (including ending 0)
-#define NUM_PLUGIN_LAYERS       16          // number of plugins that to be combined at once
-#define NUM_PLUGIN_TRACKS       8           // layers that have unique properties (redraw pixels)
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)
