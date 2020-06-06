@@ -1,4 +1,4 @@
-// PixelNutApp Bluetooth Communications
+// PixelNutApp Bluetooth Communications using Bluefruit Module
 //
 // Uses global variables: 'pixelNutSupport', 'cmdStr', 'pAppCmd'.
 // Calls global routines: 'CheckExecCmd', 'ErrorHandler'.
@@ -9,7 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if BLUETOOTH_COMM
+#if BLUEFRUIT_BLE
 
 #include <SPI.h>
 
@@ -219,5 +219,5 @@ bool Bluetooth::loop(void)
   return false;  // allow for physical controls
 };
 
-#endif // BLUETOOTH_COMM
+#endif // BLUEFRUIT_BLE
 //========================================================================================

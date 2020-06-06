@@ -9,8 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if WIFI_COMM
-#if defined(SPARK)
+#if PARTICLE_WIFI
 
 extern void CheckExecCmd(char *instr); // defined in main.h
 
@@ -897,6 +896,5 @@ public:
 };
 WiFiNet wifinet;
 
-#endif // defined(SPARK)
-#endif // WIFI_COMM
+#endif // PARTICLE_WIFI
 //========================================================================================
