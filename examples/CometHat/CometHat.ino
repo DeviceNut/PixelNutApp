@@ -32,21 +32,17 @@
 //*********************************************************************************************
 
 // when first flash a new device, set this to 1 to clear the EEPROM, then reset to 0
-#define EEPROM_FORMAT           0           // 1 to write 0 to entire flash data space
-                                            // MUST be performed once on new hardware
+#define EEPROM_FORMAT           0           // MUST be performed once on new hardware
 
 #define PIXEL_COUNT             32          // can support up to 64 pixels with the 32u4
 #define DPIN_PIXELS             12          // drives output pixel data (@3.3v)
 #define APIN_SEED               A0          // used to seed randomizer
 
-#define BLUETOOTH_COMM          1           // include bluetooth code
-#define BLUEFRUIT_SPI_CS        8           // assign pins for Bluefruit Micro
-#define BLUEFRUIT_SPI_IRQ       7
-#define BLUEFRUIT_SPI_RST       4
-
-#define STRLEN_PATTERNS         110         // maxlen of pattern strings (including ending 0)
-#define NUM_PLUGIN_LAYERS       4           // number of plugins that to be combined at once
+#define STRLEN_PATTERNS         100         // maxlen of pattern strings (including ending 0)
+#define NUM_PLUGIN_LAYERS       4           // number of plugins that can be combined at once
 #define NUM_PLUGIN_TRACKS       3           // layers that have unique properties (redraw pixels)
+
+#define BLUEFRUIT_BLE           1           // include bluefruit bluetooth handling code
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)
