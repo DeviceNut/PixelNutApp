@@ -50,9 +50,6 @@
 #define NUM_PLUGIN_TRACKS       8           // layers that have unique properties (redraw pixels)
 
 #define BLUEFRUIT_BLE           1           // include bluefruit bluetooth handling code
-#define BLUEFRUIT_SPI_CS        10          // wire pins for Bluefruit SPI Friend
-#define BLUEFRUIT_SPI_IRQ       9           //  (also connect MOSI, MISO, SCK pins
-#define BLUEFRUIT_SPI_RST       8           //   to pins 11, 12, 13 respectively)
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)

@@ -35,6 +35,10 @@ See license.txt for the terms of this license.
 #define BLUEFRUIT_SPI_CS        8           // assign pins for Bluefruit Micro
 #define BLUEFRUIT_SPI_IRQ       7           // ** hardcoded for this module **
 #define BLUEFRUIT_SPI_RST       4
+#else                                       // must override if change pins:
+#define BLUEFRUIT_SPI_CS        10          // wire pins for Bluefruit SPI Friend
+#define BLUEFRUIT_SPI_IRQ       9           //  (also connect MOSI, MISO, SCK pins
+#define BLUEFRUIT_SPI_RST       8           //   to pins 11, 12, 13 respectively)
 #endif
 #define BLE_COMM                1           // using bluetooth BLE
 #endif
