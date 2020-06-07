@@ -89,6 +89,7 @@ static uint16_t strOffset = FLASHOFF_PATTERN_START;
 static void SetFlashValue(uint16_t offset, byte value) { EEPROM.write(valOffset + offset, value); }
 static byte GetFlashValue(uint16_t offset) { return EEPROM.read(valOffset + offset); }
 
+// 'seg' MUST be >0
 void FlashSetSegment(byte seg)
 {
   valOffset = FLASHOFF_SEGMENT_DATA + ((seg-1) * FLASH_SEG_LENGTH);

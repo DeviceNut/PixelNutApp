@@ -51,12 +51,17 @@ public:
     {
       case '#': // allows client to switch logical segments
       {
-        curSegment = *(instr+1)-0x30; // convert ASCII digit to value
-        FlashSetSegment(curSegment);
-        pPixelNutEngineX->SetTrackSegEnable(curSegment);
+        int seg = *(instr+1)-0x30; // convert ASCII digit to value
+        if (seg > 0)
+        {
+          curSegment = seg;
+          DBGOUT((F("Switch to segment=%d"), curSegment));
+          FlashSetSegment(curSegment);
+          pPixelNutEngineX->SetTrackSegEnable(curSegment);
+        }
         break;
       }
-      case '%': // brightness/delay: affects all segments so set in segment 0
+      case '%': // brightness/delay: affects all segments so set in first segment
       case ':':
       {
         FlashSetSegment(1);
