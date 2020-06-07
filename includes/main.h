@@ -69,6 +69,10 @@ void setup()
   // set seed to value read from unconnected analog port
   randomSeed(analogRead(APIN_SEED));
 
+  #if (PIXELS_APA && !BLUEFRUIT_BLE)
+  SPI.begin(); // initialize SPI library
+  #endif
+
   // turn off all pixels
   memset(pPixelData, 0, (PIXEL_COUNT*3));
   ShowPixels();
@@ -87,10 +91,6 @@ void setup()
 
   #if EXTERNAL_COMM
   FlashStartup(); // get saved settings from flash
-  #endif
-
-  #if (PIXELS_APA && !BLUEFRUIT_BLE)
-  SPI.begin(); // initialize SPI library
   #endif
 
   DBGOUT((F("Configuration Settings:")));
