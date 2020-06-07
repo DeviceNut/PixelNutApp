@@ -12,7 +12,7 @@ See license.txt for the terms of this license.
 #if !defined(EEPROM_BYTES)
 #if defined(__arm__) && defined(__MKL26Z64__)         // Teensy LC
 #define EEPROM_BYTES            128
-#elif defined(__arm__) && defined(__MK20DX256__)      // Teensy 3.x
+#elif defined(__arm__) && defined(__MK20DX256__)      // Teensy 3.2
 #define EEPROM_BYTES            2048
 #elif defined(STM32F2XX)                              // Particle Photon
 #define EEPROM_BYTES            2048
