@@ -9,8 +9,9 @@ See license.txt for the terms of this license.
 // required variables:
 char cmdStr[STRLEN_PATTERNS];               // command & pattern string
 byte codePatterns = 0;                      // number of internal patterns
-byte curPattern = 0;                        // current pattern (1..codePatterns)
+byte curPattern = 1;                        // current pattern (1..codePatterns)
 bool doUpdate = true;                       // false to not update display
+byte curSegment = 0;                        // index of current segment
 
 #if CUSTOM_PATTERNS
 #if EXTERNAL_COMM

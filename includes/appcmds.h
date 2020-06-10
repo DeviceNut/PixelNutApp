@@ -59,7 +59,7 @@ public:
           if (!pCustomCode->sendReply((char*)SEGMENT_INFO)) return false;
 
           char outstr[FLASH_SEG_LENGTH * 5]; // max length of each value is 4 + space
-          for (int i = 1; i <= SEGMENT_COUNT; ++i)
+          for (int i = 0; i < SEGMENT_COUNT; ++i)
           {
             FlashSetSegment(i);
 
@@ -72,7 +72,7 @@ public:
             if (!pCustomCode->sendReply(outstr)) return false;
           }
 
-          FlashSetSegment(curSegment);
+          FlashSetSegment(curSegment = 0); // MUST start with segment 0
           break;
         }
         #endif
@@ -117,33 +117,33 @@ public:
         DBGOUT((F("Info Line #2")));
         outstr[0] = 0;
 
-        #if (STRAND_COUNT > 1)
-        DBGOUT((F("  Segments:    %d"), -SEGMENT_COUNT));
-        AddNumToStr(outstr, -SEGMENT_COUNT); // indicates physically separate segments
-        #else
-        DBGOUT((F("  Segments:    %d"), SEGMENT_COUNT)); // number of logical segments
+        DBGOUT((F("  Segments:    %d"), SEGMENT_COUNT));    // number of segments
         AddNumToStr(outstr, SEGMENT_COUNT);
-        #endif
-
         DBGOUT((F("  CurPattern:  %d"), curPattern));
         AddNumToStr(outstr, curPattern);
-        DBGOUT((F("  NumPatterns: %d"), codePatterns));         // number of custom patterns
+        DBGOUT((F("  NumPatterns: %d"), codePatterns));     // number of custom patterns
         AddNumToStr(outstr, codePatterns);
 
         #if !EXTERN_PATTERNS
-        DBGOUT((F("  Features:    %d"), FEATURE_BITS | 0x01));  // cannot use external patterns
-        AddNumToStr(outstr, FEATURE_BITS | 0x01);
+        DBGOUT((F("  Features:    %d"), 0x01));   // cannot use external patterns
+        AddNumToStr(outstr, 0x01);
         #elif BASIC_PATTERNS
-        DBGOUT((F("  Features:    %d"), FEATURE_BITS | 0x02));  // cannot use advanced patterns
-        AddNumToStr(outstr, FEATURE_BITS | 0x02);
+        DBGOUT((F("  Features:    %d"), 0x02));   // cannot use advanced patterns
+        AddNumToStr(outstr, 0x02);
         #else
-        DBGOUT((F("  Features:    %d"), FEATURE_BITS));         // other feature bits
-        AddNumToStr(outstr, FEATURE_BITS);
+        DBGOUT((F("  Features:    %d"), 0));      // no special features
+        AddNumToStr(outstr, 0);
         #endif
 
-        DBGOUT((F("  XPlugins:    %d"), CUSTOM_PLUGINS));       // number of custom plugins
-        AddNumToStr(outstr, CUSTOM_PLUGINS);
-        DBGOUT((F("  CmdStrLen:   %d"), STRLEN_PATTERNS));      // maxlen of commands/patterns
+        #if (STRAND_COUNT > 1)
+        DBGOUT((F("  MultiStrand: 1")));
+        AddNumToStr(outstr, 1);
+        #else
+        DBGOUT((F("  MultiStrand: 0")));
+        AddNumToStr(outstr, 0);
+        #endif
+
+        DBGOUT((F("  CmdStrLen:   %d"), STRLEN_PATTERNS));  // maxlen of commands/patterns
         AddNumToStr(outstr, STRLEN_PATTERNS);
 
         if (!pCustomCode->sendReply(outstr)) return false;
@@ -269,10 +269,6 @@ public:
 
     return useCmdStr;
   }
-
-  #if (SEGMENT_COUNT > 1)
-  byte curSegment = 1; // segment values start at 1
-  #endif
 
   char* skipSpaces(char *instr)
   {

@@ -103,7 +103,7 @@ static char vstrSegsInfo[100];                // holds segment string for variab
 static char vstrSegsVals[SEGMENT_COUNT][100]; // holds segment strings for variables with prefix PNUT_VARNAME_SEGINFO_PFX
 static bool segStrFirst = true;               // false after first segment info string is retrieved
 #endif
-static short segmentCount = 0;                // nonzero for state of retrieving segment info strings
+static short segmentCount = 0;                // >=0 for state of retrieving segment info strings
 
 #if EEPROM_FORMAT
 #if USE_PARTICLE_NAME
@@ -736,7 +736,7 @@ static boolean SetupCloud(void)
 
   SetVariable(PNUT_VARNAME_NETWORKS, vstrNetworks);
 
-  segmentCount = 0;
+  segmentCount = -1;
   dataString[0] = 0;
   pAppCmd->execCmd((char*)"?"); // get main configuration strings
   strcpy(vstrConfigInfo, dataString);
@@ -744,7 +744,7 @@ static boolean SetupCloud(void)
 
   #if (SEGMENT_COUNT > 1)
   segStrFirst = true;
-  for (segmentCount = 1; segmentCount <= SEGMENT_COUNT; ++segmentCount)
+  for (segmentCount = 0; segmentCount < SEGMENT_COUNT; ++segmentCount)
   {
     dataString[0] = 0;
     pAppCmd->execCmd((char*)"?S"); // get segment configuration strings
@@ -753,10 +753,10 @@ static boolean SetupCloud(void)
 
   SetVariable(PNUT_VARNAME_SEGINFO, vstrSegsInfo);
 
-  for (int seg = 1; seg <= SEGMENT_COUNT; ++seg)
+  for (int seg = 0; seg < SEGMENT_COUNT; ++seg)
   {
     sprintf(cmdname, "%s-%d", PNUT_VARNAME_SEGVALS_PFX, seg);
-    SetVariable(cmdname, vstrSegsVals[seg-1]);
+    SetVariable(cmdname, vstrSegsVals[seg]);
   }
   #endif
 
@@ -863,7 +863,7 @@ public:
   // information strings from the PixelNut application
   bool sendReply(char *instr)
   {
-    if (segmentCount == 0)
+    if (segmentCount < 0)
     {
       //DBGOUT((F("ReplyStr: \"%s\""), instr));
       strcat(dataString, instr);
@@ -876,7 +876,7 @@ public:
       strcpy(vstrSegsInfo, instr);
       segStrFirst = false;
     }
-    else strcpy(vstrSegsVals[segmentCount-1], instr);
+    else strcpy(vstrSegsVals[segmentCount], instr);
     #endif
 
     return true; // this cannot fail

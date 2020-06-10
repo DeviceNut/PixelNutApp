@@ -21,15 +21,15 @@ public:
     // NOTE: cannot call DBGOUT from constructor
   }
 
-  void SetTrackSegEnable(byte seg)
+  void SetTrackSegEnable(byte segindex)
   {
     for (int i = 0; i <= indexTrackStack; ++i)
     {
       PluginTrack *pTrack = (pluginTracks + i);
-      pTrack->disable = (pTrack->segNum != seg);
+      pTrack->disable = (pTrack->segIndex != segindex);
 
       #if DEBUG_OUTPUT
-      if (!pTrack->disable) DBGOUT((F("Track %d enabled for segment=%d"), i, seg));
+      DBGOUT((F("Track %d: segment=%d enable=%d"), i, segindex, pTrack->disable));
       #endif
     }
   }
@@ -38,6 +38,19 @@ public:
 PixelNutEngineX pixelNutEngineX   = PixelNutEngineX(pPixelData, PIXEL_COUNT, PIXEL_OFFSET, DIRECTION_UP, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
 PixelNutEngineX *pPixelNutEngineX = &pixelNutEngineX;
 PixelNutEngine *pPixelNutEngine   = pPixelNutEngineX;
+
+void SwitchSegments(byte segindex)
+{
+  if (segindex < SEGMENT_COUNT)
+  {
+    curSegment = segindex;
+    DBGOUT((F("Switch to segment=%d"), curSegment));
+    FlashSetSegment(curSegment);
+    pPixelNutEngineX->SetTrackSegEnable(curSegment);
+  }
+}
+
+#if EXTERNAL_COMM
 
 class AppCommandsX : public AppCommands
 {
@@ -51,20 +64,14 @@ public:
     {
       case '#': // allows client to switch logical segments
       {
-        int seg = *(instr+1)-0x30; // convert ASCII digit to value
-        if (seg > 0)
-        {
-          curSegment = seg;
-          DBGOUT((F("Switch to segment=%d"), curSegment));
-          FlashSetSegment(curSegment);
-          pPixelNutEngineX->SetTrackSegEnable(curSegment);
-        }
+        byte segindex = *(instr+1)-0x30; // convert ASCII digit to value
+        SwitchSegments(segindex);
         break;
       }
       case '%': // brightness/delay: affects all segments so set in first segment
       case ':':
       {
-        FlashSetSegment(1);
+        FlashSetSegment(0);
         AppCommands::cmdHandler(instr);
         FlashSetSegment(curSegment);
         break;
@@ -79,12 +86,14 @@ public:
 AppCommandsX appCmdX; // extended class instance
 AppCommands *pAppCmd = &appCmdX;
 
+#endif // EXTERNAL_COMM
+
 #if BLE_COMM
 class CustomCodeX : public Bluetooth
 #elif WIFI_COMM
 class CustomCodeX : public WiFiNet
 #else
-#error("Multiple logical segments only supported by external client!")
+class CustomCodeX : public CustomCode
 #endif
 {
 public:
@@ -92,11 +101,11 @@ public:
   void pattern(void) // called if have new pattern in engine
   {
     // must update properties for all segments
-    for (int i = 1; i <= SEGMENT_COUNT; ++i)
+    for (int i = 0; i < SEGMENT_COUNT; ++i)
     {
-      if (i != pAppCmd->curSegment) updateProperties(i);
+      if (i != curSegment) updateProperties(i);
     }
-    updateProperties(pAppCmd->curSegment);
+    updateProperties(curSegment);
   }
 
 private:

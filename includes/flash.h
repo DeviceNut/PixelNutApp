@@ -2,6 +2,7 @@
 // Stores the pattern number, effect properties, and pattern strings in (eeprom flash).
 //
 // Uses global variables: 'pPixelNutEngine'.
+// Set global variable: 'curPattern'.
 //========================================================================================
 /*
 Copyright (c) 2015-2017, Greg de Valois
@@ -29,7 +30,6 @@ void FlashSetStr(char *str, int offset) {}
 void FlashGetStr(char *str) { *str = 0; }
 void FlashSetBright() {}
 void FlashSetDelay()  {}
-byte FlashGetPattern(void) { return 1; }
 void FlashSetPattern(byte pattern)  {}
 void FlashSetXmode(bool enable) {}
 void FlashSetExterns(uint16_t hue, byte wht, byte cnt) {}
@@ -64,7 +64,7 @@ void FlashSetProperties(void) {}
 #if EXTERNAL_COMM
 #define FLASHOFF_SEGMENT_DATA   MAXLEN_DEVICE_NAME
 #else
-#define FLASHOFF_SEGMENT_DATA   0
+#define FLASHOFF_SEGMENT_DATA   FLASHOFF_DEVICE_NAME
 #endif
 
 #if EXTERN_PATTERNS
@@ -89,13 +89,13 @@ static uint16_t strOffset = FLASHOFF_PATTERN_START;
 static void SetFlashValue(uint16_t offset, byte value) { EEPROM.write(valOffset + offset, value); }
 static byte GetFlashValue(uint16_t offset) { return EEPROM.read(valOffset + offset); }
 
-// 'seg' MUST be >0
-void FlashSetSegment(byte seg)
+// Note: this is not range checked
+void FlashSetSegment(byte segindex)
 {
-  valOffset = FLASHOFF_SEGMENT_DATA + ((seg-1) * FLASH_SEG_LENGTH);
+  valOffset = FLASHOFF_SEGMENT_DATA + (segindex * FLASH_SEG_LENGTH);
 
   #if (STRAND_COUNT > 1) // logical segments use a single string
-  strOffset = FLASHOFF_PATTERN_START + ((seg-1) * STRLEN_PATTERNS);
+  strOffset = FLASHOFF_PATTERN_START + (segindex * FLASHLEN_PATTERN);
   #endif
 }
 
@@ -142,7 +142,6 @@ void FlashGetStr(char *str)
 void FlashSetBright() { SetFlashValue(FLASH_SEG_BRIGHTNESS, pPixelNutEngine->getMaxBrightness());   }
 void FlashSetDelay()  { SetFlashValue(FLASH_SEG_DELAYMSECS, pPixelNutEngine->getDelayOffset());     }
 
-byte FlashGetPattern(void)          { return GetFlashValue(FLASH_SEG_PATTERN);        }
 void FlashSetPattern(byte pattern)  { SetFlashValue(FLASH_SEG_PATTERN, pattern);      }
 void FlashSetXmode(bool enable)     { SetFlashValue(FLASH_SEG_XT_MODE, enable);       }
 
@@ -176,16 +175,20 @@ void FlashSetProperties(void)
 
 void FlashStartup(void)
 {
-  // retrieve saved control values from flash
+  curPattern = GetFlashValue(FLASH_SEG_PATTERN);
+  if (!curPattern || (!EXTERN_PATTERNS && (curPattern > codePatterns)))
+    curPattern = 1; // starts with 1
+
+  DBGOUT((F("Flash: pattern=#%d"), curPattern));
+
   byte bright = GetFlashValue(FLASH_SEG_BRIGHTNESS);
   if (bright == 0) SetFlashValue(FLASH_SEG_BRIGHTNESS, bright=60); // set to 60% if cleared
 
   pPixelNutEngine->setMaxBrightness(bright);
-  pPixelNutEngine->setDelayOffset((int8_t)GetFlashValue(FLASH_SEG_DELAYMSECS));
-  // make sure 8 bit value is taken as a signed integer
+  pPixelNutEngine->setDelayOffset((int8_t)GetFlashValue(FLASH_SEG_DELAYMSECS)); // 8-bit signed int
 
-  DBGOUT((F("Flash: max brightness=%d%%"), bright));
-  DBGOUT((F("Flash: delay offset=%d msecs"), (int8_t)GetFlashValue(FLASH_SEG_DELAYMSECS)));
+  DBGOUT((F("Flash: brightness=%d%%"), bright));
+  DBGOUT((F("Flash: delay=%d msecs"), (int8_t)GetFlashValue(FLASH_SEG_DELAYMSECS)));
 
   FlashSetProperties();
 }

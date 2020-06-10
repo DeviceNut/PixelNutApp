@@ -87,12 +87,4 @@ See license.txt for the terms of this license.
 #define EXTERN_PATTERNS         EXTERNAL_COMM   // use external (client) patterns if possible
 #endif
 
-#if !defined(CUSTOM_PLUGINS)
-#define CUSTOM_PLUGINS          0           // define default value
-#endif
-
-#if !defined(FEATURE_BITS)
-#define FEATURE_BITS            0           // define default value
-#endif
-
 //========================================================================================
