@@ -83,16 +83,6 @@ void setup()
   ErrorHandler(0, 3, true);
   #endif
 
-  if (pPixelNutEngine->pDrawPixels == NULL)
-  {
-    DBGOUT((F("Failed to alloc pixel engine buffers")));
-    ErrorHandler(2, PixelNutEngine::Status_Error_Memory, true);
-  }
-
-  #if EXTERNAL_COMM
-  FlashStartup(); // get saved settings from flash
-  #endif
-
   DBGOUT((F("Configuration Settings:")));
   #if !EXTERNAL_COMM
   DBGOUT((F("  MAX_BRIGHTNESS    = %d"), MAX_BRIGHTNESS));
@@ -120,13 +110,14 @@ void setup()
   SetupTriggerControls();
   SetupPatternControls();
 
-  CheckForPatterns();     // read internal patterns (if any) and current pattern number
   pCustomCode->setup();   // custom initialization here (external communications setup)
 
-  GetCurPattern(cmdStr);  // get pattern string corresponding that that pattern number
+  CheckForPatterns();     // check for internal patterns, fail if none and required
+  FlashStartup();         // get curPattern and settings from flash, set engine properties
+  GetCurPattern(cmdStr);  // get pattern string corresponding to that pattern number
   CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
 
-  BlinkStatusLED(0, 2); // indicate success
+  BlinkStatusLED(0, 2);   // indicate success
   DBGOUT((F("** Setup complete **")));
 }
 

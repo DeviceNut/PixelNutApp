@@ -15,7 +15,7 @@ See license.txt for the terms of this license.
 // returns false if fails to find any stored pattern strings
 void CheckForPatterns(void)
 {
-  DBGOUT((F("Read patterns from flash code")));
+  DBGOUT((F("Read patterns from flash memory")));
 
   codePatterns = 0;
   for (int i = 0; ; ++i)
@@ -30,19 +30,10 @@ void CheckForPatterns(void)
     DBGOUT((F("  %2d: \"%s\""), i+1, cmdStr));
   }
 
-  DBGOUT((F("Number of code patterns = %d"), codePatterns));
+  DBGOUT((F("Number of patterns = %d"), codePatterns));
 
   // cannot continue if cannot find any valid pattern strings
   if (!codePatterns) ErrorHandler(1, 1, true);
-
-  curPattern = FlashGetPattern();
-
-  #if !EXTERN_PATTERNS // else client handles it
-  if (!curPattern || (curPattern > codePatterns))
-    curPattern = 1;
-  #endif
-
-  DBGOUT((F("Starting pattern = #%d"), curPattern));
 }
 
 void GetCurPattern(char *instr)
@@ -78,7 +69,7 @@ void GetNextPattern(void)
 
 void GetPrevPattern(void)
 {
-  // curPattern must be 0...codePatterns
+  // curPattern must be 1...codePatterns
   if (curPattern <= 1) curPattern = codePatterns;
   else --curPattern;
 
@@ -87,10 +78,7 @@ void GetPrevPattern(void)
 
 #else // !CUSTOM_PATTERNS
 
-void CheckForPatterns(void)
-{
-  curPattern = FlashGetPattern();
-}
+void CheckForPatterns(void) {}
 
 void GetCurPattern(char *instr)
 {
