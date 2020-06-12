@@ -33,11 +33,9 @@ Applications that use bluetooth must set 'BLE_COMM' to 1. Applications that use 
 
 'NUM_PLUGIN_LAYERS' and 'NUM_PLUGIN_TRACKS' set the size of the stacks used in the PixelNutLib Library, and must be at large enough for the effect patterns being used.
 
-'CUSTOM_PATTERNS' is set to 1 when defining internal patterns (this is the default). Set 'BASIC_PATTERNS' to 1 to restrict the available plugins to the most basic ones to save on code flash space.
+'CUSTOM_PATTERNS' is set to 1 when defining internal patterns (this is the default). Setting EXTERN_PATTERNS is only needed when using an external application (which has built-in patterns), but you only want to use internally created ones instead.
 
-'STRAND_COUNT' is set to the number of physically separate pixel strands being used (default is 1). Support for more than 1 requires additional code that is not privided here.
-
-'SEGMENT_COUNT' is set to the number of separate segments, whether or not they're on a single strand or not (default is 1). Using segments on a single strand is fully supported in 'segments.h'. This is used in the SaturnHat example to allow use of pixel rings and a strand connected together on the same output pin.
+'SEGMENT_COUNT' is set to the number of logical (on the same single strand - set STRANDS_MULTI to 0) or physical (multiple strands - set STRANDS_MULTI to 1). Logical segments are fully supported in 'segments.h'. This is used in the SaturnHat example to allow use of pixel rings and a strand connected together on the same output pin. Multiple physical strands can be supported by extending this library.
 
 Set 'EEPROM_FORMAT' to 1 once to format (clear to 0) the entire EEPROM area, then back to 0 to enable normal operation: the storing of various user settings across power cycles.
 

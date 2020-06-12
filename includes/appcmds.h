@@ -67,7 +67,7 @@ public:
             for (int j = 0; j < FLASH_SEG_LENGTH; ++j)
               AddNumToStr(outstr, GetFlashValue(j));
 
-            DBGOUT((F("FlashVals(%d): %s"), i, outstr));
+            DBGOUT((F("FlashVals[%d]: %s"), i, outstr));
 
             if (!pCustomCode->sendReply(outstr)) return false;
           }
@@ -101,7 +101,7 @@ public:
         DBGOUT((F("  Title=P!")));
         strcpy(outstr, "P! ");
 
-        #if (STRAND_COUNT > 1)    // multiple physical strands
+        #if STRANDS_MULTI         // multiple physical strands
         DBGOUT((F("  Lines=2")));
         AddNumToStr(outstr, 2);   // number of lines to be sent
         #elif (SEGMENT_COUNT > 1) // multiple logical segments
@@ -117,38 +117,31 @@ public:
         DBGOUT((F("Info Line #2")));
         outstr[0] = 0;
 
-        DBGOUT((F("  Segments:    %d"), SEGMENT_COUNT));    // number of segments
+        DBGOUT((F("  Segments:    %d"), SEGMENT_COUNT));        // number of segments
         AddNumToStr(outstr, SEGMENT_COUNT);
+
         DBGOUT((F("  CurPattern:  %d"), curPattern));
         AddNumToStr(outstr, curPattern);
-        DBGOUT((F("  NumPatterns: %d"), codePatterns));     // number of custom patterns
+        DBGOUT((F("  NumPatterns: %d"), codePatterns));         // number of custom patterns
         AddNumToStr(outstr, codePatterns);
 
         #if !EXTERN_PATTERNS
-        DBGOUT((F("  Features:    %d"), 0x01));   // cannot use external patterns
+        DBGOUT((F("  Features:    %d"), 0x01));                 // cannot use external patterns
         AddNumToStr(outstr, 0x01);
-        #elif BASIC_PATTERNS
-        DBGOUT((F("  Features:    %d"), 0x02));   // cannot use advanced patterns
-        AddNumToStr(outstr, 0x02);
         #else
-        DBGOUT((F("  Features:    %d"), 0));      // no special features
+        DBGOUT((F("  Features:    %d"), 0));                    // no special features
         AddNumToStr(outstr, 0);
         #endif
 
-        #if (STRAND_COUNT > 1)
-        DBGOUT((F("  MultiStrand: 1")));
-        AddNumToStr(outstr, 1);
-        #else
-        DBGOUT((F("  MultiStrand: 0")));
-        AddNumToStr(outstr, 0);
-        #endif
+        DBGOUT((F("  MultiStrand: %d"), STRANDS_MULTI));
+        AddNumToStr(outstr, STRANDS_MULTI);
 
-        DBGOUT((F("  CmdStrLen:   %d"), STRLEN_PATTERNS));  // maxlen of commands/patterns
+        DBGOUT((F("  CmdStrLen:   %d"), STRLEN_PATTERNS));      // maxlen of commands/patterns
         AddNumToStr(outstr, STRLEN_PATTERNS);
 
         if (!pCustomCode->sendReply(outstr)) return false;
 
-        #if (STRAND_COUNT <= 1)
+        #if !STRANDS_MULTI
         DBGOUT((F("Info Line #3")));
         DBGOUT((F("  PixelCount:  %d"), PIXEL_COUNT));          // total number of pixels
         DBGOUT((F("  LayerCount:  %d"), NUM_PLUGIN_LAYERS));    // max number of layers

@@ -1,4 +1,4 @@
-// PixelNutApp Global Code Variables
+// PixelNutApp Global Variables
 //========================================================================================
 /*
 Copyright (c) 2015-2017, Greg de Valois
@@ -48,14 +48,10 @@ extern PixelNutEngine *pPixelNutEngine;
 #endif
 
 #if !PLUGINS_OVERRIDE
-#if BASIC_PATTERNS
-PluginFactoryCore pluginFactory = PluginFactoryCore();
+PluginFactory pluginFactory = PluginFactory();
+PluginFactory *pPluginFactory = &pluginFactory;
 #else
-PluginFactoryAdv pluginFactory = PluginFactoryAdv();
-#endif
-PluginFactoryCore *pPluginFactory = &pluginFactory;
-#else
-extern PluginFactoryCore *pPluginFactory;
+extern PluginFactory *pPluginFactory;
 #endif
 
 //========================================================================================

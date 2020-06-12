@@ -15,6 +15,8 @@ extern void CheckExecCmd(char *instr); // defined in main.h
 
 #include "softap_http.h"
 
+namespace {
+
 SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
@@ -882,19 +884,19 @@ public:
     return true; // this cannot fail
   }
 
-  bool loop()
+  void loop()
   {
     if (rebootTime > 0) // waiting to reboot
     {
       if ((millis() - rebootTime) > 1000)
         RestartDevice(); // never returns
     }
-
-    return false; // check physical controls
   }
 
 };
 WiFiNet wifinet;
+
+} // namespace
 
 #endif // PARTICLE_WIFI
 //========================================================================================

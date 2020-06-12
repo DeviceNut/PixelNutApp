@@ -10,6 +10,33 @@ Copyright (c) 2015-2017, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
+
+#if EXTERN_PATTERNS
+
+void GetCurPattern(char *instr)
+{
+  FlashGetStr(instr);
+  DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(instr)));
+}
+
+#elif CUSTOM_PATTERNS
+
+void GetCurPattern(char *instr)
+{
+  // check for an internal pattern first
+  if ((curPattern > 0) && (curPattern <= codePatterns))
+  {
+    DBGOUT((F("Copying pattern = #%d"), curPattern));
+    strcpy_P(instr, customPatterns[curPattern-1]);
+
+    DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(instr)));
+    pPixelNutEngine->popPluginStack(); // clear stack to prepare for new cmds
+  }
+  // else should never heppen
+}
+
+#endif
+
 #if CUSTOM_PATTERNS
 
 // returns false if fails to find any stored pattern strings
@@ -36,28 +63,6 @@ void CheckForPatterns(void)
   if (!codePatterns) ErrorHandler(1, 1, true);
 }
 
-void GetCurPattern(char *instr)
-{
-  // check for an internal pattern first
-  if ((curPattern > 0) && (curPattern <= codePatterns))
-  {
-    DBGOUT((F("Copying pattern = #%d"), curPattern));
-    strcpy_P(instr, customPatterns[curPattern-1]);
-  }
-  #if EXTERN_PATTERNS
-  // else retrieve pattern from flash for current segment
-  else FlashGetStr(instr);
-  #else
-  else instr[0] = 0;
-  #endif
-
-  if (instr[0])
-  {
-    DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(instr)));
-    pPixelNutEngine->popPluginStack(); // clear stack to prepare for new cmds
-  }
-}
-
 void GetNextPattern(void)
 {
   // curPattern must be 1...codePatterns
@@ -76,15 +81,10 @@ void GetPrevPattern(void)
   GetCurPattern(cmdStr);
 }
 
-#else // !CUSTOM_PATTERNS
+#else
 
 void CheckForPatterns(void) {}
 
-void GetCurPattern(char *instr)
-{
-  FlashGetStr(instr);
-  DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(instr)));
-}
-
 #endif // CUSTOM_PATTERNS
+
 //========================================================================================

@@ -12,6 +12,10 @@ See license.txt for the terms of this license.
 #define PREFIX_DEVICE_NAME      "P!"        // for name to be recognized
 #define PREFIX_LEN_DEVNAME      2           // length of this prefix
 
+#if !PIXELS_APA
+#define PIXELS_APA              0           // define default value
+#endif
+
 #if PIXELS_APA
 #if !defined(SPI_SETTINGS_FREQ)
 #define SPI_SETTINGS_FREQ       4000000     // use fastest speed by default
@@ -55,28 +59,25 @@ See license.txt for the terms of this license.
 #define EXTERNAL_COMM           0           // define default value
 #endif
 
-#if !defined(STRAND_COUNT)
-#define STRAND_COUNT            1           // have a single strand
+#if !defined(STRANDS_MULTI)
+#define STRANDS_MULTI           0           // have a single strand
 #endif
 
 #if !defined(SEGMENT_COUNT)
 #define SEGMENT_COUNT           1           // have a single segment
 #endif
 
-#if ((STRAND_COUNT > 1) && (SEGMENT_COUNT != STRAND_COUNT))
-#error("Must be same number of segments as strands (if more than one strand)")
-#endif
-
-#if ((STRAND_COUNT == 1) && (SEGMENT_COUNT > 1)) // to support logical segments:
-#define PIXENGINE_OVERRIDE      1           // must extend PixelNutEngine class
+#if (!STRANDS_MULTI && (SEGMENT_COUNT > 1)) // to support logical segments:
 #define APPCMDS_OVERRIDE        1           // must extend AppCommands class
-#define CUSTOM_OVERRIDE         1           // must extend CustomCode class
-#elif EXTERNAL_COMM
-#define CUSTOM_OVERRIDE         1           // must extend for communications
+#define PIXENGINE_OVERRIDE      1           // must extend PixelNutEngine class
 #endif
 
-#if !defined(BASIC_PATTERNS)
-#define BASIC_PATTERNS          0           // define default value
+#if !defined(APPCMDS_OVERRIDE)
+#define APPCMDS_OVERRIDE        0           // define default value
+#endif
+
+#if !defined(PIXENGINE_OVERRIDE)
+#define PIXENGINE_OVERRIDE      0           // define default value
 #endif
 
 #if !defined(CUSTOM_PATTERNS)

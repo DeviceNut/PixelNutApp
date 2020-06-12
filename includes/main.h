@@ -89,10 +89,9 @@ void setup()
   DBGOUT((F("  DELAY_OFFSET      = %d"), DELAY_OFFSET));
   #endif
   DBGOUT((F("  PIXEL_COUNT       = %d"), PIXEL_COUNT));
-  DBGOUT((F("  STRAND_COUNT      = %d"), STRAND_COUNT));
+  DBGOUT((F("  STRANDS_MULTI     = %d"), STRANDS_MULTI));
   DBGOUT((F("  SEGMENT_COUNT     = %d"), SEGMENT_COUNT));
   DBGOUT((F("  STRLEN_PATTERNS   = %d"), STRLEN_PATTERNS));
-  DBGOUT((F("  BASIC_PATTERNS    = %d"), BASIC_PATTERNS));
   DBGOUT((F("  CUSTOM_PATTERNS   = %d"), CUSTOM_PATTERNS));
   DBGOUT((F("  EXTERN_PATTERNS   = %d"), EXTERN_PATTERNS));
   DBGOUT((F("  EXTERNAL_COMM     = %d"), EXTERNAL_COMM));
@@ -110,12 +109,12 @@ void setup()
   SetupTriggerControls();
   SetupPatternControls();
 
-  pCustomCode->setup();   // custom initialization here (external communications setup)
-
   CheckForPatterns();     // check for internal patterns, fail if none and required
   FlashStartup();         // get curPattern and settings from flash, set engine properties
   GetCurPattern(cmdStr);  // get pattern string corresponding to that pattern number
   CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
+
+  pCustomCode->setup();   // custom initialization here (external communications setup)
 
   BlinkStatusLED(0, 2);   // indicate success
   DBGOUT((F("** Setup complete **")));
@@ -125,17 +124,17 @@ void setup()
 
 void loop()
 {
-  if (!pCustomCode->loop())
-  {
-    // check physical controls for changes
-    CheckBrightControls();
-    CheckDelayControls();
-    CheckEModeControls();
-    CheckColorControls();
-    CheckCountControls();
-    CheckTriggerControls();
-    CheckPatternControls();
-  }
+  pCustomCode->loop();
+
+  // check physical controls for changes
+  CheckBrightControls();
+  CheckDelayControls();
+  CheckEModeControls();
+  CheckColorControls();
+  CheckCountControls();
+  CheckTriggerControls();
+  CheckPatternControls();
+
   CheckExecCmd(cmdStr); // load any new pattern into the engine
 
   // if enabled: display new pixel values if anything has changed

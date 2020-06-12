@@ -19,13 +19,18 @@ See license.txt for the terms of this license.
 #define EEPROM_BYTES            2048
 #elif defined(__AVR__)                                // all other AVR processors
 #define EEPROM_BYTES            1024
+#elif defined(ARDUINO_ARCH_ESP32)                     // ESP32
+#define EEPROM_BYTES            4096
 #else                                                 // disable for unknown processor
 #define EEPROM_BYTES            0
+#warning("No EEPROM - unspecified processor")
 #endif
 #endif
 
 #if (EEPROM_BYTES <= 0)
 #define EEPROM_FREE_BYTES 0
+#define FLASHOFF_PATTERN_START 0
+#define FLASHOFF_PATTERN_END 0
 void FlashSetStr(char *str, int offset) {}
 void FlashGetStr(char *str) { *str = 0; }
 void FlashSetBright() {}
@@ -36,12 +41,13 @@ void FlashSetExterns(uint16_t hue, byte wht, byte cnt) {}
 void FlashSetForce(short force) {}
 short FlashGetForce(void) { return 0; }
 void FlashSetProperties(void) {}
+void FlashStartup(void) {}
 
 #if EXTERNAL_COMM
 #error("Must have EEPROM to use external communications")
 #endif
 
-#else
+#else // (EEPROM_BYTES > 0)
 
 #if !defined(SPARK)
 #include <EEPROM.h>
@@ -73,8 +79,13 @@ void FlashSetProperties(void) {}
 #define FLASHLEN_PATTERN        0
 #endif
 
+#if STRANDS_MULTI
+#define FLASHOFF_PATTERN_START  (FLASHOFF_SEGMENT_DATA  + (SEGMENT_COUNT * FLASH_SEG_LENGTH))
+#define FLASHOFF_PATTERN_END    (FLASHOFF_PATTERN_START + (SEGMENT_COUNT * FLASHLEN_PATTERN))
+#else // logical segments use a single pattern string
 #define FLASHOFF_PATTERN_START  (FLASHOFF_SEGMENT_DATA + (SEGMENT_COUNT * FLASH_SEG_LENGTH))
-#define FLASHOFF_PATTERN_END    (FLASHOFF_PATTERN_START + (STRAND_COUNT * FLASHLEN_PATTERN))
+#define FLASHOFF_PATTERN_END    (FLASHOFF_PATTERN_START + FLASHLEN_PATTERN)
+#endif
 
 #if (FLASHOFF_PATTERN_END > EEPROM_BYTES)
 #error("Not enough flash space to store external pattern strings");
@@ -94,7 +105,7 @@ void FlashSetSegment(byte segindex)
 {
   valOffset = FLASHOFF_SEGMENT_DATA + (segindex * FLASH_SEG_LENGTH);
 
-  #if (STRAND_COUNT > 1) // logical segments use a single string
+  #if STRANDS_MULTI // logical segments use a single pattern string
   strOffset = FLASHOFF_PATTERN_START + (segindex * FLASHLEN_PATTERN);
   #endif
 }
@@ -176,9 +187,11 @@ void FlashSetProperties(void)
 void FlashStartup(void)
 {
   curPattern = GetFlashValue(FLASH_SEG_PATTERN);
-  if (!curPattern || (!EXTERN_PATTERNS && (curPattern > codePatterns)))
-    curPattern = 1; // starts with 1
-
+  if (!curPattern) curPattern = 1; // starts with 1
+  #if !EXTERN_PATTERNS
+  if (curPattern > codePatterns) curPattern = 1;
+  #endif
+ 
   DBGOUT((F("Flash: pattern=#%d"), curPattern));
 
   byte bright = GetFlashValue(FLASH_SEG_BRIGHTNESS);
@@ -193,13 +206,13 @@ void FlashStartup(void)
   FlashSetProperties();
 }
 
+#if EEPROM_FORMAT
 void FlashFormat(void)
 {
-  #if EEPROM_FORMAT
   for (int i = 0; i < EEPROM_BYTES; ++i) EEPROM.write(i, 0);
   DBGOUT((F("Cleared %d bytes of EEPROM"), EEPROM_BYTES));
-  #endif
 }
+#endif
 
 #endif // (EEPROM_BYTES > 0)
 

@@ -24,7 +24,7 @@ class Bluetooth : public CustomCode
 public:
 
   void setup(void);
-  bool loop(void);
+  void loop(void);
 
   bool setName(char *name);
   bool sendReply(char *instr);
@@ -195,8 +195,7 @@ static void ResponseCB(void)
   if (pAppCmd->execCmd(cmdStr)) CheckExecCmd(cmdStr);
 }
 
-// return true if handling commands externally
-bool Bluetooth::loop(void)
+void Bluetooth::loop(void)
 {
   if ((pixelNutSupport.getMsecs() - msecsConnect) > MSECS_CHECK_CONNECT)
   {
@@ -215,8 +214,6 @@ bool Bluetooth::loop(void)
       DBGOUT((F("BLE read data failed")));
     }
   }
-
-  return false;  // allow for physical controls
 };
 
 #endif // BLUEFRUIT_BLE

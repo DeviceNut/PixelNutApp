@@ -9,8 +9,9 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if (APPCMDS_OVERRIDE && ((STRAND_COUNT <= 1) && (SEGMENT_COUNT > 1)))
+#if (!STRANDS_MULTI && (SEGMENT_COUNT > 1)) // logical segments
 
+#if PIXENGINE_OVERRIDE
 class PixelNutEngineX : public PixelNutEngine
 {
 public:
@@ -28,9 +29,7 @@ public:
       PluginTrack *pTrack = (pluginTracks + i);
       pTrack->disable = (pTrack->segIndex != segindex);
 
-      #if DEBUG_OUTPUT
-      DBGOUT((F("Track %d: segment=%d enable=%d"), i, segindex, pTrack->disable));
-      #endif
+      //DBGOUT((F("Track %d: segment=%d enable=%d"), i, segindex, pTrack->disable));
     }
   }
 };
@@ -39,6 +38,9 @@ PixelNutEngineX pixelNutEngineX   = PixelNutEngineX(pPixelData, PIXEL_COUNT, PIX
 PixelNutEngineX *pPixelNutEngineX = &pixelNutEngineX;
 PixelNutEngine *pPixelNutEngine   = pPixelNutEngineX;
 
+#endif // PIXENGINE_OVERRIDE
+
+// could be called by internal controls
 void SwitchSegments(byte segindex)
 {
   if (segindex < SEGMENT_COUNT)
@@ -50,7 +52,7 @@ void SwitchSegments(byte segindex)
   }
 }
 
-#if EXTERNAL_COMM
+#if (EXTERNAL_COMM && APPCMDS_OVERRIDE)
 
 class AppCommandsX : public AppCommands
 {
@@ -86,14 +88,14 @@ public:
 AppCommandsX appCmdX; // extended class instance
 AppCommands *pAppCmd = &appCmdX;
 
-#endif // EXTERNAL_COMM
+#endif // (EXTERNAL_COMM && APPCMDS_OVERRIDE)
 
 #if BLE_COMM
-class CustomCodeX : public Bluetooth
+class LogicalSegs : public Bluetooth
 #elif WIFI_COMM
-class CustomCodeX : public WiFiNet
+class LogicalSegs : public WiFiNet
 #else
-class CustomCodeX : public CustomCode
+class LogicalSegs : public CustomCode
 #endif
 {
 public:
@@ -118,8 +120,7 @@ private:
   }
 };
 
-CustomCodeX customX;
-CustomCode *pCustomCode = &customX;
+LogicalSegs customSegs;
 
-#endif // (APPCMDS_OVERRIDE && ((STRAND_COUNT <= 1) && (SEGMENT_COUNT > 1)))
+#endif // (!STRANDS_MULTI && (SEGMENT_COUNT > 1))
 //========================================================================================
