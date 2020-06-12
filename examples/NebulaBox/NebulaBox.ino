@@ -39,7 +39,7 @@
                                             // MUST be performed once on new hardware
 
 #define PIXEL_COUNT             300         // standard 5 meter strand of pixels
-#define DPIN_PIXELS             2           // drives output pixel data (@3.3v)
+#define DPIN_PIXELS             2           // drives output pixel data (@5v)
 #define APIN_SEED               A0          // used to seed randomizer
 
 #define STRLEN_PATTERNS         300         // maxlen of pattern strings (including ending 0)
@@ -50,8 +50,5 @@
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)
-
-CustomCode *pCustomCode = &bluetooth; // override custom class with bluetooth handler
-
 //**************************************************************************************************
 

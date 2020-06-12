@@ -39,7 +39,7 @@
 #define MAX_BRIGHTNESS          85          // limit brightness for longer battery life
 #define DELAY_OFFSET            -15         // speed it up a little
 #define PIXEL_COUNT             144         // can support up to 240
-#define DPIN_PIXELS             17          // drives output pixel data (@Vin)
+#define DPIN_PIXELS             17          // drives output pixel data (from battery)
 #define DPIN_LED                13          // on-board red LED for status
 #define DPIN_PATTERN_BUTTON     9           // pattern selection button
 #define DPIN_TRIGGER_BUTTON     11          // trigger control button

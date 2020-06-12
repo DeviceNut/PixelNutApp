@@ -41,7 +41,7 @@
                                             // MUST be performed once on new hardware
 
 #define PIXEL_COUNT             35          // can support up to 64 pixels
-#define DPIN_PIXELS             17          // drives output pixel data (@Vin)
+#define DPIN_PIXELS             17          // drives output pixel data (from battery)
 #define DPIN_LED                5           // off-board red LED for status
 #define APIN_SEED               A0          // used to seed randomizer
 
@@ -53,7 +53,4 @@
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)
-
-CustomCode *pCustomCode = &bluetooth; // override custom class with bluetooth handler
-
 //**************************************************************************************************

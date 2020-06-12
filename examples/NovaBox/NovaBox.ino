@@ -38,7 +38,7 @@
 #define MAX_BRIGHTNESS          100         // allow for the maximum brightness
 #define DELAY_OFFSET            0           // no additional delay needed
 #define PIXEL_COUNT             300         // 5 meter strand of pixels
-#define DPIN_PIXELS             20          // drives output pixel data @3.3v
+#define DPIN_PIXELS             20          // drives output pixel data (@5v)
 #define DPIN_LED                13          // on-board red LED for status
 #define DPIN_PATTERN_BUTTON     2           // preset selection button
 #define DPIN_PAT_BUTTON_PREV    6           // prev pattern select button

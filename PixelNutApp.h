@@ -7,8 +7,8 @@ See license.txt for the terms of this license.
 
 #if defined(ARDUINO)
 #include "includes/defines.h"       // Global Defines
+#include "includes/custom.h"        // Base Custom Class
 #include "includes/globals.h"       // Global Variables
-#include "includes/custom.h"        // Default Custom Code
                                     // Helper Functions:
 #include "includes/leds.h"          // LED Indicator Control
 #include "includes/dbgerr.h"        // Debug/Error Handling
@@ -26,6 +26,7 @@ See license.txt for the terms of this license.
 #include "includes/bright.h"        // Sets global max brightness applied to all effects
 #include "includes/color.h"         // Sets color hue/white properties in pixelnut engine
 #include "includes/count.h"         // Sets pixel count property in pixelnut engine
+#include "includes/custvar.h"       // Sets global reference to custom code handler
                                     // Main Routines:
 #include "includes/main.h"          // setup() and loop() functions
 

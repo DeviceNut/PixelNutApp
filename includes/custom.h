@@ -18,11 +18,7 @@ public:
   virtual void setup(void) {}
   
   // called during loop()
-  virtual bool loop(void)
-  {
-    // return true if handling commands externally
-    return false; // check physical controls
-  }
+  virtual void loop(void) {}
 
   // called in loop() if have new pattern in engine
   virtual void pattern(void) {}
@@ -32,11 +28,6 @@ public:
   virtual bool sendReply(char *instr) { return false; }
 };
 
-#if !CUSTOM_OVERRIDE
-CustomCode customcode;
-CustomCode *pCustomCode = &customcode;
-#else
-extern CustomCode *pCustomCode;
-#endif
+extern CustomCode *pCustomCode; // must be forward declared here
 
 //========================================================================================

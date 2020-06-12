@@ -34,7 +34,7 @@
 #define MAX_BRIGHTNESS          85          // limit brightness for longer battery life
 #define DELAY_OFFSET            20          // additional msecs delay: few pixels
 #define PIXEL_COUNT             32          // can support up to 64 pixels
-#define DPIN_PIXELS             12          // drives output pixel data (@3.3v)
+#define DPIN_PIXELS             12          // drives output pixel data (from battery)
 #define DPIN_PATTERN_BUTTON     3           // pattern select button
 #define DPIN_DELAY_BUTTON       11          // delay select button
 #define DPIN_BRIGHT_BUTTON      2           // brightness select button

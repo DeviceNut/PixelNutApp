@@ -39,10 +39,10 @@
                                             // MUST be performed once on new hardware
 
 #define PIXEL_COUNT             74                      // strip of 53 + 3 rings of 7
-#define SEGMENT_COUNT           4                       // total number of segments
+#define SEGMENT_COUNT           4                       // number of logical segments
 #define SEGMENT_INFO            "0 53 53 7 60 7 67 7"   // segment offsets/lengths: 3 rings
 
-#define DPIN_PIXELS             1           // drives output pixel data (@3.3v)
+#define DPIN_PIXELS             1           // drives output pixel data (from battery)
 #define APIN_SEED               A0          // used to seed randomizer
 
 #define STRLEN_PATTERNS         300         // maxlen of pattern strings (including ending 0)

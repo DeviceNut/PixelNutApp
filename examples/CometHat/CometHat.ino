@@ -35,7 +35,7 @@
 #define EEPROM_FORMAT           0           // MUST be performed once on new hardware
 
 #define PIXEL_COUNT             32          // can support up to 64 pixels with the 32u4
-#define DPIN_PIXELS             12          // drives output pixel data (@3.3v)
+#define DPIN_PIXELS             12          // drives output pixel data (from battery)
 #define APIN_SEED               A0          // used to seed randomizer
 
 #define STRLEN_PATTERNS         100         // maxlen of pattern strings (including ending 0)
@@ -46,8 +46,5 @@
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)
-
-CustomCode *pCustomCode = &bluetooth; // override custom class with bluetooth handler
-
 //**************************************************************************************************
 
