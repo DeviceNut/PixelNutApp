@@ -72,6 +72,10 @@ See license.txt for the terms of this license.
 #define PIXENGINE_OVERRIDE      1           // must extend PixelNutEngine class
 #endif
 
+#if !defined(CUSTOM_CODE)
+#define CUSTOM_CODE             0           // define default value
+#endif
+
 #if !defined(APPCMDS_OVERRIDE)
 #define APPCMDS_OVERRIDE        0           // define default value
 #endif

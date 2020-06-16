@@ -12,6 +12,8 @@ See license.txt for the terms of this license.
 */
 
 #if EXTERN_PATTERNS
+// patterns are sent from external client and stored in flash
+// the pattern number is meaningful only to the client
 
 void GetCurPattern(char *instr)
 {
@@ -23,7 +25,6 @@ void GetCurPattern(char *instr)
 
 void GetCurPattern(char *instr)
 {
-  // check for an internal pattern first
   if ((curPattern > 0) && (curPattern <= codePatterns))
   {
     DBGOUT((F("Copying pattern = #%d"), curPattern));
@@ -32,14 +33,13 @@ void GetCurPattern(char *instr)
     DBGOUT((F("Retrieved pattern %d (len=%d)"), curPattern, strlen(instr)));
     pPixelNutEngine->popPluginStack(); // clear stack to prepare for new cmds
   }
-  // else should never heppen
 }
 
 #endif
 
 #if CUSTOM_PATTERNS
 
-// returns false if fails to find any stored pattern strings
+// never returns if fails to find any stored pattern strings
 void CheckForPatterns(void)
 {
   DBGOUT((F("Read patterns from flash memory")));

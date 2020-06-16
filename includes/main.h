@@ -13,6 +13,27 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
+void DisplayConfiguration(void)
+{
+  DBGOUT((F("Configuration Settings:")));
+  #if !EXTERNAL_COMM
+  DBGOUT((F("  MAX_BRIGHTNESS         = %d"), MAX_BRIGHTNESS));
+  DBGOUT((F("  DELAY_OFFSET           = %d"), DELAY_OFFSET));
+  #endif
+  DBGOUT((F("  PIXEL_COUNT            = %d"), PIXEL_COUNT));
+  DBGOUT((F("  STRANDS_MULTI          = %d"), STRANDS_MULTI));
+  DBGOUT((F("  SEGMENT_COUNT          = %d"), SEGMENT_COUNT));
+  DBGOUT((F("  STRLEN_PATTERNS        = %d"), STRLEN_PATTERNS));
+  DBGOUT((F("  CUSTOM_PATTERNS        = %d"), CUSTOM_PATTERNS));
+  DBGOUT((F("  EXTERN_PATTERNS        = %d"), EXTERN_PATTERNS));
+  DBGOUT((F("  EXTERNAL_COMM          = %d"), EXTERNAL_COMM));
+  DBGOUT((F("  NUM_PLUGIN_TRACKS      = %d"), NUM_PLUGIN_TRACKS));
+  DBGOUT((F("  NUM_PLUGIN_LAYERS      = %d"), NUM_PLUGIN_LAYERS));
+  DBGOUT((F("  FLASHOFF_PATTERN_START = %d"), FLASHOFF_PATTERN_START));
+  DBGOUT((F("  FLASHOFF_PATTERN_END   = %d"), FLASHOFF_PATTERN_END));
+  DBGOUT((F("  EEPROM_FREE_BYTES      = %d"), EEPROM_FREE_BYTES));
+}
+
 #if !MAIN_OVERRIDE
 
 #if !SHOWPIX_OVERRIDE
@@ -61,21 +82,10 @@ void CheckExecCmd(char *instr)
 
 void setup()
 {
-  SetupLEDs(); // status LED: indicate in setup now
-  SetupDebugInterface(); // setup/wait for debug monitor
-  // Note: cannot use debug output until above is used,
+  SetupLED(); // status LED: indicate in setup now
+  SetupDBG(); // setup/wait for debug monitor
+  // Note: cannot use debug output until above is called,
   // meaning DBGOUT() cannot be used in constructors.
-
-  // set seed to value read from unconnected analog port
-  randomSeed(analogRead(APIN_SEED));
-
-  #if (PIXELS_APA && !BLUEFRUIT_BLE)
-  SPI.begin(); // initialize SPI library
-  #endif
-
-  // turn off all pixels
-  memset(pPixelData, 0, (PIXEL_COUNT*3));
-  ShowPixels();
 
   #if EEPROM_FORMAT
   FlashFormat(); // format entire EEPROM
@@ -83,25 +93,20 @@ void setup()
   ErrorHandler(0, 3, true);
   #endif
 
-  DBGOUT((F("Configuration Settings:")));
-  #if !EXTERNAL_COMM
-  DBGOUT((F("  MAX_BRIGHTNESS    = %d"), MAX_BRIGHTNESS));
-  DBGOUT((F("  DELAY_OFFSET      = %d"), DELAY_OFFSET));
-  #endif
-  DBGOUT((F("  PIXEL_COUNT       = %d"), PIXEL_COUNT));
-  DBGOUT((F("  STRANDS_MULTI     = %d"), STRANDS_MULTI));
-  DBGOUT((F("  SEGMENT_COUNT     = %d"), SEGMENT_COUNT));
-  DBGOUT((F("  STRLEN_PATTERNS   = %d"), STRLEN_PATTERNS));
-  DBGOUT((F("  CUSTOM_PATTERNS   = %d"), CUSTOM_PATTERNS));
-  DBGOUT((F("  EXTERN_PATTERNS   = %d"), EXTERN_PATTERNS));
-  DBGOUT((F("  EXTERNAL_COMM     = %d"), EXTERNAL_COMM));
-  DBGOUT((F("  NUM_PLUGIN_TRACKS = %d"), NUM_PLUGIN_TRACKS));
-  DBGOUT((F("  NUM_PLUGIN_LAYERS = %d"), NUM_PLUGIN_LAYERS));
-  DBGOUT((F("  EE_PATTERN_START  = %d"), FLASHOFF_PATTERN_START));
-  DBGOUT((F("  EE_PATTERN_END    = %d"), FLASHOFF_PATTERN_END));
-  DBGOUT((F("  EEPROM_FREE_BYTES = %d"), EEPROM_FREE_BYTES));
+  // set seed to value read from unconnected analog port
+  randomSeed(analogRead(APIN_SEED));
 
-  SetupBrightControls();
+  #if (PIXELS_APA && !BLUEFRUIT_BLE)
+  SPI.begin(); // also called in BluefruitStrs library
+  #endif
+
+  // turn off all pixels
+  memset(pPixelData, 0, (PIXEL_COUNT*3));
+  ShowPixels();
+
+  DisplayConfiguration(); // Display configuration settings
+
+  SetupBrightControls();  // Setup any physical controls present
   SetupDelayControls();
   SetupEModeControls();
   SetupColorControls();

@@ -13,7 +13,7 @@ CustomCode *pCustomCode = &customSegs; // override with segment handler
 CustomCode *pCustomCode = &bluetooth;   // override with bluetooth handler
 #elif WIFI_COMM
 CustomCode *pCustomCode = &wifinet;     // override wifinet handler
-#else
+#elif !CUSTOM_CODE
 CustomCode customcode;
 CustomCode *pCustomCode = &customcode;  // base class handler
 #endif

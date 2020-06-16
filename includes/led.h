@@ -23,7 +23,7 @@ See license.txt for the terms of this license.
 #define TURN_OFF  RGB.control(false)
 #endif
 
-void SetupLEDs(void)
+void SetupLED(void)
 {
   #if defined(DPIN_LED)
   pinMode(DPIN_LED, OUTPUT);

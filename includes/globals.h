@@ -36,7 +36,7 @@ NeoPixelShow *pNeoPixels = &neoPixels;
 SPISettings spiSettings(SPI_SETTINGS_FREQ, MSBFIRST, SPI_MODE0);
 PixelValOrder pixorder = {2,1,0}; // mapping of (RGB) to (BRG) for APA102
 #else
-PixelValOrder pixorder = {1,0,2}; // mapping of (RGB) to (GRB) for WS8218B
+PixelValOrder pixorder = {1,0,2}; // mapping of (RGB) to (GRB) for WS2812B
 #endif
 PixelNutSupport pixelNutSupport = PixelNutSupport((GetMsecsTime)millis, &pixorder);
 

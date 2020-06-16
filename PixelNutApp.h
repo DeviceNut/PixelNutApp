@@ -10,7 +10,7 @@ See license.txt for the terms of this license.
 #include "includes/custom.h"        // Base Custom Class
 #include "includes/globals.h"       // Global Variables
                                     // Helper Functions:
-#include "includes/leds.h"          // LED Indicator Control
+#include "includes/led.h"           // LED Indicator Control
 #include "includes/dbgerr.h"        // Debug/Error Handling
 #include "includes/flash.h"         // Flash Storage Handling
 #include "includes/select.h"        // Preset Patterns Selection
@@ -34,7 +34,7 @@ See license.txt for the terms of this license.
 #include "defines.h"
 #include "globals.h"
 #include "custom.h"
-#include "leds.h"
+#include "led.h"
 #include "dbgerr.h"
 #include "flash.h"
 #include "select.h"

@@ -49,7 +49,7 @@ void MsgFormat(const __FlashStringHelper *str_in_code, ...)
 }
 #endif
 
-void SetupDebugInterface(void)
+void SetupDBG(void)
 {
   // function called from DBGOUT macro
   pixelNutSupport.msgFormat = MsgFormat;
@@ -66,6 +66,10 @@ void SetupDebugInterface(void)
     if (millis() > tout) break;
     BlinkStatusLED(0, 1);
   }
+  #elif defined(ESP32)
+  // wait up to 5 secs for something to be sent from the serial window
+  uint32_t tout = millis() + 5000;
+  while (!Serial.available()) if (millis() > tout) break;
   #else // !SPARK
   // wait up to 5 secs for serial window
   uint32_t tout = millis() + 5000;
@@ -80,7 +84,7 @@ void SetupDebugInterface(void)
 #else
 #define DBG(x)
 #define DBGOUT(x)
-void SetupDebugInterface(void) {}
+void SetupDBG(void) {}
 #endif
 
 // does not return if 'dostop' is true

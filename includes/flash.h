@@ -19,7 +19,7 @@ See license.txt for the terms of this license.
 #define EEPROM_BYTES            2048
 #elif defined(__AVR__)                                // all other AVR processors
 #define EEPROM_BYTES            1024
-#elif defined(ARDUINO_ARCH_ESP32)                     // ESP32
+#elif defined(ESP32)                                  // Espressif ESP32
 #define EEPROM_BYTES            4096
 #else                                                 // disable for unknown processor
 #define EEPROM_BYTES            0
