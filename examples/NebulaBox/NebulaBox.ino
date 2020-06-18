@@ -46,7 +46,7 @@
 #define NUM_PLUGIN_LAYERS       16          // number of plugins that can be combined at once
 #define NUM_PLUGIN_TRACKS       8           // layers that have unique properties (redraw pixels)
 
-#define BLUEFRUIT_BLE           1           // include bluefruit bluetooth handling code
+#define BLE_BLUEFRUIT           1           // include bluefruit bluetooth handling code
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)

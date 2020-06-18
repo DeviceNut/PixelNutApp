@@ -13,7 +13,7 @@ See license.txt for the terms of this license.
 #define DBG(x) x
 #define DBGOUT(x) MsgFormat x
 
-#if defined(SPARK)
+#if defined(SPARK) || defined(ESP32)
 #undef F
 #define F(x) x
 #endif
@@ -25,7 +25,7 @@ See license.txt for the terms of this license.
 char fmtstr[MAXLEN_FMTSTR];   // holds debug format string
 char outstr[MAXLEN_DBGSTR];   // holds debug output string
 
-#if defined(SPARK)
+#if defined(SPARK) || defined(ESP32)
 void MsgFormat(const char *fmtstr, ...)
 {
   va_list va;

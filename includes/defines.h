@@ -12,6 +12,10 @@ See license.txt for the terms of this license.
 #define PREFIX_DEVICE_NAME      "P!"        // for name to be recognized
 #define PREFIX_LEN_DEVNAME      2           // length of this prefix
 
+#if !defined(DEBUG_SIGNON)
+#define DEBUG_SIGNON            DEFAULT_DEVICE_NAME
+#endif
+
 #if !PIXELS_APA
 #define PIXELS_APA              0           // define default value
 #endif
@@ -34,7 +38,7 @@ See license.txt for the terms of this license.
 #define MAX_BRIGHTNESS          100         // default is to allow for maximum brightness
 #endif
 
-#if BLUEFRUIT_BLE
+#if BLE_BLUEFRUIT
 #if defined(__AVR_ATmega32U4__)
 #define BLUEFRUIT_SPI_CS        8           // assign pins for Bluefruit Micro
 #define BLUEFRUIT_SPI_IRQ       7           // ** hardcoded for this module **
@@ -47,7 +51,7 @@ See license.txt for the terms of this license.
 #define BLE_COMM                1           // using bluetooth BLE
 #endif
 
-#if PARTICLE_WIFI
+#if (WIFI_PARTICLE || WIFI_ESP32)
 #define WIFI_COMM               1           // using WiFi
 #endif
 

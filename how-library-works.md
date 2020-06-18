@@ -16,9 +16,7 @@ Built-in Classes
 
 There are two defined classes in this library: 'CustomCode' and 'AppCommands'.
 
-The former doesn't do anything by default, but allows adding custom functionality to the 'setup()' and 'loop()' routines without having to override the entire function, and is in fact used by the bluetooth code in 'bluetooth.h'.
-
-The latter handles communications with an external client (phone app or browser) when using bluetooth or WiFi. It is called by routines in 'bluetooth.h' or "wifi.h", and is extended by code in 'segments.h' to provide support for multiple logical segments.
+The former doesn't do anything by default, but allows adding custom functionality to the 'setup()' and 'loop()' routines without having to override the entire function, and is in fact used by the bluetooth code in 'ble-bluefruit.h and wifi-esp32.h'. These handle communications with an external client (phone app or browser) when using bluetooth or WiFi. It is extended by code in 'segments.h' to provide support for multiple logical segments.
 
 
 Main Control Defines

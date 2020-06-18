@@ -9,7 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if BLUEFRUIT_BLE
+#if BLE_BLUEFRUIT
 
 #include <SPI.h>
 
@@ -216,5 +216,5 @@ void Bluetooth::loop(void)
   }
 };
 
-#endif // BLUEFRUIT_BLE
+#endif // BLE_BLUEFRUIT
 //========================================================================================

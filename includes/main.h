@@ -13,6 +13,11 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
+// Blink patterns (long, short):
+// 0,1  waiting for debugger
+// 0,2  once: startup successful
+// 0,3  EEPROM format finished
+
 void DisplayConfiguration(void)
 {
   DBGOUT((F("Configuration Settings:")));
@@ -93,18 +98,23 @@ void setup()
   ErrorHandler(0, 3, true);
   #endif
 
-  // set seed to value read from unconnected analog port
-  randomSeed(analogRead(APIN_SEED));
+  DisplayConfiguration(); // Display configuration settings
 
-  #if (PIXELS_APA && !BLUEFRUIT_BLE)
+  #if (PIXELS_APA && !BLE_BLUEFRUIT)
   SPI.begin(); // also called in BluefruitStrs library
+  #endif
+
+  #if defined(ESP32)
+  if (!pNeoPixels->rmtInit(0, PIXEL_COUNT*3))
+  {
+    DBGOUT((F("Alloc failed for RMT data")));
+    ErrorHandler(1, 0, true);
+  }
   #endif
 
   // turn off all pixels
   memset(pPixelData, 0, (PIXEL_COUNT*3));
   ShowPixels();
-
-  DisplayConfiguration(); // Display configuration settings
 
   SetupBrightControls();  // Setup any physical controls present
   SetupDelayControls();
@@ -120,6 +130,13 @@ void setup()
   CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
 
   pCustomCode->setup();   // custom initialization here (external communications setup)
+
+  #if defined(ESP32)
+  randomSeed(esp_random()); // should be called after BLE/WiFi started
+  #else
+  // set seed to value read from unconnected analog port
+  randomSeed(analogRead(APIN_SEED));
+  #endif
 
   BlinkStatusLED(0, 2);   // indicate success
   DBGOUT((F("** Setup complete **")));

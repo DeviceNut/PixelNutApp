@@ -291,7 +291,7 @@ protected:
 
 #if !APPCMDS_OVERRIDE
 AppCommands appCmd; // create instance of AppCommands to handle user commands
-AppCommands *pAppCmd = &appCmd; // pointer used in (bluetooth.h, ethernet.h)
+AppCommands *pAppCmd = &appCmd; // pointer used by communications classes
 #else
 extern AppCommands *pAppCmd;
 #endif

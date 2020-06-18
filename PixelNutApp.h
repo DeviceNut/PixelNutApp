@@ -15,8 +15,9 @@ See license.txt for the terms of this license.
 #include "includes/flash.h"         // Flash Storage Handling
 #include "includes/select.h"        // Preset Patterns Selection
 #include "includes/appcmds.h"       // Application Commands
-#include "includes/particle-wifi.h" // Particle WiFi
-#include "includes/bluefruit-ble.h" // Bluefriuit Bluetooth
+#include "includes/wifi-esp32.h"    // WiFi using ESP32 
+#include "includes/wifi-particle.h" // WiFi using Particle 
+#include "includes/ble-bluefruit.h" // Bluefriuit Bluetooth
 #include "includes/segments.h"      // Logical Segment Support
                                     // Physical Controls:
 #include "includes/pattern.h"       // Sets the current preset pattern string
