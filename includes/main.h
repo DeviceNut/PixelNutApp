@@ -24,6 +24,7 @@ void DisplayConfiguration(void)
   #if !EXTERNAL_COMM
   DBGOUT((F("  MAX_BRIGHTNESS         = %d"), MAX_BRIGHTNESS));
   DBGOUT((F("  DELAY_OFFSET           = %d"), DELAY_OFFSET));
+  DBGOUT((F("  DELAY_RANGE            = %d"), DELAY_RANGE));
   #endif
   DBGOUT((F("  PIXEL_COUNT            = %d"), PIXEL_COUNT));
   DBGOUT((F("  STRANDS_MULTI          = %d"), STRANDS_MULTI));

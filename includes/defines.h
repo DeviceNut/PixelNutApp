@@ -38,6 +38,14 @@ See license.txt for the terms of this license.
 #define MAX_BRIGHTNESS          100         // default is to allow for maximum brightness
 #endif
 
+#if !defined(DELAY_OFFSET)
+#define DELAY_OFFSET            0           // default is no additional delay
+#endif
+
+#if !defined(DELAY_RANGE)
+#define DELAY_RANGE             60          // default is to allow for maximum brightness
+#endif
+
 #if BLE_BLUEFRUIT
 #if defined(__AVR_ATmega32U4__)
 #define BLUEFRUIT_SPI_CS        8           // assign pins for Bluefruit Micro

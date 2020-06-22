@@ -42,7 +42,7 @@ Defines for Hardware Controls
 
 'MAX_BRIGHTNESS' sets the maximum percentage that the user can achieve with any hardware control, useful for projects are powered from batteries, to extend the time before power is lost. See the file "bright.h" for that code.
 
-'DELAY_OFFSET' is used to adjust the default delay/speed of the animations, and will raise or lower the entire range of delay presets. This is only used on products with physical controls.
+'DELAY_OFFSET' is used to adjust the default delay/speed of the animations, and will raise or lower the entire range of delay presets. 'DELAY_RANGE' specifies the maximum range for the delay value. These are only used on products with physical controls.
 
 This is used to compensate for processor speed and the number of pixels that are being displayed (which takes longer). See the file 'delay.h' for that code.
 
