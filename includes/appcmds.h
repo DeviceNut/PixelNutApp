@@ -65,7 +65,7 @@ public:
 
             outstr[0] = 0;
             for (int j = 0; j < FLASH_SEG_LENGTH; ++j)
-              AddNumToStr(outstr, GetFlashValue(j));
+              AddNumToStr(outstr, FlashGetValue(j));
 
             DBGOUT((F("FlashVals[%d]: %s"), i, outstr));
 

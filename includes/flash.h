@@ -112,7 +112,7 @@ static void FlashDone(void)
 }
 
 static void FlashSetValue(uint16_t offset, byte value) { EEPROM.write(valOffset + offset, value); }
-static byte FlashGetValue(uint16_t offset) { return EEPROM.read(valOffset + offset); }
+       byte FlashGetValue(uint16_t offset) { return EEPROM.read(valOffset + offset); }
 
 // Note: this is not range checked
 void FlashSetSegment(byte segindex)
