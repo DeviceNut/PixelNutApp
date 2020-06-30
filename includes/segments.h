@@ -58,7 +58,7 @@ class AppCommandsX : public AppCommands
 {
 public:
 
-  virtual bool cmdHandler(char *instr)
+  bool cmdHandler(char *instr)
   {
     //DBGOUT((F("CmdHandlerX: \"%s\""), instr));
 
