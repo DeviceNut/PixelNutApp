@@ -11,29 +11,28 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if EXTERN_PATTERNS
-// patterns are sent from external client and stored in flash
-// the pattern number is meaningful only to the client
-
 void GetCurPattern(char *instr)
 {
-  FlashGetStr(instr);
-  DBGOUT((F("Retrieved pattern #%d"), curPattern));
-}
-
-#elif CUSTOM_PATTERNS
-
-void GetCurPattern(char *instr)
-{
+  #if CUSTOM_PATTERNS
   if ((curPattern > 0) && (curPattern <= codePatterns))
   {
     strcpy_P(instr, customPatterns[curPattern-1]);
-    DBGOUT((F("Retrieved pattern #%d"), curPattern));
+    DBGOUT((F("Retrieved custom pattern #%d"), curPattern));
     pPixelNutEngine->popPluginStack(); // clear stack to prepare for new cmds
   }
+  #endif
+  #if EXTERN_PATTERNS
+  #if CUSTOM_PATTERNS
+  else
+  #endif
+  {
+    // patterns are sent from external client and stored in flash
+    // the pattern number is meaningful only to the client
+    FlashGetStr(instr);
+    DBGOUT((F("Retrieved external pattern #%d"), curPattern));
+  }
+  #endif
 }
-
-#endif
 
 #if CUSTOM_PATTERNS
 
@@ -77,10 +76,10 @@ void GetPrevPattern(void)
   GetCurPattern(cmdStr);
 }
 
-#else
+#else // !CUSTOM_PATTERNS
 
 void CheckForPatterns(void) {}
 
-#endif // CUSTOM_PATTERNS
+#endif
 
 //========================================================================================
