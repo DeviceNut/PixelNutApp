@@ -20,11 +20,11 @@ See license.txt for the terms of this license.
 #endif
 
 // no repeating allowed, but use single/long press for pattern change/save
-UIDeviceButton bc_pattern(DPIN_PATTERN_BUTTON, DO_DOUBLE_CLICK);
+UIDeviceButton bc_pattern(DPIN_PATTERN_BUTTON, DO_DOUBLE_CLICK, true);
 
 #if defined(DPIN_PAT_BUTTON_PREV)
 // no repeating allowed, but use single/long press for pattern change/save
-UIDeviceButton bc_pat_prev(DPIN_PAT_BUTTON_PREV, DO_DOUBLE_CLICK);
+UIDeviceButton bc_pat_prev(DPIN_PAT_BUTTON_PREV, DO_DOUBLE_CLICK, true);
 #endif
 
 static void CheckPatternButton(void)

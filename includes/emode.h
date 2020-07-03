@@ -18,7 +18,7 @@ static void SetExternMode(bool enable)
 }
 
 // don't allow double-click, repeating, or long press
-UIDeviceButton bc_emode(DPIN_EMODE_BUTTON, false, false, false);
+UIDeviceButton bc_emode(DPIN_EMODE_BUTTON);
 static bool emode = false; // start with extern mode off
 
 static void CheckEModeButton(void)

@@ -22,7 +22,7 @@ static void SetCountByPercent(byte percent)
 #if defined(DPIN_COUNT_BUTTON)
 
 // allow repeating and long press, but not double-click
-UIDeviceButton bc_count(DPIN_COUNT_BUTTON, false, true);
+UIDeviceButton bc_count(DPIN_COUNT_BUTTON, false, true, true);
 
 static byte count_pos = 2; // default setting
 static byte count_presets[] = { 0, 25, 50, 75, 100 }; // percentages

@@ -24,7 +24,7 @@ static void SetMaxBrightness(byte brightness)
 #if defined(DPIN_BRIGHT_BUTTON)
 
 // allow repeating and long press, but not double-click
-UIDeviceButton bc_bright(DPIN_BRIGHT_BUTTON, false, true);
+UIDeviceButton bc_bright(DPIN_BRIGHT_BUTTON, false, true, true);
 
 static byte bright_pos = 2; // default setting
 static byte bright_presets[] = { 40, 55, 70, 85, 100 }; // percentages

@@ -12,7 +12,7 @@ See license.txt for the terms of this license.
 #if defined(DPIN_TRIGGER_BUTTON)
 
 // no double-click, repeating, or long press
-UIDeviceButton bc_trigger(DPIN_TRIGGER_BUTTON, false, false, false);
+UIDeviceButton bc_trigger(DPIN_TRIGGER_BUTTON);
 
 #if defined(APIN_TRIGGER_POT)
 // allow headroom on output value to insure can reach min/max

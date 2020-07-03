@@ -24,7 +24,7 @@ static void SetDelayOffset(int8_t msecs = 0)
 #if defined(DPIN_DELAY_BUTTON)
 
 // allow repeating and long press, but not double-click
-UIDeviceButton bc_delay(DPIN_DELAY_BUTTON, false, true);
+UIDeviceButton bc_delay(DPIN_DELAY_BUTTON, false, true, true);
 
 static byte delay_pos = 2; // default setting
 static int8_t delay_presets[] = { 30, 15, 0, -15, -30 };
