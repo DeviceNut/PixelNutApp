@@ -6,8 +6,6 @@
 // circuit board along with a battery charger from Adafruit (www.adafruit.com),
 // powered by a 2000 mA lithium battery, installed inside a mason jar with 2
 // buttons and attached to a meter strand of WS2812B LEDs.
-//
-// To purchase one of these products: www.devicenut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -47,9 +45,8 @@
 
 #define PATTERN_OVERRIDE        1           // creates its own patterns
 #define MAIN_OVERRIDE           1           // has its own setup/loop
+#define XAPP_FIREFLY            1           // enables extended code
 
+//**************************************************************************************************
 #include <PixelNutApp.h>                    // Devicenut's PixelNutApp Library (common application code)
-
-#include "FireFly.h"                        // custom code for this implementation
-
 //**************************************************************************************************

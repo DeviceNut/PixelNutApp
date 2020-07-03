@@ -16,7 +16,6 @@ See license.txt for the terms of this license.
 #include "includes/select.h"        // Preset Patterns Selection
 #include "includes/appcmds.h"       // Application Commands
 #include "includes/wifi-esp32.h"    // WiFi using ESP32 
-#include "includes/wifi-particle.h" // WiFi using Particle 
 #include "includes/ble-bluefruit.h" // Bluefriuit Bluetooth
 #include "includes/segments.h"      // Logical Segment Support
                                     // Physical Controls:
@@ -30,6 +29,8 @@ See license.txt for the terms of this license.
 #include "includes/custvar.h"       // Sets global reference to custom code handler
                                     // Main Routines:
 #include "includes/main.h"          // setup() and loop() functions
+                                    // Extended Applications (with setup/loop):
+#include "includes/xapp_firefly.h"  // FireFly - uses accelerometer
 
 #elif defined(SPARK)
 #include "defines.h"
@@ -40,7 +41,7 @@ See license.txt for the terms of this license.
 #include "flash.h"
 #include "select.h"
 #include "appcmds.h"
-#include "particle-wifi.h"
+#include "wifi-particle.h"
 #include "segments.h"
 #include "pattern.h"
 #include "trigger.h"
@@ -49,5 +50,6 @@ See license.txt for the terms of this license.
 #include "bright.h"
 #include "color.h"
 #include "count.h"
+#include "custvar.h"
 #include "main.h"
 #endif

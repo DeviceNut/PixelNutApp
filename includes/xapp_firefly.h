@@ -1,6 +1,13 @@
 //*********************************************************************************************
 // Custom Setup & Loop routines for the FireFly configuration.
 //*********************************************************************************************
+/*
+Copyright (c) 2015-2020, Greg de Valois
+Software License Agreement (BSD License)
+See license.txt for the terms of this license.
+*/
+
+#ifdef XAPP_FIREFLY
 
 // Patterns used:
 // 1) when at rest - purple swelling, with triggered orange comets
@@ -500,8 +507,8 @@ static void CheckExecCmd(char *instr)
 
 void setup(void)
 {
-  SetupLED(); // status LED: indicate in setup now
-  SetupDBG(); // setup/wait for debug monitor
+  SetupLED();             // status LED: indicate in setup now
+  SetupDBG();             // setup/wait for debug monitor
 
   AccelerometerInit();    // initialize particular accelerometer being used
   CalibrateValues();      // calibrate to compensate for gravity/orientation
@@ -509,6 +516,8 @@ void setup(void)
   CheckForPatterns();     // check for internal patterns, fail if none and required
   GetCurPattern(cmdStr);  // get pattern string corresponding to that pattern number
   CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
+
+  randomSeed(analogRead(APIN_SEED)); // set seed to value read from unconnected analog port
 
   BlinkStatusLED(0, 2);   // indicate success
   DBGOUT((F("** Setup complete **")));
@@ -652,4 +661,5 @@ void loop(void)
     pNeoPixels->show(pPixelData, (PIXEL_COUNT*3));
 }
 
+#endif // XAPP_FIREFLY
 //*********************************************************************************************

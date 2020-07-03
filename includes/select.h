@@ -39,7 +39,7 @@ void GetCurPattern(char *instr)
 // never returns if fails to find any stored pattern strings
 void CheckForPatterns(void)
 {
-  DBGOUT((F("Read all stored patterns:")));
+  DBGOUT((F("Stored Patterns:")));
 
   codePatterns = 0;
   for (int i = 0; ; ++i)

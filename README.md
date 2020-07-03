@@ -23,7 +23,7 @@ The following are features actively being worked on:
 
 2) Advanced pattern creation with both phone app and browser.
 
-3) Support for hardware input devices such as accelerometers, gyroscopes, range finders, microphones, and solar cells.
+3) Support for additional hardware input devices such as range finders, microphones, and solar cells.
 
 
 
