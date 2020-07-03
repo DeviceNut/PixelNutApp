@@ -4,8 +4,6 @@
 // This application is built specifically for the "Meteor Hat" PixelNut! products:
 // A Feather 32u4 processor module from Adafruit (www.adafruit.com), mounted on a hat
 // with a strand of WS2812B LEDs, powered by a battery, and uses 3 buttons for control.
-//
-// To purchase one of these products: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU

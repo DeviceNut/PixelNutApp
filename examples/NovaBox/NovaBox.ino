@@ -4,8 +4,6 @@
 // This application is built specifically for the "Nova Box" PixelNut! product:
 // A Teensy 3.2 processor module from PJRC (www.pjrc.com), in a box with an physical
 // controls, powered from an adapter, and attached to a strand of 300 WS2812B LEDs.
-//
-// To purchase one of these products: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU

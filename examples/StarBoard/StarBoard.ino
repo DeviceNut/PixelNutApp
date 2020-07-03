@@ -6,8 +6,6 @@
 // circuit board along with a battery charger and Bluefruit LE SPI Friend module
 // from Adafruit (www.adafruit.com), powered by a 2000-2500 mA lithium battery,
 // and attached to a 1 meter strand of 144 WS2812B LEDs.
-//
-// To purchase one of these products: www.pixelnut.io
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU
