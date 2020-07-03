@@ -225,7 +225,7 @@ void FlashStartup(void)
   DBGOUT((F("Flash: pattern=#%d"), curPattern));
 
   byte bright = FlashGetValue(FLASH_SEG_BRIGHTNESS);
-  if (bright == 0) FlashSetValue(FLASH_SEG_BRIGHTNESS, bright=60); // set to 60% if cleared
+  if (bright == 0) FlashSetValue(FLASH_SEG_BRIGHTNESS, bright=MAX_BRIGHTNESS); // set to max if 0
 
   pPixelNutEngine->setMaxBrightness(bright);
   pPixelNutEngine->setDelayOffset((int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS)); // 8-bit signed int

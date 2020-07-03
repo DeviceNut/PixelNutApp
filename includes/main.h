@@ -20,7 +20,7 @@ See license.txt for the terms of this license.
 
 void DisplayConfiguration(void)
 {
-  DBGOUT((F("Configuration Settings:")));
+  DBGOUT((F("Configuration:")));
   #if !EXTERNAL_COMM
   DBGOUT((F("  MAX_BRIGHTNESS         = %d"), MAX_BRIGHTNESS));
   DBGOUT((F("  DELAY_OFFSET           = %d"), DELAY_OFFSET));
@@ -111,19 +111,15 @@ void setup()
     DBGOUT((F("Alloc failed for RMT data")));
     ErrorHandler(1, 0, true);
   }
+  randomSeed(esp_random()); // should be called after BLE/WiFi started
+  #else
+  // set seed to value read from unconnected analog port
+  randomSeed(analogRead(APIN_SEED));
   #endif
 
   // turn off all pixels
   memset(pPixelData, 0, (PIXEL_COUNT*3));
   ShowPixels();
-
-  SetupBrightControls();  // Setup any physical controls present
-  SetupDelayControls();
-  SetupEModeControls();
-  SetupColorControls();
-  SetupCountControls();
-  SetupTriggerControls();
-  SetupPatternControls();
 
   CheckForPatterns();     // check for internal patterns, fail if none and required
   FlashStartup();         // get curPattern and settings from flash, set engine properties
@@ -132,12 +128,13 @@ void setup()
 
   pCustomCode->setup();   // custom initialization here (external communications setup)
 
-  #if defined(ESP32)
-  randomSeed(esp_random()); // should be called after BLE/WiFi started
-  #else
-  // set seed to value read from unconnected analog port
-  randomSeed(analogRead(APIN_SEED));
-  #endif
+  SetupBrightControls();  // Setup any physical controls present
+  SetupDelayControls();
+  SetupEModeControls();
+  SetupColorControls();
+  SetupCountControls();
+  SetupTriggerControls();
+  SetupPatternControls();
 
   BlinkStatusLED(0, 2);   // indicate success
   DBGOUT((F("** Setup complete **")));
