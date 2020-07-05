@@ -9,7 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if PARTICLE_WIFI
+#if WIFI_PARTICLE
 
 extern void CheckExecCmd(char *instr); // defined in main.h
 
@@ -21,9 +21,13 @@ SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 #define PARTICLE_PRODUCT_VER 1
-#if PARTICLE_PRODUCT_ID
+#if defined(PARTICLE_PRODUCT_ID)
 PRODUCT_ID(PARTICLE_PRODUCT_ID);
 PRODUCT_VERSION(PARTICLE_PRODUCT_VER);
+#endif
+
+#if !defined(USE_WIFI_SOFTAP)
+#define USE_WIFI_SOFTAP 0
 #endif
 
 // Blink patterns (long, short):
@@ -105,10 +109,10 @@ static char vstrSegsInfo[100];                // holds segment string for variab
 static char vstrSegsVals[SEGMENT_COUNT][100]; // holds segment strings for variables with prefix PNUT_VARNAME_SEGINFO_PFX
 static bool segStrFirst = true;               // false after first segment info string is retrieved
 #endif
-static short segmentCount = 0;                // >=0 for state of retrieving segment info strings
+static short segmentCount = -1;               // >=0 for state of retrieving segment info strings
 
 #if EEPROM_FORMAT
-#if USE_PARTICLE_NAME
+#if defined(USE_PARTICLE_NAME) && USE_PARTICLE_NAME
 static char* deviceName = (char*)PREFIX_DEVICE_NAME "Photon"; // needed to be recognized by Particle (after prefix removed)
 #else
 static char* deviceName = (char*)DEFAULT_DEVICE_NAME;
@@ -738,7 +742,6 @@ static boolean SetupCloud(void)
 
   SetVariable(PNUT_VARNAME_NETWORKS, vstrNetworks);
 
-  segmentCount = -1;
   dataString[0] = 0;
   pAppCmd->execCmd((char*)"?"); // get main configuration strings
   strcpy(vstrConfigInfo, dataString);
@@ -789,7 +792,7 @@ public:
     setName(deviceName); // override device name
 
     SetNetwork((char*)""); // clear all networks
-    #if DEFAULT_WIFI_INFO
+    #if defined(DEFAULT_WIFI_INFO) && DEFAULT_WIFI_INFO
     SetNetwork(DEFAULT_WIFI_INFO); // set default network
     #endif
   }
@@ -809,7 +812,7 @@ public:
     Time.timeStr().getBytes(instr, 100);
     DBGOUT((F("  Time=%s"), instr));
 
-    #if PARTICLE_PRODUCT_ID
+    #if defined(PARTICLE_PRODUCT_ID) && defined(PARTICLE_PRODUCT_VER)
     DBGOUT((F("Product ID:  %d"), PARTICLE_PRODUCT_ID));
     DBGOUT((F("Product Ver: %d"), PARTICLE_PRODUCT_VER));
     #endif
@@ -897,6 +900,5 @@ public:
 WiFiNet wifinet;
 
 } // namespace
-
-#endif // PARTICLE_WIFI
+#endif // WIFI_PARTICLE
 //========================================================================================
