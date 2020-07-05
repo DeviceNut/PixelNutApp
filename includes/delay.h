@@ -58,9 +58,9 @@ static void SetupDelay(void)
 #elif defined(APIN_DELAY_POT)
 
 // we define this so that the animation gets faster when increasing the pot
-#if DELAY_POT_BACKWARDS // if wired the pot backwards
+#if defined(DELAY_POT_BACKWARDS) && DELAY_POT_BACKWARDS
 UIDeviceAnalog pc_delay(APIN_DELAY_POT, -DELAY_RANGE, DELAY_RANGE);
-#else
+#else // default is not wired backwards
 UIDeviceAnalog pc_delay(APIN_DELAY_POT, DELAY_RANGE, -DELAY_RANGE);
 #endif
 

@@ -7,17 +7,17 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if LED_ACTIVE_LOW
+#if defined(DPIN_LED)
+#if defined(LED_ACTIVE_LOW) && LED_ACTIVE_LOW
 #define LED_ON    LOW
 #define LED_OFF   HIGH
-#else
+#else // default is active high
 #define LED_ON    HIGH
 #define LED_OFF   LOW
 #endif
-
-#if defined(DPIN_LED)
 #define LED_TURN_ON   digitalWrite(DPIN_LED, LED_ON)
 #define LED_TURN_OFF  digitalWrite(DPIN_LED, LED_OFF)
+
 #elif defined(SPARK)
 #define LED_TURN_ON   RGB.control(true); RGB.color(255,0,0)
 #define LED_TURN_OFF  RGB.control(false)

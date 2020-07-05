@@ -29,19 +29,15 @@ See license.txt for the terms of this license.
 #if !defined(PIXEL_OFFSET)
 #define PIXEL_OFFSET            0           // start drawing at the first pixel
 #endif
-
 #if !defined(DIRECTION_UP)
 #define DIRECTION_UP            true        // draw from start to end by default
 #endif
-
 #if !defined(MAX_BRIGHTNESS)
 #define MAX_BRIGHTNESS          100         // default is to allow for maximum brightness
 #endif
-
 #if !defined(DELAY_OFFSET)
 #define DELAY_OFFSET            0           // default is no additional delay
 #endif
-
 #if !defined(DELAY_RANGE)
 #define DELAY_RANGE             60          // default is to allow for maximum brightness
 #endif
@@ -61,6 +57,13 @@ See license.txt for the terms of this license.
 
 #if (WIFI_PARTICLE || WIFI_ESP32)
 #define WIFI_COMM               1           // using WiFi
+#endif
+
+#if !defined(BLE_COMM)
+#define BLE_COMM                0          // default is no bluetooth
+#endif
+#if !defined(WIFI_COMM)
+#define WIFI_COMM                0         // default is no wifi
 #endif
 
 #if (BLE_COMM || WIFI_COMM)
@@ -87,13 +90,17 @@ See license.txt for the terms of this license.
 #if !defined(CUSTOM_CODE)
 #define CUSTOM_CODE             0           // define default value
 #endif
-
 #if !defined(APPCMDS_OVERRIDE)
 #define APPCMDS_OVERRIDE        0           // define default value
 #endif
-
+#if !defined(SHOWPIX_OVERRIDE)
+#define SHOWPIX_OVERRIDE        0           // define default value
+#endif
 #if !defined(PIXENGINE_OVERRIDE)
 #define PIXENGINE_OVERRIDE      0           // define default value
+#endif
+#if !defined(PLUGINS_OVERRIDE)
+#define PLUGINS_OVERRIDE        0           // define default value
 #endif
 
 #if !defined(CUSTOM_PATTERNS)

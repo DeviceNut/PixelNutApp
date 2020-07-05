@@ -59,9 +59,9 @@ void SetupBrightness(void)
 // cannot use brightness button AND a pot
 #elif defined(APIN_BRIGHT_POT)
 
-#if BRIGHT_POT_BACKWARDS // if wired the pot backwards
+#if defined(BRIGHT_POT_BACKWARDS) && BRIGHT_POT_BACKWARDS
 UIDeviceAnalog pc_bright(APIN_BRIGHT_POT, MAX_PERCENTAGE, 0);
-#else
+#else // default is not wired backwards
 // allow headroom on output value to insure can reach max
 UIDeviceAnalog pc_bright(APIN_BRIGHT_POT, 0, MAX_PERCENTAGE+10);
 #endif
