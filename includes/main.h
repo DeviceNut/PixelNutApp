@@ -40,7 +40,7 @@ void DisplayConfiguration(void)
   DBGOUT((F("  EEPROM_FREE_BYTES      = %d"), EEPROM_FREE_BYTES));
 }
 
-#if !MAIN_OVERRIDE
+#if !(defined(MAIN_OVERRIDE) && MAIN_OVERRIDE)
 
 #if !SHOWPIX_OVERRIDE
 void ShowPixels(void)
@@ -161,5 +161,5 @@ void loop()
   if (doUpdate && pPixelNutEngine->updateEffects()) ShowPixels();
 }
 
-#endif
+#endif // !MAIN_OVERRIDE
 //*********************************************************************************************

@@ -21,6 +21,13 @@ extern const char* const customPhelp[];
 extern const char* const customPatterns[];
 #endif
 
+#if !defined(SHOWPIX_OVERRIDE)
+#define SHOWPIX_OVERRIDE        0           // define default value
+#endif
+#if !PIXELS_APA
+#define PIXELS_APA              0           // define default value
+#endif
+
 #if !SHOWPIX_OVERRIDE
 byte pixelArray[PIXEL_COUNT*3];             // static allocation of pixel strip
 byte *pPixelData = pixelArray;
@@ -40,18 +47,18 @@ PixelValOrder pixorder = {1,0,2}; // mapping of (RGB) to (GRB) for WS2812B
 #endif
 PixelNutSupport pixelNutSupport = PixelNutSupport((GetMsecsTime)millis, &pixorder);
 
-#if !PIXENGINE_OVERRIDE
+#if defined(PIXENGINE_OVERRIDE) && PIXENGINE_OVERRIDE
+extern PixelNutEngine *pPixelNutEngine;
+#else
 PixelNutEngine pixelNutEngine = PixelNutEngine(pPixelData, PIXEL_COUNT, PIXEL_OFFSET, DIRECTION_UP, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
 PixelNutEngine *pPixelNutEngine = &pixelNutEngine;
-#else
-extern PixelNutEngine *pPixelNutEngine;
 #endif
 
-#if !PLUGINS_OVERRIDE
+#if defined(PLUGINS_OVERRIDE) && PLUGINS_OVERRIDE
+extern PluginFactory *pPluginFactory;
+#else
 PluginFactory pluginFactory = PluginFactory();
 PluginFactory *pPluginFactory = &pluginFactory;
-#else
-extern PluginFactory *pPluginFactory;
 #endif
 
 //========================================================================================

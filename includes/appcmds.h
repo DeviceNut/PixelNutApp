@@ -289,11 +289,11 @@ protected:
   }
 };
 
-#if !APPCMDS_OVERRIDE
+#if defined(APPCMDS_OVERRIDE) && APPCMDS_OVERRIDE
+extern AppCommands *pAppCmd;
+#else
 AppCommands appCmd; // create instance of AppCommands to handle user commands
 AppCommands *pAppCmd = &appCmd; // pointer used by communications classes
-#else
-extern AppCommands *pAppCmd;
 #endif
 
 #endif // EXTERNAL_COMM

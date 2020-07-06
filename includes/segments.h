@@ -11,7 +11,7 @@ See license.txt for the terms of this license.
 
 #if (!STRANDS_MULTI && (SEGMENT_COUNT > 1)) // logical segments
 
-#if PIXENGINE_OVERRIDE
+#if defined(PIXENGINE_OVERRIDE) && PIXENGINE_OVERRIDE
 class PixelNutEngineX : public PixelNutEngine
 {
 public:
@@ -52,7 +52,7 @@ void SwitchSegments(byte segindex)
   }
 }
 
-#if (EXTERNAL_COMM && APPCMDS_OVERRIDE)
+#if (EXTERNAL_COMM && defined(APPCMDS_OVERRIDE) && APPCMDS_OVERRIDE)
 
 class AppCommandsX : public AppCommands
 {

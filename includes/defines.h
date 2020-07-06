@@ -16,10 +16,6 @@ See license.txt for the terms of this license.
 #define DEBUG_SIGNON            DEFAULT_DEVICE_NAME
 #endif
 
-#if !PIXELS_APA
-#define PIXELS_APA              0           // define default value
-#endif
-
 #if PIXELS_APA
 #if !defined(SPI_SETTINGS_FREQ)
 #define SPI_SETTINGS_FREQ       4000000     // use fastest speed by default
@@ -58,18 +54,16 @@ See license.txt for the terms of this license.
 #if (WIFI_PARTICLE || WIFI_ESP32)
 #define WIFI_COMM               1           // using WiFi
 #endif
-
 #if !defined(BLE_COMM)
-#define BLE_COMM                0          // default is no bluetooth
+#define BLE_COMM                0           // default is no bluetooth
 #endif
 #if !defined(WIFI_COMM)
-#define WIFI_COMM                0         // default is no wifi
+#define WIFI_COMM               0           // default is no wifi
 #endif
 
 #if (BLE_COMM || WIFI_COMM)
 #define EXTERNAL_COMM           1           // external communications
 #endif
-
 #if !EXTERNAL_COMM
 #define EXTERNAL_COMM           0           // define default value
 #endif
@@ -77,7 +71,6 @@ See license.txt for the terms of this license.
 #if !defined(STRANDS_MULTI)
 #define STRANDS_MULTI           0           // have a single strand
 #endif
-
 #if !defined(SEGMENT_COUNT)
 #define SEGMENT_COUNT           1           // have a single segment
 #endif
@@ -87,28 +80,16 @@ See license.txt for the terms of this license.
 #define PIXENGINE_OVERRIDE      1           // must extend PixelNutEngine class
 #endif
 
-#if !defined(CUSTOM_CODE)
-#define CUSTOM_CODE             0           // define default value
-#endif
-#if !defined(APPCMDS_OVERRIDE)
-#define APPCMDS_OVERRIDE        0           // define default value
-#endif
-#if !defined(SHOWPIX_OVERRIDE)
-#define SHOWPIX_OVERRIDE        0           // define default value
-#endif
-#if !defined(PIXENGINE_OVERRIDE)
-#define PIXENGINE_OVERRIDE      0           // define default value
-#endif
-#if !defined(PLUGINS_OVERRIDE)
-#define PLUGINS_OVERRIDE        0           // define default value
-#endif
-
 #if !defined(CUSTOM_PATTERNS)
 #define CUSTOM_PATTERNS         !EXTERNAL_COMM  // must use internal patterns if no external client
 #endif
 
 #if !defined(EXTERN_PATTERNS)
 #define EXTERN_PATTERNS         EXTERNAL_COMM   // use external (client) patterns if possible
+#endif
+
+#if defined(PLUGIN_SPECTRA) && PLUGIN_SPECTRA
+#define FREQ_FFT                1               // plugin uses frequency FFT
 #endif
 
 //========================================================================================
