@@ -227,8 +227,11 @@ void FlashStartup(void)
   byte bright = FlashGetValue(FLASH_SEG_BRIGHTNESS);
   if (bright == 0) FlashSetValue(FLASH_SEG_BRIGHTNESS, bright=MAX_BRIGHTNESS); // set to max if 0
 
+  int8_t delay = (int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS);
+  if ((delay < -DELAY_RANGE) || (DELAY_RANGE < delay)) delay = 0; // set to min if out of range
+
   pPixelNutEngine->setMaxBrightness(bright);
-  pPixelNutEngine->setDelayOffset((int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS)); // 8-bit signed int
+  pPixelNutEngine->setDelayOffset(delay);
 
   DBGOUT((F("Flash: brightness=%d%%"), bright));
   DBGOUT((F("Flash: delay=%d msecs"), (int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS)));
