@@ -12,8 +12,7 @@ See license.txt for the terms of this license.
 
 #define ANALOG_READ_RESOLUTION  10      // Bits of resolution for the ADC
 #define ANALOG_READ_AVERAGING   16      // Number of samples to average with each ADC reading
-#define FFT_SIZE                64      // Size of the FFT.  Realistically can only be at most 256 
-                                        // without running out of memory for buffers and other state
+#define FFT_SIZE                64      // Determines number of samples gathered before FFT
 
 typedef void (*FreqFFT_SetPos_CB)(int pos, float value);
 

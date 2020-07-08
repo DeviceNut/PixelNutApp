@@ -32,7 +32,7 @@
 #define MATRIX_HEIGHT 0
 #endif
 
-#define SAMPLE_RATE_HZ          5000    // Sample rate of the audio in hertz
+#define SAMPLE_RATE_HZ          2000    // Sample rate of the audio in hertz
 #define SPECTRUM_MIN_DB         40.0    // intensity (in decibels) that maps to low LED brightness
 #define SPECTRUM_MAX_DB         80.0    // intensity (in decibels) that maps to high LED brightness
 
