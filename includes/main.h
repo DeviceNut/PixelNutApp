@@ -91,7 +91,7 @@ void setup()
   SetupLED(); // status LED: indicate in setup now
   SetupDBG(); // setup/wait for debug monitor
   // Note: cannot use debug output until above is called,
-  // meaning DBGOUT() cannot be used in constructors.
+  // meaning DBGOUT() cannot be used in static constructors.
 
   #if EEPROM_FORMAT
   FlashFormat(); // format entire EEPROM

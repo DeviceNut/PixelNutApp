@@ -27,8 +27,14 @@ See license.txt for the terms of this license.
 #include "includes/color.h"         // Sets color hue/white properties in pixelnut engine
 #include "includes/count.h"         // Sets pixel count property in pixelnut engine
 #include "includes/custvar.h"       // Sets global reference to custom code handler
+#include "includes/freqfft.h"       // Performs frequency analysis with FFT
                                     // Main Routines:
 #include "includes/main.h"          // setup() and loop() functions
+                                    // Extended Effect Plugins:
+#include "includes/PNP_Spectra.h"   // 
+#include "includes/PNP_Plasma.h"    // 
+#include "includes/PNP_Fader.h"     // 
+#include "includes/xplugins.h"      // 
                                     // Extended Applications (with setup/loop):
 #include "includes/xapp_firefly.h"  // FireFly - uses accelerometer
 
@@ -52,4 +58,8 @@ See license.txt for the terms of this license.
 #include "count.h"
 #include "custvar.h"
 #include "main.h"
+#include "PNP_Spectra.h"
+#include "PNP_Plasma.h"
+#include "PNP_Fader.h"
+#include "xplugins.h"
 #endif
