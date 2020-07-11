@@ -28,15 +28,18 @@
 //
 #if defined(PLUGIN_SPECTRA) && PLUGIN_SPECTRA
 
-#if !defined(MATRIX_HEIGHT)
-#define MATRIX_HEIGHT 0
+#if !defined(MATRIX_STRIDE)
+#define MATRIX_STRIDE 0
 #endif
 
 #define SAMPLE_RATE_HZ          2000    // Sample rate of the audio in hertz
 #define SPECTRUM_MIN_DB         40.0    // intensity (in decibels) that maps to low LED brightness
 #define SPECTRUM_MAX_DB         80.0    // intensity (in decibels) that maps to high LED brightness
 
+#if (MATRIX_STRIDE > 1)
 uint16_t* hueVals = NULL;
+#endif
+
 PixelNutHandle theHandle;
 PixelNutSupport::DrawProps *thePdraw;
 
@@ -44,20 +47,21 @@ static void Spectra_SetPixel(int pos, float value)
 {
   //pixelNutSupport.msgFormat(F("Spectra: pos=%d value=%.2f"), pos, value);
 
-  thePdraw->degreeHue = hueVals[pos];
   thePdraw->pcentWhite = 0;
 
-  #if (MATRIX_HEIGHT > 1)
+  #if (MATRIX_STRIDE > 1)
 
-  int pix = pos * MATRIX_HEIGHT;
-  float last = (MATRIX_HEIGHT * value);
+  int pix = pos * MATRIX_STRIDE;
+  float last = (MATRIX_STRIDE * value);
   int index = (int)last;
   value = last - (float)index;
-  if (!(pos & 1)) index = MATRIX_HEIGHT - index;
+  if (!(pos & 1)) index = MATRIX_STRIDE - index;
+
   //pixelNutSupport.msgFormat(F("Spectra: pix=%d last=%.2f index=%d value=%.2f"), pix, last, index, value);
 
   for (int i = 0; i < index; ++i)
   {
+    thePdraw->degreeHue = (pos & 1) ? 25+(i*4) : 0;
     thePdraw->pcentBright = (pos & 1) ? 100 : 0;
     pixelNutSupport.makeColorVals(thePdraw);
     pixelNutSupport.setPixel(theHandle, pix+i, thePdraw->r, thePdraw->g, thePdraw->b);
@@ -65,14 +69,16 @@ static void Spectra_SetPixel(int pos, float value)
     //pixelNutSupport.msgFormat(F("Spectra: %d+%d <= %d"), pix, i, thePdraw->pcentBright);
   }
 
+  thePdraw->degreeHue = 50; // yellowish
   thePdraw->pcentBright = (value * 100);
   pixelNutSupport.makeColorVals(thePdraw);
   pixelNutSupport.setPixel(theHandle, pix+index, thePdraw->r, thePdraw->g, thePdraw->b);
 
   //pixelNutSupport.msgFormat(F("Spectra: %d+%d <= %d"), pix, index, thePdraw->pcentBright);
 
-  for (int i = index+1; i < MATRIX_HEIGHT; ++i)
+  for (int i = index+1; i < MATRIX_STRIDE; ++i)
   {
+    thePdraw->degreeHue = (pos & 1) ? 0 : 25+((MATRIX_STRIDE-i)*4);
     thePdraw->pcentBright = (pos & 1) ? 0 : 100;
     pixelNutSupport.makeColorVals(thePdraw);
     pixelNutSupport.setPixel(theHandle, pix+i, thePdraw->r, thePdraw->g, thePdraw->b);
@@ -81,6 +87,7 @@ static void Spectra_SetPixel(int pos, float value)
   }
 
   #else
+  thePdraw->degreeHue = hueVals[pos];
   thePdraw->pcentBright = (value * 100);
   pixelNutSupport.makeColorVals(thePdraw);
   pixelNutSupport.setPixel(theHandle, pos, thePdraw->r, thePdraw->g, thePdraw->b);
@@ -95,20 +102,18 @@ public:
 
   void begin(byte id, uint16_t pixlen)
   {
-    #if (MATRIX_HEIGHT > 1)
-    pixlen /= MATRIX_HEIGHT;
+    #if (MATRIX_STRIDE > 1)
+    pixlen /= MATRIX_STRIDE;
     #endif
 
     if (FreqFFT_Init(SAMPLE_RATE_HZ, pixlen))
     {
       pinMode(APIN_MICROPHONE, INPUT);
 
+      #if (MATRIX_STRIDE > 1)
       hueVals = (uint16_t*)malloc(pixlen * sizeof(uint16_t));
       if (hueVals != NULL)
       {
-        #if (MATRIX_HEIGHT > 1)
-        for (int i = 0; i < pixlen; ++i) hueVals[i] = 0; // red
-        #else
         // evenly spread hues across all pixels, starting with red
         // TODO: set manually for better color separation
         float inc = (float)MAX_DEGREES_HUE / (float)pixlen;
@@ -121,9 +126,9 @@ public:
           hue += inc;
           if (hue >= MAX_DEGREES_HUE) hue = 0.0;
         }
-        #endif
       }
       else FreqFFT_Fini();
+      #endif
     }
   }
 
