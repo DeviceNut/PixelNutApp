@@ -35,6 +35,8 @@ Applications that use bluetooth must set 'BLE_COMM' to 1. Applications that use 
 
 'SEGMENT_COUNT' is set to the number of logical (on the same single strand - set STRANDS_MULTI to 0) or physical (multiple strands - set STRANDS_MULTI to 1). Logical segments are fully supported in 'segments.h'. This is used in the SaturnHat example to allow use of pixel rings and a strand connected together on the same output pin. Multiple physical strands can be supported by extending this library.
 
+'PLUGIN_SPECTRA', 'PLUGIN_PLASMA', 'PLUGIN_FADER' enable additional effect plugins that can be used in your patterns. If 'MATRIX_STRIDE' is more than 1 then the Spectra plugin assumes you are using a matrix of pixels with the size of each column equal to that value.
+
 Set 'EEPROM_FORMAT' to 1 once to format (clear to 0) the entire EEPROM area, then back to 0 to enable normal operation: the storing of various user settings across power cycles.
 
 
