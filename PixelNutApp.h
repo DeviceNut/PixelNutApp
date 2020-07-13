@@ -30,11 +30,12 @@ See license.txt for the terms of this license.
 #include "includes/freqfft.h"       // Performs frequency analysis with FFT
                                     // Main Routines:
 #include "includes/main.h"          // setup() and loop() functions
+#include "includes/xmain.h"         // Must be used for multiple physical segments
                                     // Extended Effect Plugins:
-#include "includes/PNP_Spectra.h"   // 
-#include "includes/PNP_Plasma.h"    // 
-#include "includes/PNP_Fader.h"     // 
-#include "includes/xplugins.h"      // 
+#include "includes/PNP_Spectra.h"   // Creates spectrum effect with frequency FFT
+#include "includes/PNP_Plasma.h"    // Creates plasma effect with Lissajious curves
+#include "includes/PNP_Fader.h"     // Fades existing effects over time
+#include "includes/xplugins.h"      // Used with above extended effects
                                     // Extended Applications (with setup/loop):
 #include "includes/xapp_firefly.h"  // FireFly - uses accelerometer
 
@@ -58,6 +59,7 @@ See license.txt for the terms of this license.
 #include "count.h"
 #include "custvar.h"
 #include "main.h"
+#include "xmain.h"
 #include "PNP_Spectra.h"
 #include "PNP_Plasma.h"
 #include "PNP_Fader.h"
