@@ -16,16 +16,14 @@ Built-in Classes
 
 There are two defined classes in this library: 'CustomCode' and 'AppCommands'.
 
-The former doesn't do anything by default, but allows adding custom functionality to the 'setup()' and 'loop()' routines without having to override the entire function, and is in fact used by the bluetooth code in 'ble-bluefruit.h and wifi-esp32.h'. These handle communications with an external client (phone app or browser) when using bluetooth or WiFi. It is extended by code in 'segments.h' to provide support for multiple logical segments.
+The former doesn't do anything by default, but allows adding custom functionality to the 'setup()' and 'loop()' routines without having to override the entire function, and is used by the bluetooth code in 'ble-bluefruit.h, and the wifi code in 'wifi-particle.h' and 'wifi-esp32.h'. These handle communications with an external phone application client. It is also extended by code in 'segments.h' to provide support for multiple logical segments.
 
 
-Main Control Defines
+Main Control #defines
 
 Here are some of the main #define statements that determine important functionality of the application. All of these defines are listed in the "keywords.txt" file.
 
 'PIXEL_COUNT' sets the number of pixels to be displayed, and "PIXEL_OFFSET' shifts the drawing window around the pixel strip.
-
-Applications that use bluetooth must set 'BLE_COMM' to 1. Applications that use WiFi must set 'WIFI_COMM' to 1.
 
 'STRLEN_PATTERNS' sets the size of the 'cmdStr' buffer used to hold the pattern strings, and MUST be large enough for the longest effect pattern defined internally, or to receive patterns sent from an external client (over bluetooth).
 
@@ -35,12 +33,20 @@ Applications that use bluetooth must set 'BLE_COMM' to 1. Applications that use 
 
 'SEGMENT_COUNT' is set to the number of logical (on the same single strand - set STRANDS_MULTI to 0) or physical (multiple strands - set STRANDS_MULTI to 1). Logical segments are fully supported in 'segments.h'. This is used in the SaturnHat example to allow use of pixel rings and a strand connected together on the same output pin. Multiple physical strands can be supported by extending this library.
 
-'PLUGIN_SPECTRA', 'PLUGIN_PLASMA', 'PLUGIN_FADER' enable additional effect plugins that can be used in your patterns. If 'MATRIX_STRIDE' is more than 1 then the Spectra plugin assumes you are using a matrix of pixels with the size of each column equal to that value.
-
 Set 'EEPROM_FORMAT' to 1 once to format (clear to 0) the entire EEPROM area, then back to 0 to enable normal operation: the storing of various user settings across power cycles.
 
 
-Defines for Hardware Controls
+Communications #defines
+
+Currently, there is support for bluetooth using Adafruit hardware ('BLE_BLUEFRUIT'), and wifi using either the Particle Photon ('WIFI_PARTICLE'), or the ESP32 ('WIFI_ESP32'). These in turn set either 'BLE_COM' or 'WIFI_COM', and 'EXTERNAL_COMM'.
+
+
+Override/Extend #defines
+
+The following are used to allow overriding various parts of the standard application for implementing custom features. 'PIXENGINE_OVERRIDE' and 'SHOWPIX_OVERRIDE' allows overriding variables in 'globals.h', 'APPCMDS_EXTEND' allows extending application commands (for multi-segment support for example). 'MAIN_OVERRIDE' is necessary if you want to provide your own 'main' and 'loop' commands (as is in 'xmain.h' for example). Finally, 'CUSTOM_CODE' is used to provide your own implemtation of the 'CustomCode' class, or extend the ones use for communications.
+
+
+Hardware Controls #defines
 
 'MAX_BRIGHTNESS' sets the maximum percentage that the user can achieve with any hardware control, useful for projects are powered from batteries, to extend the time before power is lost. See the file "bright.h" for that code.
 
@@ -49,7 +55,7 @@ Defines for Hardware Controls
 This is used to compensate for processor speed and the number of pixels that are being displayed (which takes longer). See the file 'delay.h' for that code.
 
 
-Hardware Pin Definitions
+Hardware Pin #defines
 
 Only for products with physical controls:
 
@@ -60,3 +66,15 @@ There are usually 2 different routines that need to be called for each type of h
 If the associated control code is not being compiled for a given application, these calls resolve to empty functions (which are then eliminated by the linker during optimization).
 
 For example, 'SetupColorControls()' and 'CheckColorControls()' do nothing if the symbols 'APIN_HUE_POT' and 'APIN_WHITE_POT' are not defined, which would indicate that aren't any pots being used to adjust the color properties.
+
+
+Extended Plugin #defines
+
+'PLUGIN_SPECTRA', 'PLUGIN_PLASMA', 'PLUGIN_FADER' enables additional effect plugins that can be used in your patterns. If 'MATRIX_STRIDE' is more than 1 then the Spectra plugin assumes you are using a matrix of pixels with the size of each column equal to that value.
+
+
+Extended Application #defines
+
+'XAPP_FIREFLY' enables the extended application 'FireFly' - see the example for more details.
+
+To support multiple physical strands of pixels, you must first define 'XMAIN_ENABLE', 'APPCMDS_EXTEND', 'PIXENGINE_OVERRIDE', 'SHOWPIX_OVERRIDE' to use the code in 'xmain.h. Thenb set the following: 'PIXEL_COUNTS' to an array of the number of pixels in each strand, 'PIXEL_PINS' to an array of the pin driving the strand, 'PIXEL_DIRS' to an array of the direction (1=up, 0=down).
