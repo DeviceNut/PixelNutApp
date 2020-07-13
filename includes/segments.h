@@ -52,7 +52,7 @@ void SwitchSegments(byte segindex)
   }
 }
 
-#if (EXTERNAL_COMM && defined(APPCMDS_OVERRIDE) && APPCMDS_OVERRIDE)
+#if (EXTERNAL_COMM && defined(APPCMDS_EXTEND) && APPCMDS_EXTEND)
 
 class AppCommandsX : public AppCommands
 {
@@ -88,7 +88,7 @@ public:
 AppCommandsX appCmdX; // extended class instance
 AppCommands *pAppCmd = &appCmdX;
 
-#endif // (EXTERNAL_COMM && APPCMDS_OVERRIDE)
+#endif // (EXTERNAL_COMM && APPCMDS_EXTEND)
 
 #if BLE_COMM
 class LogicalSegs : public Bluetooth

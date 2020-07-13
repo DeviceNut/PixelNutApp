@@ -38,7 +38,6 @@
 
 #define PIXEL_COUNT             300         // standard 5 meter strand of pixels
 #define DPIN_PIXELS             2           // drives output pixel data (@5v)
-#define APIN_SEED               A0          // used to seed randomizer
 
 #define STRLEN_PATTERNS         300         // maxlen of pattern strings (including ending 0)
 #define NUM_PLUGIN_LAYERS       16          // number of plugins that can be combined at once

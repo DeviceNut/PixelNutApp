@@ -22,6 +22,10 @@ See license.txt for the terms of this license.
 #endif
 #endif
 
+#if !defined(APIN_SEED)
+#define APIN_SEED               A0          // default pin for seeding randomizer
+#endif
+
 #if !defined(PIXEL_OFFSET)
 #define PIXEL_OFFSET            0           // start drawing at the first pixel
 #endif
@@ -38,7 +42,7 @@ See license.txt for the terms of this license.
 #define DELAY_RANGE             60          // default is to allow for maximum brightness
 #endif
 
-#if BLE_BLUEFRUIT
+#if defined(BLE_BLUEFRUIT) && BLE_BLUEFRUIT
 #if defined(__AVR_ATmega32U4__)
 #define BLUEFRUIT_SPI_CS        8           // assign pins for Bluefruit Micro
 #define BLUEFRUIT_SPI_IRQ       7           // ** hardcoded for this module **
@@ -50,12 +54,15 @@ See license.txt for the terms of this license.
 #endif
 #define BLE_COMM                1           // using bluetooth BLE
 #endif
-
-#if (WIFI_PARTICLE || WIFI_ESP32)
-#define WIFI_COMM               1           // using WiFi
-#endif
 #if !defined(BLE_COMM)
 #define BLE_COMM                0           // default is no bluetooth
+#endif
+
+#if defined(WIFI_PARTICLE) && WIFI_PARTICLE
+#define WIFI_COMM               1           // using WiFi
+#endif
+#if defined(WIFI_ESP32) && WIFI_ESP32
+#define WIFI_COMM               1           // using WiFi
 #endif
 #if !defined(WIFI_COMM)
 #define WIFI_COMM               0           // default is no wifi
@@ -76,8 +83,26 @@ See license.txt for the terms of this license.
 #endif
 
 #if (!STRANDS_MULTI && (SEGMENT_COUNT > 1)) // to support logical segments:
-#define APPCMDS_OVERRIDE        1           // must extend AppCommands class
+#define APPCMDS_EXTEND        1           // must extend AppCommands class
 #define PIXENGINE_OVERRIDE      1           // must extend PixelNutEngine class
+#endif
+
+#if STRANDS_MULTI                           // multi physical strands
+#define APPCMDS_EXTEND        1           // must have extended AppCommands
+#define MAIN_OVERRIDE           1           // must replace both setup() and loop()
+#define XMAIN_ENABLE            1           // with code here
+#endif
+
+#if !defined(MAIN_OVERRIDE)
+#define MAIN_OVERRIDE           0
+#endif
+#if !defined(XMAIN_ENABLE)
+#define XMAIN_ENABLE            0
+#endif
+
+#if XMAIN_ENABLE
+#define SHOWPIX_OVERRIDE        1           // use different pixel displaying
+#define PIXENGINE_OVERRIDE      1           // must have extended PixelNutEngine
 #endif
 
 #if !defined(CUSTOM_PATTERNS)

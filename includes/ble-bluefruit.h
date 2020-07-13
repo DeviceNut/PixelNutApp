@@ -9,7 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if BLE_BLUEFRUIT
+#if defined(BLE_BLUEFRUIT) && BLE_BLUEFRUIT
 
 #include <SPI.h>
 

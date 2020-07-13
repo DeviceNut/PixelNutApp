@@ -9,7 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if WIFI_PARTICLE
+#if defined(WIFI_PARTICLE) && WIFI_PARTICLE
 
 extern void CheckExecCmd(char *instr); // defined in main.h
 

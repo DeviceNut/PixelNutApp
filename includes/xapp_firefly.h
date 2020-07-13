@@ -7,7 +7,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#ifdef XAPP_FIREFLY
+#if defined(XAPP_FIREFLY) && XAPP_FIREFLY
 
 // Patterns used:
 // 1) when at rest - purple swelling, with triggered orange comets

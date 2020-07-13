@@ -9,7 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if WIFI_ESP32
+#if defined(WIFI_ESP32) && WIFI_ESP32
 
 #include <WiFi.h>
 #include <WiFiClient.h>

@@ -36,7 +36,6 @@
 #define DPIN_PATTERN_BUTTON     3           // pattern select button
 #define DPIN_DELAY_BUTTON       11          // delay select button
 #define DPIN_BRIGHT_BUTTON      2           // brightness select button
-#define APIN_SEED               A0          // used to seed randomizer
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)

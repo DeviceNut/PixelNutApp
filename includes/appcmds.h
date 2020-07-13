@@ -289,7 +289,7 @@ protected:
   }
 };
 
-#if defined(APPCMDS_OVERRIDE) && APPCMDS_OVERRIDE
+#if defined(APPCMDS_EXTEND) && APPCMDS_EXTEND
 extern AppCommands *pAppCmd;
 #else
 AppCommands appCmd; // create instance of AppCommands to handle user commands

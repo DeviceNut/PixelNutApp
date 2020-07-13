@@ -34,7 +34,6 @@
 
 #define PIXEL_COUNT             32          // can support up to 64 pixels with the 32u4
 #define DPIN_PIXELS             12          // drives output pixel data (from battery)
-#define APIN_SEED               A0          // used to seed randomizer
 
 #define STRLEN_PATTERNS         100         // maxlen of pattern strings (including ending 0)
 #define NUM_PLUGIN_LAYERS       4           // number of plugins that can be combined at once

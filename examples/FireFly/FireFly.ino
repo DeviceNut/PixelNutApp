@@ -37,13 +37,11 @@
 #define DPIN_PIXELS             17          // drives output pixel data
 #define DPIN_LED                13          // drives R-LED for error status
 #define DPIN_FADER_BUTTON       12          // toggles fader/player mode
-#define APIN_SEED               A0          // used to seed randomizer
 
 #define STRLEN_PATTERNS         100         // maxlen of pattern strings (including ending 0)
 #define NUM_PLUGIN_LAYERS       8           // number of plugins that can be combined at once
 #define NUM_PLUGIN_TRACKS       4           // layers that have unique properties (redraw pixels)
 
-#define PATTERN_OVERRIDE        1           // creates its own patterns
 #define MAIN_OVERRIDE           1           // has its own setup/loop
 #define XAPP_FIREFLY            1           // enables extended code
 
