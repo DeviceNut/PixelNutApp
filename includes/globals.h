@@ -24,7 +24,7 @@ extern const char* const customPatterns[];
 #if !defined(SHOWPIX_OVERRIDE)
 #define SHOWPIX_OVERRIDE        0           // define default value
 #endif
-#if !PIXELS_APA
+#if !defined(PIXELS_APA)
 #define PIXELS_APA              0           // define default value
 #endif
 

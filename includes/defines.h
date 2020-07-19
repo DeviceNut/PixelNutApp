@@ -16,7 +16,7 @@ See license.txt for the terms of this license.
 #define DEBUG_SIGNON            DEFAULT_DEVICE_NAME
 #endif
 
-#if PIXELS_APA
+#if !defined(PIXELS_APA) || PIXELS_APA
 #if !defined(SPI_SETTINGS_FREQ)
 #define SPI_SETTINGS_FREQ       4000000     // use fastest speed by default
 #endif
@@ -71,7 +71,7 @@ See license.txt for the terms of this license.
 #if (BLE_COMM || WIFI_COMM)
 #define EXTERNAL_COMM           1           // external communications
 #endif
-#if !EXTERNAL_COMM
+#if !defined(EXTERNAL_COMM)
 #define EXTERNAL_COMM           0           // define default value
 #endif
 
