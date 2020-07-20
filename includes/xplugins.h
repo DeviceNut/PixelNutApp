@@ -23,10 +23,6 @@ public:
       case 80: return new PNP_Plasma;
       #endif
 
-      #if defined(PLUGIN_FADER) && PLUGIN_FADER
-      case 99: return new PNP_Fader
-      #endif
-
       default: return PluginFactory::makePlugin(plugin);
     }
   }

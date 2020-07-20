@@ -36,7 +36,6 @@ See license.txt for the terms of this license.
                                     // Extended Effect Plugins:
 #include "includes/PNP_Spectra.h"   // Creates spectrum effect with frequency FFT
 #include "includes/PNP_Plasma.h"    // Creates plasma effect with Lissajious curves
-#include "includes/PNP_Fader.h"     // Fades existing effects over time
 #include "includes/xplugins.h"      // Supports above extended effects
                                     // Extended Applications (with setup/loop):
 #include "includes/xapp_firefly.h"  // FireFly - uses accelerometer
@@ -64,6 +63,5 @@ See license.txt for the terms of this license.
 #include "xmain.h"
 #include "PNP_Spectra.h"
 #include "PNP_Plasma.h"
-#include "PNP_Fader.h"
 #include "xplugins.h"
 #endif

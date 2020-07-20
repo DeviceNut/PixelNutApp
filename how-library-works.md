@@ -70,7 +70,7 @@ For example, 'SetupColorControls()' and 'CheckColorControls()' do nothing if the
 
 Extended Plugin #defines
 
-'PLUGIN_SPECTRA', 'PLUGIN_PLASMA', 'PLUGIN_FADER' enables additional effect plugins that can be used in your patterns. If 'MATRIX_STRIDE' is more than 1 then the Spectra plugin assumes you are using a matrix of pixels with the size of each column equal to that value.
+'PLUGIN_SPECTRA', and 'PLUGIN_PLASMA' enables additional effect plugins that can be used in your patterns. If 'MATRIX_STRIDE' is more than 1 then the Spectra plugin assumes you are using a matrix of pixels with the size of each column equal to that value.
 
 
 Extended Application #defines

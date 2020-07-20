@@ -145,10 +145,6 @@ See license.txt for the terms of this license.
 #define FREQ_FFT                1               // plugin uses frequency FFT
 #endif
 
-#if !defined(PLUGIN_FADER)
-#define PLUGIN_FADER            0               // only use this if specially requested
-#endif
-
 // Used to form patterns with multiple logical segments, with J,K,X,Y engine commands
 #define MACRO_TO_STR(s) #s
 #define MACRO_TO_MACRO(s) MACRO_TO_STR(s)
