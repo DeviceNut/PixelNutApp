@@ -29,7 +29,7 @@ Here are some of the main #define statements that determine important functional
 
 'NUM_PLUGIN_LAYERS' and 'NUM_PLUGIN_TRACKS' set the size of the stacks used in the PixelNutLib Library, and must be at large enough for the effect patterns being used.
 
-'CUSTOM_PATTERNS' is set to 1 when defining internal patterns (this is the default). Setting EXTERN_PATTERNS is only needed when using an external application (which has built-in patterns), but you only want to use internally created ones instead.
+'CUSTOM_PATTERNS' is set to 1 when defining internal patterns, whether because there is no external client, or because you're adding additional patterns. 'EXTERN_PATTERNS' is normally set if using an external client (which has built-in patterns). Sett 'EXTERN_PATTERNS' to 0 when you don't want to use these extern patterns, and use only internal custom ones. Use 'PATTERN_OVERRIDE' to override all of the above and only use specific patterns defined by your application (see FireFly example).
 
 'SEGMENT_COUNT' is set to the number of logical (on the same single strand - set STRANDS_MULTI to 0) or physical (multiple strands - set STRANDS_MULTI to 1). Logical segments are fully supported in 'segments.h'. This is used in the SaturnHat example to allow use of pixel rings and a strand connected together on the same output pin. Multiple physical strands can be supported by extending this library.
 

@@ -27,7 +27,7 @@ PRODUCT_VERSION(PARTICLE_PRODUCT_VER);
 #endif
 
 #if !defined(USE_WIFI_SOFTAP)
-#define USE_WIFI_SOFTAP 0
+#define USE_WIFI_SOFTAP 1 // default is SoftAP mode
 #endif
 
 // Blink patterns (long, short):
@@ -792,7 +792,7 @@ public:
     setName(deviceName); // override device name
 
     SetNetwork((char*)""); // clear all networks
-    #if defined(DEFAULT_WIFI_INFO) && DEFAULT_WIFI_INFO
+    #if defined(DEFAULT_WIFI_INFO)
     SetNetwork(DEFAULT_WIFI_INFO); // set default network
     #endif
   }
