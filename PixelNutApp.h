@@ -9,23 +9,25 @@ See license.txt for the terms of this license.
 #include "includes/defines.h"       // Global Defines
 #include "includes/custom.h"        // Base Custom Class
 #include "includes/globals.h"       // Global Variables
+#include "includes/patterns.h"      // Patterns Strings
                                     // Helper Functions:
 #include "includes/led.h"           // LED Indicator Control
 #include "includes/dbgerr.h"        // Debug/Error Handling
 #include "includes/flash.h"         // Flash Storage Handling
-#include "includes/select.h"        // Preset Patterns Selection
+#include "includes/pselect.h"       // Pattern Selection
 #include "includes/appcmds.h"       // Application Commands
 #include "includes/wifi-esp32.h"    // WiFi using ESP32 
 #include "includes/ble-bluefruit.h" // Bluefriuit Bluetooth
 #include "includes/segments.h"      // Logical Segment Support
                                     // Physical Controls:
-#include "includes/pattern.h"       // Sets the current preset pattern string
-#include "includes/trigger.h"       // Triggers effects in current pattern string 
-#include "includes/emode.h"         // Sets extern color/count property mode enable
-#include "includes/delay.h"         // Sets global delay offset applied to all effects
-#include "includes/bright.h"        // Sets global max brightness applied to all effects
-#include "includes/color.h"         // Sets color hue/white properties in pixelnut engine
-#include "includes/count.h"         // Sets pixel count property in pixelnut engine
+#include "includes/ctrl-pattern.h"  // Sets the current preset pattern string
+#include "includes/ctrl-trigger.h"  // Triggers effects in current pattern string 
+#include "includes/ctrl-emode.h"    // Sets extern color/count property mode enable
+#include "includes/ctrl-delay.h"    // Sets global delay offset applied to all effects
+#include "includes/ctrl-bright.h"   // Sets global max brightness applied to all effects
+#include "includes/ctrl-color.h"    // Sets color hue/white properties in pixelnut engine
+#include "includes/ctrl-count.h"    // Sets pixel count property in pixelnut engine
+                                    // Specialized Code:
 #include "includes/custvar.h"       // Sets global reference to custom code handler
 #include "includes/freqfft.h"       // Performs frequency analysis with FFT
                                     // Main Routines:
@@ -35,7 +37,7 @@ See license.txt for the terms of this license.
 #include "includes/PNP_Spectra.h"   // Creates spectrum effect with frequency FFT
 #include "includes/PNP_Plasma.h"    // Creates plasma effect with Lissajious curves
 #include "includes/PNP_Fader.h"     // Fades existing effects over time
-#include "includes/xplugins.h"      // Used with above extended effects
+#include "includes/xplugins.h"      // Supports above extended effects
                                     // Extended Applications (with setup/loop):
 #include "includes/xapp_firefly.h"  // FireFly - uses accelerometer
 

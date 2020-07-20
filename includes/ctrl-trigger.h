@@ -1,4 +1,4 @@
-// PixelNutApp Pattern Selection Controls
+// PixelNutApp Trigger Intercept Controls
 // Selects the current preset pattern from physical controls.
 //
 // Uses global variables: 'pPixelNutEngine' and 'pixelNutSupport'.
