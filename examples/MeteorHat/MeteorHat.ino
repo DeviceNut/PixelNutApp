@@ -18,7 +18,6 @@
 #include <NeoPixelShow.h>       // Adafruit's Neopixel Show()
 #include <UIDeviceButton.h>     // Devicenut's Button Class
 #include <PixelNutLib.h>        // Devicenut's PixelNutLib Library
-#include "MyPatterns.h"         // Customized effect patterns
 
 // make sure we're compiling for the correct processor
 #if !defined(__AVR__) || !defined(__AVR_ATmega32U4__)
@@ -36,6 +35,10 @@
 #define DPIN_PATTERN_BUTTON     3           // pattern select button
 #define DPIN_DELAY_BUTTON       11          // delay select button
 #define DPIN_BRIGHT_BUTTON      2           // brightness select button
+
+#define PATTERN_JULY4           1           // enable extended "July 4th" pattern
+#define CUSTOM_PATTERNS         1           // enables extended patterns in general
+#define PATTERN_JULY4           1           // enables "July 4th" pattern specifically
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)

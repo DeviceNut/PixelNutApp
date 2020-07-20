@@ -41,11 +41,10 @@
 #define DPIN_PIXELS             17          // drives output pixel data (from battery)
 #define DPIN_LED                5           // if have off-board red LED for status
 
-#define STRLEN_PATTERNS         100         // maxlen of pattern strings (including ending 0)
-#define NUM_PLUGIN_LAYERS       8           // number of plugins that can be combined at once
-#define NUM_PLUGIN_TRACKS       4           // layers that have unique properties (redraw pixels)
-
 #define BLE_BLUEFRUIT           1           // include bluefruit bluetooth handling code
+
+#define CUSTOM_PATTERNS         1           // enables extended patterns in general
+#define PATTERN_JULY4           1           // enables "July 4th" pattern specifically
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)

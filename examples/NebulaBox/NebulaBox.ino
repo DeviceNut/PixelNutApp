@@ -45,6 +45,9 @@
 
 #define BLE_BLUEFRUIT           1           // include bluefruit bluetooth handling code
 
+#define CUSTOM_PATTERNS         1           // enables extended patterns in general
+#define PATTERN_JULY4           1           // enables "July 4th" pattern specifically
+
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)
 //**************************************************************************************************

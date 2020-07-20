@@ -4,8 +4,8 @@
 // This application is built specifically for the "FireFly" PixelNut! product:
 // A Teensy LC processor module from PJRC (www.pjrc.com), which is mounted on a
 // circuit board along with a battery charger from Adafruit (www.adafruit.com),
-// powered by a 2000 mA lithium battery, installed inside a mason jar with 2
-// buttons and attached to a meter strand of WS2812B LEDs.
+// powered by a 2000 mA lithium battery, installed inside a mason jar with a
+// power button and a mode button, and attached to a strand of WS2812B LEDs.
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -38,12 +38,9 @@
 #define DPIN_LED                13          // drives R-LED for error status
 #define DPIN_FADER_BUTTON       12          // toggles fader/player mode
 
-#define STRLEN_PATTERNS         100         // maxlen of pattern strings (including ending 0)
-#define NUM_PLUGIN_LAYERS       8           // number of plugins that can be combined at once
-#define NUM_PLUGIN_TRACKS       4           // layers that have unique properties (redraw pixels)
-
-#define MAIN_OVERRIDE           1           // has its own setup/loop
 #define XAPP_FIREFLY            1           // enables extended code
+#define MAIN_OVERRIDE           1           // with its own setup/loop
+#define PATTERN_OVERRIDE        1           // creates its own patterns
 
 //**************************************************************************************************
 #include <PixelNutApp.h>                    // Devicenut's PixelNutApp Library (common application code)

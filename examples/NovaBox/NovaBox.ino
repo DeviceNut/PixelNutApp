@@ -19,7 +19,6 @@
 #include <UIDeviceAnalog.h>     // Devicenut's Analog Class
 #include <UIDeviceButton.h>     // Devicenut's Button Class
 #include <PixelNutLib.h>        // Devicenut's PixelNutLib Library
-#include "MyPatterns.h"         // Customized effect patterns
 
 // make sure we're compiling for the correct processor
 #if !defined(__arm__) || !defined(__MK20DX256__)
@@ -38,14 +37,17 @@
 #define PIXEL_COUNT             300         // 5 meter strand of pixels
 #define DPIN_PIXELS             20          // drives output pixel data (@5v)
 #define DPIN_LED                13          // on-board red LED for status
+
 #define DPIN_PATTERN_BUTTON     2           // preset selection button
 #define DPIN_PAT_BUTTON_PREV    6           // prev pattern select button
 #define DPIN_TRIGGER_BUTTON     4           // trigger control button
-#define APIN_SEED               A0          // used to seed randomizer
 #define APIN_DELAY_POT          A1          // delay control potentiometer
 #define APIN_BRIGHT_POT         A3          // brightness control potentiometer
 #define BRIGHT_POT_BACKWARDS    0           // brightness pot NOT wired backwards
 #define DELAY_POT_BACKWARDS     1           // delay pot IS wired backwards
+
+#define CUSTOM_PATTERNS         1           // enables extended patterns in general
+#define PATTERN_JULY4           1           // enables "July 4th" pattern specifically
 
 //**************************************************************************************************
 #include <PixelNutApp.h>        // Devicenut's PixelNutApp Library (common application code)
