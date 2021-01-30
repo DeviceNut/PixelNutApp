@@ -32,10 +32,6 @@
 //
 #if defined(PLUGIN_PLASMA) && PLUGIN_PLASMA
 
-#if defined(SPARK)
-#include "math.h"
-#endif
-
 #define COLOR_STRETCH 0.5    // larger numbers for tighter color bands
 #define MIN_PHASE_INC 0.0001 // larger numbers for faster points
 #define MAX_PHASE_INC 0.04

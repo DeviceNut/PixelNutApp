@@ -4,7 +4,7 @@
 // Calls global functions: 'BlinkStatusLED()'.
 //========================================================================================
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2021, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
@@ -13,7 +13,7 @@ See license.txt for the terms of this license.
 #define DBG(x) x
 #define DBGOUT(x) MsgFormat x
 
-#if defined(SPARK) || defined(ESP32)
+#if defined(ESP32)
 #undef F
 #define F(x) x
 #endif
@@ -25,7 +25,7 @@ See license.txt for the terms of this license.
 char fmtstr[MAXLEN_FMTSTR];   // holds debug format string
 char outstr[MAXLEN_DBGSTR];   // holds debug output string
 
-#if defined(SPARK) || defined(ESP32)
+#if defined(ESP32)
 void MsgFormat(const char *fmtstr, ...)
 {
   va_list va;
@@ -54,29 +54,19 @@ void SetupDBG(void)
   // function called from DBGOUT macro
   pixelNutSupport.msgFormat = MsgFormat;
 
-  Serial.begin(115200); // MATCH THIS BAUD RATE <<<
+  Serial.begin(SERIAL_BAUD_RATE);
 
-  #if defined(SPARK)
-  // wait up to 15 secs for serial window
-  uint32_t tout = millis() + 15000;
-  // on Windows only: user should have serial terminal closed first,
-  // then start running this, and then open terminal and press a key
-  while (!Serial.available())
-  {
-    if (millis() > tout) break;
-    BlinkStatusLED(0, 1);
-  }
+  uint32_t tout = millis() + MSECS_WAIT_FOR_USER;
 
-  #elif defined(ESP32)
-  // wait up to 5 secs for something to be sent from the serial window
-  uint32_t tout = millis() + 5000;
-  while (!Serial.available()) if (millis() > tout) break;
-
-  #else // !SPARK
-  // wait up to 5 secs for serial window
-  uint32_t tout = millis() + 5000;
-  while (!Serial) if (millis() > tout) break;
+  #if defined(ESP32)
+  while (!Serial.available()) // wait for something sent
+  #else
+  while (!Serial) // wait for serial monitor
   #endif
+  {
+    BlinkStatusLED(0, 1);
+    if (millis() > tout) break;
+  }
 
   // wait a tad longer, then send sign-on message
   delay(10);

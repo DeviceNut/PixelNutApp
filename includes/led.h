@@ -17,26 +17,19 @@ See license.txt for the terms of this license.
 #endif
 #define LED_TURN_ON   digitalWrite(DPIN_LED, LED_ON)
 #define LED_TURN_OFF  digitalWrite(DPIN_LED, LED_OFF)
-
-#elif defined(SPARK)
-#define LED_TURN_ON   RGB.control(true); RGB.color(255,0,0)
-#define LED_TURN_OFF  RGB.control(false)
 #endif
 
 void SetupLED(void)
 {
   #if defined(DPIN_LED)
   pinMode(DPIN_LED, OUTPUT);
-  #endif
-
-  #if defined(DPIN_LED) || defined(SPARK)
   LED_TURN_ON;
   #endif
 }
 
 void BlinkStatusLED(uint16_t slow, uint16_t fast)
 {
-  #if defined(DPIN_LED) || defined(SPARK)
+  #if defined(DPIN_LED)
   LED_TURN_OFF;
   delay(250);
 
@@ -58,7 +51,7 @@ void BlinkStatusLED(uint16_t slow, uint16_t fast)
     for (int i = 0; i < fast; ++i)
     {
       LED_TURN_ON;
-      delay(200);
+      delay(150);
       LED_TURN_OFF;
       delay(250);
     }

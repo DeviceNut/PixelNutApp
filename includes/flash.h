@@ -15,8 +15,6 @@ See license.txt for the terms of this license.
 #define EEPROM_BYTES            128
 #elif defined(__arm__) && defined(__MK20DX256__)      // Teensy 3.2
 #define EEPROM_BYTES            2048
-#elif defined(STM32F2XX)                              // Particle Photon
-#define EEPROM_BYTES            2048
 #elif defined(__AVR__)                                // all other AVR processors
 #define EEPROM_BYTES            1024
 #elif defined(ESP32)                                  // Espressif ESP32
@@ -49,9 +47,7 @@ void FlashStartup(void) {}
 
 #else // (EEPROM_BYTES > 0)
 
-#if !defined(SPARK)
 #include <EEPROM.h>
-#endif
 
 // for each segment:
 #define FLASH_SEG_LENGTH        10

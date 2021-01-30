@@ -1,11 +1,10 @@
 // PixelNutApp: Include All Application Code
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2021, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if defined(ARDUINO)
 #include "includes/defines.h"       // Global Defines
 #include "includes/custom.h"        // Base Custom Class
 #include "includes/globals.h"       // Global Variables
@@ -16,7 +15,8 @@ See license.txt for the terms of this license.
 #include "includes/flash.h"         // Flash Storage Handling
 #include "includes/pselect.h"       // Pattern Selection
 #include "includes/appcmds.h"       // Application Commands
-#include "includes/wifi-esp32.h"    // WiFi using ESP32 
+#include "includes/wifi-softap.h"   // WiFi using SoftAP
+#include "includes/wifi-mqtt.h"     // WiFi using MQTT
 #include "includes/ble-bluefruit.h" // Bluefriuit Bluetooth
 #include "includes/segments.h"      // Logical Segment Support
                                     // Physical Controls:
@@ -39,30 +39,3 @@ See license.txt for the terms of this license.
 #include "includes/xplugins.h"      // Supports above extended effects
                                     // Extended Applications (with setup/loop):
 #include "includes/xapp_firefly.h"  // FireFly - uses accelerometer
-
-#elif defined(SPARK)
-#include "defines.h"
-#include "globals.h"
-#include "custom.h"
-#include "patterns.h"
-#include "led.h"
-#include "dbgerr.h"
-#include "flash.h"
-#include "pselect.h"
-#include "appcmds.h"
-#include "wifi-particle.h"
-#include "segments.h"
-#include "ctrl-pattern.h"
-#include "ctrl-trigger.h"
-#include "ctrl-emode.h"
-#include "ctrl-delay.h"
-#include "ctrl-bright.h"
-#include "ctrl-color.h"
-#include "ctrl-count.h"
-#include "custvar.h"
-#include "main.h"
-#include "xmain.h"
-#include "PNP_Spectra.h"
-#include "PNP_Plasma.h"
-#include "xplugins.h"
-#endif

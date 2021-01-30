@@ -16,7 +16,7 @@ Built-in Classes
 
 There are two defined classes in this library: 'CustomCode' and 'AppCommands'.
 
-The former doesn't do anything by default, but allows adding custom functionality to the 'setup()' and 'loop()' routines without having to override the entire function, and is used by the bluetooth code in 'ble-bluefruit.h, and the wifi code in 'wifi-particle.h' and 'wifi-esp32.h'. These handle communications with an external phone application client. It is also extended by code in 'segments.h' to provide support for multiple logical segments.
+The former doesn't do anything by default, but allows adding custom functionality to the 'setup()' and 'loop()' routines without having to override the entire function, and is used by the bluetooth code in 'ble-bluefruit.h, and the wifi code in 'wifi-softap.h' and 'wifi-msqtt.h'. These handle communications with an external phone application client. It is also extended by code in 'segments.h' to provide support for multiple logical segments.
 
 
 Main Control #defines
@@ -38,7 +38,7 @@ Set 'EEPROM_FORMAT' to 1 once to format (clear to 0) the entire EEPROM area, the
 
 Communications #defines
 
-Currently, there is support for bluetooth using Adafruit hardware ('BLE_BLUEFRUIT'), and wifi using either the Particle Photon ('WIFI_PARTICLE'), or the ESP32 ('WIFI_ESP32'). These in turn set either 'BLE_COM' or 'WIFI_COM', and 'EXTERNAL_COMM'.
+Currently, there is support for bluetooth using Adafruit hardware ('BLE_BLUEFRUIT'), and wifi using either the SoftAP ('WIFI_SOFTAP') or MQTT ('WIFI-MQTT') handlers. These in turn set 'EXTERNAL_COMM', and either 'BLE_COM' or 'WIFI_COM'.
 
 
 Override/Extend #defines
