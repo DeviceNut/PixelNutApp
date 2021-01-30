@@ -92,8 +92,10 @@ AppCommands *pAppCmd = &appCmdX;
 
 #if BLE_COMM
 class LogicalSegs : public Bluetooth
-#elif WIFI_COMM
-class LogicalSegs : public WiFiNet
+#elif WIFI_SOFTAP
+class LogicalSegs : public WiFiSoftAp
+#elif WIFI_MQTT
+class LogicalSegs : public WiFiMqtt
 #else
 class LogicalSegs : public CustomCode
 #endif

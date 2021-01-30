@@ -1,4 +1,4 @@
-// PixelNutApp WiFi Communications using the ESP32
+// PixelNutApp WiFi Communications with the ESP32
 //
 // Uses global variables: 'pixelNutSupport', 'pAppCmd'.
 // Calls global routines: 'CheckExecCmd'.
@@ -9,7 +9,7 @@ Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
 
-#if defined(WIFI_ESP32) && WIFI_ESP32
+#if defined(WIFI_SOFTAP) && WIFI_SOFTAP
 
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -17,7 +17,7 @@ See license.txt for the terms of this license.
 
 extern void CheckExecCmd(char *instr); // defined in main.h
 
-class WiFiNet : public CustomCode
+class WiFiSoftAp : public CustomCode
 {
 public:
 
@@ -44,9 +44,9 @@ private:
 
   void ServerConnection(void);
 };
-WiFiNet wifinet;
+WiFiSoftAp wifiSAP;
 
-void WiFiNet::setup(void)
+void WiFiSoftAp::setup(void)
 {
   char devname[MAXLEN_DEVICE_NAME + PREFIX_LEN_DEVNAME + 1];
   strcpy(devname, PREFIX_DEVICE_NAME);
@@ -58,11 +58,13 @@ void WiFiNet::setup(void)
   esp_chip_info_t sysinfo;
   esp_chip_info(&sysinfo);
 
+  #if defined(ESP32)
   DBGOUT(("ESP32 Board:"));
   DBGOUT(("  SDK Version=%s", esp_get_idf_version()));
   DBGOUT(("  ModelRev=%d.%d", sysinfo.model, sysinfo.revision));
   DBGOUT(("  Cores=%d", sysinfo.cores));
   DBGOUT(("  Heap=%d bytes", esp_get_free_heap_size()));
+  #endif
 
   DBGOUT(("WiFi Info:"));
   DBGOUT(("  SoftAP=%s", devname));
@@ -80,13 +82,13 @@ void WiFiNet::setup(void)
   DBGOUT(("---------------------------------------"));
 }
 
-bool WiFiNet::setName(char *name)
+bool WiFiSoftAp::setName(char *name)
 {
   FlashSetName(name);
   return true;
 }
 
-bool WiFiNet::sendReply(char *instr)
+bool WiFiSoftAp::sendReply(char *instr)
 {
   DBGOUT(("ReplyStr: \"%s\"", instr));
   strcat(replyString, instr);
@@ -94,7 +96,7 @@ bool WiFiNet::sendReply(char *instr)
   return true;
 }
 
-void WiFiNet::loop(void)
+void WiFiSoftAp::loop(void)
 {
   WiFiClient client = wifiServer.available();
   if (client)
@@ -174,5 +176,5 @@ void WiFiNet::loop(void)
   }
 }
 
-#endif // WIFI_ESP32
+#endif // WIFI_SOFTAP
 //========================================================================================

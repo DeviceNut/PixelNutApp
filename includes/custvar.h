@@ -8,13 +8,16 @@ See license.txt for the terms of this license.
 
 #if (!STRANDS_MULTI && (SEGMENT_COUNT > 1)) // have logical segments
 CustomCode *pCustomCode = &customSegs; // override with segment handler
-// note that this will call into bluetooth/wifinet handler if needed
+// note that this will call into bluetooth/wifi handler if needed
 
 #elif BLE_COMM
 CustomCode *pCustomCode = &bluetooth;   // override with bluetooth handler
 
-#elif WIFI_COMM
-CustomCode *pCustomCode = &wifinet;     // override wifinet handler
+#elif WIFI_SOFTAP
+CustomCode *pCustomCode = &wifiSAP;     // override with wifi SoftAP handler
+
+#elif WIFI_MQTT
+CustomCode *pCustomCode = &wifiMQTT;    // override with wifi MQTT handler
 
 #elif !(defined(CUSTOM_CODE) && CUSTOM_CODE)
 CustomCode customcode;

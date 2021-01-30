@@ -200,7 +200,7 @@ void setup()
   FlashSetSegment(curSegment = 0);
   pPixelNutEngine = pixelNutEngines[0];
 
-  pCustomCode->setup(); // communications initialization
+  pCustomCode->setup();   // custom initialization here (external communications setup)
 
   #if defined(ESP32)
   randomSeed(esp_random()); // should be called after BLE/WiFi started

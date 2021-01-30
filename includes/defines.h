@@ -2,10 +2,15 @@
 // Insure certain required definitions are set to defaults.
 //========================================================================================
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2021, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
+
+#if DEBUG_OUTPUT
+#define SERIAL_BAUD_RATE        115200           // *must* match this in serial monitor
+#define MSECS_WAIT_FOR_USER     15000            // msecs to wait for serial monitor
+#endif
 
 #define DEFAULT_DEVICE_NAME     "PixelNutDevice"
 #define MAXLEN_DEVICE_NAME      16              // maxlen for device name
@@ -58,11 +63,11 @@ See license.txt for the terms of this license.
 #define BLE_COMM                0               // default is no bluetooth
 #endif
 
-#if defined(WIFI_PARTICLE) && WIFI_PARTICLE
-#define WIFI_COMM               1               // using WiFi
+#if defined(WIFI_SOFTAP) && WIFI_SOFTAP
+#define WIFI_COMM               1               // using WiFi SoftAP mode
 #endif
-#if defined(WIFI_ESP32) && WIFI_ESP32
-#define WIFI_COMM               1               // using WiFi
+#if defined(WIFI_MQTT) && WIFI_MQTT
+#define WIFI_COMM               1               // using WiFi MQTT mode
 #endif
 #if !defined(WIFI_COMM)
 #define WIFI_COMM               0               // default is no wifi
