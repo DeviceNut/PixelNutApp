@@ -11,15 +11,11 @@ See license.txt for the terms of this license.
 #if STRANDS_MULTI
 static bool pixelDir[SEGMENT_COUNT] = PIXEL_DIRS;
 static uint16_t pixelCounts[SEGMENT_COUNT] = PIXEL_COUNTS;
+static byte pixelPins[SEGMENT_COUNT] = PIXEL_PINS;
+static byte layer_track_counts[] = LAYER_TRACK_COUNTS;
 #else
 static bool pixelDir[SEGMENT_COUNT] = { true };
 static uint16_t pixelCounts[SEGMENT_COUNT] = { PIXEL_COUNT };
-#endif
-
-#if (PIXELS_APA && STRANDS_MULTI) || (!PIXELS_APA && defined(ESP32))
-// these are enable pins on level shifter, or pins for ESP32 RMT
-static byte pixelPins[SEGMENT_COUNT] = PIXEL_PINS;
-#else
 static byte pixelPins[SEGMENT_COUNT] = { DPIN_PIXELS };
 #endif
 
@@ -152,6 +148,8 @@ void setup()
 
   DBGOUT((F(">>> Begin extended setup...")));
 
+  byte lcount, tcount;
+
   // alloc arrays, turn off pixels, init patterns
   for (int i = 0; i < SEGMENT_COUNT; ++i)
   {
@@ -182,7 +180,13 @@ void setup()
 
     ShowPixels(i); // turn off pixels
 
-    pixelNutEngines[i] = new PixelNutEngine(pixelArrays[i], pixelCounts[i], PIXEL_OFFSET, pixelDir[i], NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
+    if (layer_track_counts[i*2] != 0)
+    {
+      lcount = layer_track_counts[i*2];
+      tcount = layer_track_counts[i*2 + 1];
+    }
+
+    pixelNutEngines[i] = new PixelNutEngine(pixelArrays[i], pixelCounts[i], PIXEL_OFFSET, pixelDir[i], lcount, tcount);
 
     if ((pixelNutEngines[i] == NULL) || (pixelNutEngines[i]->pDrawPixels == NULL))
     {

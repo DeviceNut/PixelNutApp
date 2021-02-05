@@ -91,6 +91,10 @@ See license.txt for the terms of this license.
 #if (!STRANDS_MULTI && (SEGMENT_COUNT > 1))     // logical segments
 #define NUM_PLUGIN_LAYERS       (4 + SEGMENT_COUNT)
 #define NUM_PLUGIN_TRACKS       (3 + SEGMENT_COUNT)
+#elif STRANDS_MULTI
+#define LAYER_TRACK_COUNTS      { 16, 8, 0 }    // layer count, track count, terminator
+#define NUM_PLUGIN_LAYERS       16
+#define NUM_PLUGIN_TRACKS       8
 #else
 #define NUM_PLUGIN_LAYERS       4
 #define NUM_PLUGIN_TRACKS       3

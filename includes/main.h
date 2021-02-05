@@ -26,8 +26,10 @@ void DisplayConfiguration(void)
   DBGOUT((F("  DELAY_OFFSET           = %d"), DELAY_OFFSET));
   DBGOUT((F("  DELAY_RANGE            = %d"), DELAY_RANGE));
   #endif
-  DBGOUT((F("  PIXEL_COUNT            = %d"), PIXEL_COUNT));
   DBGOUT((F("  STRANDS_MULTI          = %d"), STRANDS_MULTI));
+  #if !STRANDS_MULTI
+  DBGOUT((F("  PIXEL_COUNT            = %d"), PIXEL_COUNT));
+  #endif
   DBGOUT((F("  SEGMENT_COUNT          = %d"), SEGMENT_COUNT));
   DBGOUT((F("  STRLEN_PATTERNS        = %d"), STRLEN_PATTERNS));
   DBGOUT((F("  CUSTOM_PATTERNS        = %d"), CUSTOM_PATTERNS));

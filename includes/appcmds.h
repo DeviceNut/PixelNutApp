@@ -126,11 +126,11 @@ public:
         AddNumToStr(outstr, codePatterns);
 
         #if !EXTERN_PATTERNS
-        DBGOUT((F("  Features:    %d"), 0x01)); // cannot use external patterns
-        AddNumToStr(outstr, (0x01 | (PIXEL_COUNT << 4)));
+        DBGOUT((F("  Features:    %d"), 0x01));                 // cannot use external patterns
+        AddNumToStr(outstr, 0x01);
         #else
-        DBGOUT((F("  Features:    %d"), 0)); // no special features
-        AddNumToStr(outstr, (PIXEL_COUNT << 4));
+        DBGOUT((F("  Features:    %d"), 0));                    // no special features
+        AddNumToStr(outstr, 0);
         #endif
 
         DBGOUT((F("  MultiStrand: %d"), STRANDS_MULTI));
