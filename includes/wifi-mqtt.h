@@ -82,6 +82,8 @@ private:
 
   WiFiClient wifiClient;
 
+  char localIP[MAXLEN_DEVICE_IPSTR];  // local IP address
+
   // topic to subscribe to, with device name
   char devnameTopic[sizeof(MQTT_TOPIC_BASE) + MAXLEN_DEVICE_NAME + 1];
   // string sent to the MQTT_TOPIC_NOTIFY topic
@@ -90,6 +92,8 @@ private:
 
   void ConnectWiFi(void);   // waits for connection to WiFi
   bool ConnectMqtt(void);   // returns True if now connected
+
+  void SetDeviceName(void);
 };
 WiFiMqtt wifiMQTT;
 
@@ -109,17 +113,19 @@ bool WiFiMqtt::ConnectMqtt(void)
 
   nextConnectTime = millis() + MSECS_CONNECT_PUB;
 
-  if (mqttClient.connected())
+  if (!mqttClient.connected())
   {
-    mqttClient.publish(MQTT_TOPIC_NOTIFY, connectStr, false); // don't retain
-    return true;
+    DBGOUT(("Connect to Mqtt..."));
+    if (mqttClient.connect(deviceName))
+    {
+      DBGOUT(("Subscribing to: %s", devnameTopic));
+      mqttClient.subscribe(devnameTopic);
+    }
   }
 
-  DBGOUT(("Connect to Mqtt..."));
-  if (mqttClient.connect(deviceName))
+  if (mqttClient.connected())
   {
-    DBGOUT(("Subscribing to: %s", devnameTopic));
-    mqttClient.subscribe(devnameTopic);
+    mqttClient.publish(MQTT_TOPIC_NOTIFY, connectStr, false);
     return true;
   }
 
@@ -162,6 +168,7 @@ void CreateReplyStr(void)
                   FlashGetValue(FLASH_SEG_DELAYMSECS), pstr);
     rstr += strlen(rstr);
   }
+
   FlashSetSegment(curSegment = 0); // MUST start with segment 0
 }
 
@@ -195,17 +202,23 @@ void CallbackMqtt(char* topic, byte* message, unsigned int msglen)
     // all other PixelNut commands, without a reply
     else if (pAppCmd->execCmd(cmdStr)) CheckExecCmd(cmdStr);
   }
-  else
-  {
-    DBGOUT(("MQTT message too long: %d bytes", msglen));
-  }
+  else { DBGOUT(("MQTT message too long: %d bytes", msglen)); }
+}
+
+void WiFiMqtt::SetDeviceName(void)
+{
+  FlashGetName(deviceName);
+
+  strcpy(devnameTopic, MQTT_TOPIC_BASE);
+  strcat(devnameTopic, deviceName);
+
+  strcpy(connectStr, deviceName);
+  strcat(connectStr, " ");
+  strcat(connectStr, localIP);
 }
 
 void WiFiMqtt::setup(void)
 {
-  FlashGetName(deviceName);
-  DBGOUT(("DeviceName=\"%s\"", deviceName));
-
   DBGOUT(("---------------------------------------"));
 
   #if defined(ESP32)
@@ -222,22 +235,15 @@ void WiFiMqtt::setup(void)
   mqttClient.setClient(wifiClient);
   mqttClient.setServer(MQTT_BROKER_IPADDR, MQTT_BROKER_PORT);
   mqttClient.setCallback(CallbackMqtt);
-  ConnectMqtt();
 
-  const char *ipstr = WiFi.localIP().toString().c_str();
+  strcpy(localIP, WiFi.localIP().toString().c_str());
+  SetDeviceName();
 
   DBGOUT(("Device \"%s\":", deviceName));
-  DBGOUT(("  LocalIP=%s", ipstr));
+  DBGOUT(("  LocalIP=%s", localIP));
   DBGOUT(("  Broker=%s:%d", MQTT_BROKER_IPADDR, MQTT_BROKER_PORT));
   DBGOUT(("  MaxBufSize=%d", MQTT_MAX_PACKET_SIZE));
   DBGOUT(("  KeepAliveSecs=%d", MQTT_KEEPALIVE));
-
-  strcpy(devnameTopic, MQTT_TOPIC_BASE);
-  strcat(devnameTopic, deviceName);
-
-  strcpy(connectStr, deviceName);
-  strcat(connectStr, " ");
-  strcat(connectStr, ipstr);
 
   DBGOUT(("---------------------------------------"));
 }
@@ -245,6 +251,12 @@ void WiFiMqtt::setup(void)
 bool WiFiMqtt::setName(char *name)
 {
   FlashSetName(name);
+  SetDeviceName();
+
+  // re-connect with new name next loop
+  mqttClient.disconnect();
+  nextConnectTime = 0;
+
   return true;
 }
 
