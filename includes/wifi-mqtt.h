@@ -12,12 +12,12 @@ See license.txt for the terms of this license.
 /*****************************************************************************************
  Protocol used with MQTT:
 
- 1) This Client has the Wifi credentials and the Broker's IP hardcoded in flash.
+ 1) This Client has the Wifi credentials and the Broker's IP hardcoded.
 
- 2) Client sends to Broker (topic="PixelNutName"): <DevName> <IPaddr>
+ 2) Client sends to Broker (topic="PixelNutNotify"): <DevName> <IPaddr>
     IPaddr: local ip address (e.g. 192.168.1.122)
     DevName: Friendly name of this device (e.g. "My Device")
-    This is sent every second to maintain a connection.
+    This is sent periodically to maintain a connection.
 
  3) Broker sends command to Client (topic is <DevName>): <cmdstr>
     <cmdstr> is a PixelNut command string.
@@ -29,6 +29,14 @@ See license.txt for the terms of this license.
 
 #if defined(WIFI_MQTT) && WIFI_MQTT
 
+// Cannot be used with logical segments or custom built-in patterns
+#if (!STRANDS_MULTI && (SEGMENT_COUNT > 1))
+#error("Logical segments not supported with WiFi/Mqtt")
+#endif
+#if CUSTOM_PATTERNS
+#error("Custom patterns not supported with WiFi/Mqtt")
+#endif
+
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <PubSubClient.h>
@@ -37,14 +45,15 @@ See license.txt for the terms of this license.
 /* Wifi SSID/Password and MQTT Broker in the following format:
 #define WIFI_CREDS_SSID "SSID"
 #define WIFI_CREDS_PASS "PASSWORD"
-#define MQTT_CREDS_IPADDR "192.168.1.4"
-#define MQTT_CREDS_PORT 1883
+#define MQTT_BROKER_IPADDR "192.168.1.4"
+#define MQTT_BROKER_PORT 1883
 */
 
 extern void CheckExecCmd(char *instr); // defined in main.h
 
-#define MQTT_TOPIC_NOTIFY     "PixelNutNotify"
-#define MQTT_TOPIC_REPLY      "PixelNutReply"
+#define MQTT_TOPIC_BASE       "PixelNut/"
+#define MQTT_TOPIC_NOTIFY     "PixelNut/Notify"
+#define MQTT_TOPIC_REPLY      "PixelNut/Reply"
 #define MAXLEN_DEVICE_IPSTR   15 // aaa.bbb.ccc.ddd
 #define MSECS_CONNECT_PUB     3000 // msecs between connect publishes
 
@@ -60,22 +69,24 @@ public:
   void loop(void);
 
   bool setName(char *name);
-  bool sendReply(char *instr);
 
   PubSubClient mqttClient;
-  char replyString[1000]; // long enough for maximum ?, ?S, ?P output strings
+
+  // creates the topic name for sending cmds
+  // needs to be public to be used in callback
+  char deviceName[MAXLEN_DEVICE_NAME + 1];
+
+  char replyStr[1000]; // long enough for all segments
 
 private:
 
   WiFiClient wifiClient;
 
-  uint32_t nextConnectTime = 0;
-
-  // creates the topic name for sending cmds
-  char deviceName[MAXLEN_DEVICE_NAME + 1];
-
+  // topic to subscribe to, with device name
+  char devnameTopic[sizeof(MQTT_TOPIC_BASE) + MAXLEN_DEVICE_NAME + 1];
   // string sent to the MQTT_TOPIC_NOTIFY topic
   char connectStr[MAXLEN_DEVICE_IPSTR + MAXLEN_DEVICE_NAME + 1];
+  uint32_t nextConnectTime = 0; // next time to send notify string
 
   void ConnectWiFi(void);   // waits for connection to WiFi
   bool ConnectMqtt(void);   // returns True if now connected
@@ -107,14 +118,51 @@ bool WiFiMqtt::ConnectMqtt(void)
   DBGOUT(("Connect to Mqtt..."));
   if (mqttClient.connect(deviceName))
   {
-    DBGOUT(("Subscribing to: %s", deviceName));
-    mqttClient.subscribe(deviceName);
+    DBGOUT(("Subscribing to: %s", devnameTopic));
+    mqttClient.subscribe(devnameTopic);
     return true;
   }
 
   DBGOUT(("Mqtt State: %s", mqttClient.state()));
   BlinkStatusLED(0, 1);
   return false;
+}
+
+void CreateReplyStr(void)
+{
+  char pstr[STRLEN_PATTERNS];
+  char *rstr = wifiMQTT.replyStr;
+  rstr[0] = 0;
+
+  #if (SEGMENT_COUNT > 1)
+  byte pixcounts[] = PIXEL_COUNTS;
+  byte ltcounts[] = LAYER_TRACK_COUNTS;
+  #else
+  byte pixcounts[] = { PIXEL_COUNT };
+  byte ltcounts[] = { NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS, 0 };
+  #endif
+  byte lcount, tcount;
+
+  sprintf(rstr, "%s\n%d %d\n", wifiMQTT.deviceName, SEGMENT_COUNT, STRLEN_PATTERNS);
+  rstr += strlen(rstr);
+
+  for (int i = 0; i < SEGMENT_COUNT; ++i)
+  {
+    FlashSetSegment(i);
+
+    if (ltcounts[i*2] != 0)
+    {
+      lcount = ltcounts[i*2];
+      tcount = ltcounts[i*2 + 1];
+    }
+
+    FlashGetStr(pstr);
+    sprintf(rstr, "%d %d %d %d %d\n%s", pixcounts[i], lcount, tcount,
+                  FlashGetValue(FLASH_SEG_BRIGHTNESS),
+                  FlashGetValue(FLASH_SEG_DELAYMSECS), pstr);
+    rstr += strlen(rstr);
+  }
+  FlashSetSegment(curSegment = 0); // MUST start with segment 0
 }
 
 void CallbackMqtt(char* topic, byte* message, unsigned int msglen)
@@ -137,13 +185,12 @@ void CallbackMqtt(char* topic, byte* message, unsigned int msglen)
     cmdStr[msglen] = 0;
     DBGOUT(("Process: \"%s\"", cmdStr));
 
-    wifiMQTT.replyString[0] = 0;
-
     if (*cmdStr == '?')
     {
-      // command to retrive info
-      pAppCmd->execCmd(cmdStr);
-      wifiMQTT.mqttClient.publish(MQTT_TOPIC_REPLY, wifiMQTT.replyString);
+      CreateReplyStr();
+      DBGOUT(("ReplyStr: \"%s\"", wifiMQTT.replyStr));
+      wifiMQTT.mqttClient.publish(MQTT_TOPIC_REPLY, wifiMQTT.replyStr);
+      *cmdStr = 0; // MUST clear string before returning
     }
     // all other PixelNut commands, without a reply
     else if (pAppCmd->execCmd(cmdStr)) CheckExecCmd(cmdStr);
@@ -157,6 +204,7 @@ void CallbackMqtt(char* topic, byte* message, unsigned int msglen)
 void WiFiMqtt::setup(void)
 {
   FlashGetName(deviceName);
+  DBGOUT(("DeviceName=\"%s\"", deviceName));
 
   DBGOUT(("---------------------------------------"));
 
@@ -172,7 +220,7 @@ void WiFiMqtt::setup(void)
 
   ConnectWiFi();
   mqttClient.setClient(wifiClient);
-  mqttClient.setServer(MQTT_CREDS_IPADDR, MQTT_CREDS_PORT);
+  mqttClient.setServer(MQTT_BROKER_IPADDR, MQTT_BROKER_PORT);
   mqttClient.setCallback(CallbackMqtt);
   ConnectMqtt();
 
@@ -180,9 +228,12 @@ void WiFiMqtt::setup(void)
 
   DBGOUT(("Device \"%s\":", deviceName));
   DBGOUT(("  LocalIP=%s", ipstr));
-  DBGOUT(("  Broker=%s:%d", MQTT_CREDS_IPADDR, MQTT_CREDS_PORT));
+  DBGOUT(("  Broker=%s:%d", MQTT_BROKER_IPADDR, MQTT_BROKER_PORT));
   DBGOUT(("  MaxBufSize=%d", MQTT_MAX_PACKET_SIZE));
   DBGOUT(("  KeepAliveSecs=%d", MQTT_KEEPALIVE));
+
+  strcpy(devnameTopic, MQTT_TOPIC_BASE);
+  strcat(devnameTopic, deviceName);
 
   strcpy(connectStr, deviceName);
   strcat(connectStr, " ");
@@ -194,14 +245,6 @@ void WiFiMqtt::setup(void)
 bool WiFiMqtt::setName(char *name)
 {
   FlashSetName(name);
-  return true;
-}
-
-bool WiFiMqtt::sendReply(char *instr)
-{
-  DBGOUT(("ReplyStr: \"%s\"", instr));
-  strcat(replyString, instr);
-  strcat(replyString, "\r\n");
   return true;
 }
 
