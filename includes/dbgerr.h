@@ -13,11 +13,6 @@ See license.txt for the terms of this license.
 #define DBG(x) x
 #define DBGOUT(x) MsgFormat x
 
-#if defined(ESP32)
-#undef F
-#define F(x) x
-#endif
-
 // debug output string must be longer than pattern strings and any debug format string
 #define MAXLEN_FMTSTR (STRLEN_PATTERNS + 20)
 #define MAXLEN_DBGSTR (STRLEN_PATTERNS + 70)
