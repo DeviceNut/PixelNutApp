@@ -1,10 +1,10 @@
-// PixelNutApp WiFi Communications with the ESP32
+// PixelNutApp WiFi Communications using SoftAP
 //
 // Uses global variables: 'pixelNutSupport', 'pAppCmd'.
 // Calls global routines: 'CheckExecCmd'.
 //========================================================================================
 /*
-Copyright (c) 2020, Greg de Valois
+Copyright (c) 2021, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */

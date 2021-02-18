@@ -75,7 +75,7 @@ public:
   // creates the topic name for sending cmds
   // needs to be public to be used in callback
   char deviceName[MAXLEN_DEVICE_NAME + 1];
-
+  char hostName[PREFIX_LEN_DEVNAME + MAXLEN_DEVICE_NAME + 1];
   char replyStr[1000]; // long enough for all segments
 
 private:
@@ -93,14 +93,17 @@ private:
   void ConnectWiFi(void);   // waits for connection to WiFi
   bool ConnectMqtt(void);   // returns True if now connected
 
-  void SetDeviceName(void);
+  void MakeHostName(void);
+  void MakeMqttStrs(void);
 };
 WiFiMqtt wifiMQTT;
 
-void WiFiMqtt::ConnectWiFi(void)
+void WiFiMqtt::ConnectWiFi()
 {
   DBGOUT(("Connect to WiFi..."));
   WiFi.begin(WIFI_CREDS_SSID, WIFI_CREDS_PASS);
+  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
+  WiFi.setHostname(hostName);
 
   while (WiFi.status() != WL_CONNECTED)
     BlinkStatusLED(1, 0);
@@ -205,16 +208,40 @@ void CallbackMqtt(char* topic, byte* message, unsigned int msglen)
   else { DBGOUT(("MQTT message too long: %d bytes", msglen)); }
 }
 
-void WiFiMqtt::SetDeviceName(void)
+void WiFiMqtt::MakeHostName(void)
 {
-  FlashGetName(deviceName);
+  strcpy(hostName, PREFIX_DEVICE_NAME);
+  char *str = hostName + strlen(hostName);
 
+  for (int i = 0; i < strlen(deviceName); ++i)
+  {
+    char ch = deviceName[i];
+    if (ch != ' ') *str++ = ch;
+  }
+  *str = 0;
+}
+
+void WiFiMqtt::MakeMqttStrs(void)
+{
   strcpy(devnameTopic, MQTT_TOPIC_BASE);
   strcat(devnameTopic, deviceName);
 
   strcpy(connectStr, deviceName);
-  strcat(connectStr, " ");
+  strcat(connectStr, ",");
   strcat(connectStr, localIP);
+}
+
+bool WiFiMqtt::setName(char *name)
+{
+  FlashSetName(name);
+  strcpy(deviceName, name);
+
+  // re-connect with new name next loop
+  MakeMqttStrs();
+  mqttClient.disconnect();
+  nextConnectTime = 0;
+
+  return true;
 }
 
 void WiFiMqtt::setup(void)
@@ -231,33 +258,25 @@ void WiFiMqtt::setup(void)
   DBGOUT(("  Heap=%d bytes", esp_get_free_heap_size()));
   #endif
 
+  FlashGetName(deviceName);
+  MakeHostName();
+
   ConnectWiFi();
   mqttClient.setClient(wifiClient);
   mqttClient.setServer(MQTT_BROKER_IPADDR, MQTT_BROKER_PORT);
   mqttClient.setCallback(CallbackMqtt);
 
   strcpy(localIP, WiFi.localIP().toString().c_str());
-  SetDeviceName();
+  MakeMqttStrs();
 
   DBGOUT(("Device \"%s\":", deviceName));
   DBGOUT(("  LocalIP=%s", localIP));
+  DBGOUT(("  Hostname=%s", WiFi.getHostname()));
   DBGOUT(("  Broker=%s:%d", MQTT_BROKER_IPADDR, MQTT_BROKER_PORT));
   DBGOUT(("  MaxBufSize=%d", MQTT_MAX_PACKET_SIZE));
   DBGOUT(("  KeepAliveSecs=%d", MQTT_KEEPALIVE));
 
   DBGOUT(("---------------------------------------"));
-}
-
-bool WiFiMqtt::setName(char *name)
-{
-  FlashSetName(name);
-  SetDeviceName();
-
-  // re-connect with new name next loop
-  mqttClient.disconnect();
-  nextConnectTime = 0;
-
-  return true;
 }
 
 void WiFiMqtt::loop(void)
