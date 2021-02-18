@@ -14,33 +14,35 @@ See license.txt for the terms of this license.
 #define DBGOUT(x) MsgFormat x
 
 // debug output string must be longer than pattern strings and any debug format string
-#define MAXLEN_FMTSTR (STRLEN_PATTERNS + 20)
 #define MAXLEN_DBGSTR (STRLEN_PATTERNS + 70)
-
-char fmtstr[MAXLEN_FMTSTR];   // holds debug format string
-char outstr[MAXLEN_DBGSTR];   // holds debug output string
+char dbgstr[MAXLEN_DBGSTR];   // holds debug output string
 
 #if defined(ESP32)
 void MsgFormat(const char *fmtstr, ...)
 {
   va_list va;
   va_start(va, fmtstr);
-  vsnprintf(outstr, MAXLEN_DBGSTR, fmtstr, va);
+  vsnprintf(dbgstr, MAXLEN_DBGSTR, fmtstr, va);
   va_end(va);
 
-  Serial.println(outstr);
+  Serial.println(dbgstr);
 }
 #else
+
+#define MAXLEN_FMTSTR (STRLEN_PATTERNS + 20)
+char fmtstr[MAXLEN_FMTSTR];   // holds debug format string
+
 void MsgFormat(const __FlashStringHelper *str_in_code, ...)
 {
   strcpy_P(fmtstr, (char*)str_in_code);
 
   va_list va;
   va_start(va, str_in_code);
-  vsnprintf(outstr, MAXLEN_DBGSTR, fmtstr, va);
+  vsnprintf(dbgstr, MAXLEN_DBGSTR, fmtstr, va);
   va_end(va);
 
-  Serial.println(outstr);
+  Serial.println(dbgstr);
+  Serial.flush();
 }
 #endif
 
