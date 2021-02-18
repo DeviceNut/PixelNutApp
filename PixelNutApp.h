@@ -15,9 +15,11 @@ See license.txt for the terms of this license.
 #include "includes/flash.h"         // Flash Storage Handling
 #include "includes/pselect.h"       // Pattern Selection
 #include "includes/appcmds.h"       // Application Commands
+                                    // Communications:
 #include "includes/wifi-softap.h"   // WiFi using SoftAP
 #include "includes/wifi-mqtt.h"     // WiFi using MQTT
-#include "includes/ble-bluefruit.h" // Bluefriuit Bluetooth
+#include "includes/ble-bluefruit.h" // Ble using Bluefruit module
+#include "includes/ble-esp32.h"     // Ble with ESP-32 boards
 #include "includes/segments.h"      // Logical Segment Support
                                     // Physical Controls:
 #include "includes/ctrl-pattern.h"  // Sets the current preset pattern string

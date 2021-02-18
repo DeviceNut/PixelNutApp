@@ -59,6 +59,9 @@ See license.txt for the terms of this license.
 #endif
 #define BLE_COMM                1               // using bluetooth BLE
 #endif
+#if defined(BLE_ESP32) && BLE_ESP32
+#define BLE_COMM                1               // using bluetooth BLE
+#endif
 #if !defined(BLE_COMM)
 #define BLE_COMM                0               // default is no bluetooth
 #endif

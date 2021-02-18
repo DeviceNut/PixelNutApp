@@ -90,8 +90,10 @@ AppCommands *pAppCmd = &appCmdX;
 
 #endif // (EXTERNAL_COMM && APPCMDS_EXTEND)
 
-#if BLE_COMM
-class LogicalSegs : public Bluetooth
+#if BLE_BLUEFRUIT
+class LogicalSegs : public BleBluefruit
+#elif BLE_ESP32
+class LogicalSegs : public BleEsp32
 #elif WIFI_SOFTAP
 class LogicalSegs : public WiFiSoftAp
 #elif WIFI_MQTT

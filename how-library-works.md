@@ -38,7 +38,7 @@ Set 'EEPROM_FORMAT' to 1 once to format (clear to 0) the entire EEPROM area, the
 
 Communications #defines
 
-Currently, there is support for bluetooth using Adafruit hardware ('BLE_BLUEFRUIT'), and wifi using either the SoftAP ('WIFI_SOFTAP') or MQTT ('WIFI-MQTT') handlers. These in turn set 'EXTERNAL_COMM', and either 'BLE_COM' or 'WIFI_COM'.
+Currently, there is support for bluetooth using Adafruit hardware ('BLE_BLUEFRUIT') and on the ESP32 ('BLE_ESP32'), and wifi using either the SoftAP ('WIFI_SOFTAP') or MQTT ('WIFI-MQTT') handlers. These in turn set 'EXTERNAL_COMM', and either 'BLE_COM' or 'WIFI_COM'.
 
 
 Override/Extend #defines

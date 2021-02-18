@@ -19,7 +19,7 @@ extern void CheckExecCmd(char *instr); // defined in main.h
 
 #define MSECS_CHECK_CONNECT   500     // check for connection every 1/2 second
 
-class Bluetooth : public CustomCode
+class BleBluefruit : public CustomCode
 {
 public:
 
@@ -36,13 +36,13 @@ private:
 
   unsigned long msecsConnect = 0;
 };
-Bluetooth bluetooth;
+BleBluefruit bleBluefruit;
 
 // this will be called upon any bluetooth communication errors
 // upon return the hardware will be reset automatically for us
 void notifyCB(NotifyMessage msgval, char *msgstr)
 {
-  DBGOUT((F("Bluetooth Notification %d: %s"), msgval, msgstr));
+  DBGOUT((F("BleBluefruit Notification %d: %s"), msgval, msgstr));
 
   DBGOUT((F("Resetting BLE controller...")));
   bfruit.reset(); // hardware reset, this clears cmdStr[] too
@@ -139,7 +139,7 @@ void getNameCB(void)
 
 // does not return if fail because NotifyCB gets
 // called which will then hang in ErrorHandler
-void Bluetooth::setup(void)
+void BleBluefruit::setup(void)
 {
   inSetup = true;
   isConnected = false;
@@ -161,7 +161,7 @@ void Bluetooth::setup(void)
 }
 
 // return false if failed to set name
-bool Bluetooth::setName(char *name)
+bool BleBluefruit::setName(char *name)
 {
   FlashSetName(name);
   return setNameBLE(name);
@@ -169,9 +169,9 @@ bool Bluetooth::setName(char *name)
 
 // return false if failed to send message
 // upon exit cmdStr[] has garbage from calling writeDataStr()
-bool Bluetooth::sendReply(char *instr)
+bool BleBluefruit::sendReply(char *instr)
 {
-  DBGOUT((F("BLE <-- \"%s\""), instr));
+  DBGOUT((F("BLE Tx: \"%s\""), instr));
 
   bool success = true;
 
@@ -191,11 +191,11 @@ bool Bluetooth::sendReply(char *instr)
 
 static void ResponseCB(void)
 {
-  DBGOUT((F("BLE --> \"%s\""), cmdStr));
+  DBGOUT((F("BLE Rx: \"%s\""), cmdStr));
   if (pAppCmd->execCmd(cmdStr)) CheckExecCmd(cmdStr);
 }
 
-void Bluetooth::loop(void)
+void BleBluefruit::loop(void)
 {
   if ((pixelNutSupport.getMsecs() - msecsConnect) > MSECS_CHECK_CONNECT)
   {
