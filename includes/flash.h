@@ -127,9 +127,7 @@ void FlashSetName(char *name)
   for (int i = 0; i < MAXLEN_DEVICE_NAME; ++i)
     EEPROM.write((FLASHOFF_DEVICE_NAME + i), name[i]);
 
-#if defined(ESP32)
-  EEPROM.commit();
-#endif
+  FlashDone();
 }
 
 void FlashGetName(char *name)
@@ -153,9 +151,7 @@ void FlashSetStr(char *str, int offset)
     if (!str[i]) break;
   }
 
-#if defined(ESP32)
-  EEPROM.commit();
-#endif
+  FlashDone();
 }
 
 void FlashGetStr(char *str)
@@ -233,6 +229,7 @@ void FlashStartup(void)
   DBGOUT((F("Flash: delay=%d msecs"), (int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS)));
 
   FlashSetProperties();
+
   FlashDone();
 }
 
