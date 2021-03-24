@@ -3,9 +3,9 @@
 //
 // This application is built specifically for the "FireFly" PixelNut! product:
 // A Teensy LC processor module from PJRC (www.pjrc.com), which is mounted on a
-// circuit board along with a battery charger from Adafruit (www.adafruit.com),
-// powered by a 2000 mA lithium battery, installed inside a mason jar with a
-// power button and a mode button, and attached to a strand of WS2812B LEDs.
+// circuit board along with a accelerometer and a battery charger, powered by a
+// 2000 mA lithium battery, installed inside a mason jar with a power button and
+// a mode button, and attached to a strand of WS2812B LEDs.
 
 /*---------------------------------------------------------------------------------------------
  This is free software: you can redistribute it and/or modify it under the terms of the GNU

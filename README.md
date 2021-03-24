@@ -1,7 +1,7 @@
 PixelNutApp Arduino Library
 ================================================================
 
-This library is a collection of common application code that you can use, along with other libraries from PixelNut (PixelNutLib, BluefruitStrs, UIDevices, and NeoPixelShow Libraries), to create your own PixelNut! applications.
+This library is a collection of common application code that you can use, along with other libraries (PixelNutLib, BluefruitStrs, UIDevices, and NeoPixelShow Libraries), to create your own PixelNut! applications.
 
 After downloading, rename folder to 'PixelNutApp' and install in the Arduino Libraries folder.
 
