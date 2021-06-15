@@ -46,10 +46,10 @@ void notifyCB(NotifyMessage msgval, char *msgstr)
 
   DBGOUT((F("Resetting BLE controller...")));
   bfruit.reset(); // hardware reset, this clears cmdStr[] too
-  bluetooth.isConnected = false;
+  bleBluefruit.isConnected = false;
   DBGOUT((F("Reset completed")));
 
-  ErrorHandler(3, msgval, bluetooth.inSetup); // hangs here if in setup
+  ErrorHandler(3, msgval, bleBluefruit.inSetup); // hangs here if in setup
 }
 
 static bool CheckDevName(char *devstr)
