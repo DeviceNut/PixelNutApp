@@ -50,17 +50,19 @@ void FlashStartup(void) {}
 #include <EEPROM.h>
 
 // for each segment:
-#define FLASH_SEG_LENGTH        10
+#define FLASH_SEG_LENGTH        13
 
 // offsets within each segment space:
 #define FLASH_SEG_BRIGHTNESS    0
 #define FLASH_SEG_DELAYMSECS    1
-#define FLASH_SEG_PATTERN       2
-#define FLASH_SEG_XT_MODE       3
-#define FLASH_SEG_XT_HUE        4 // 2 bytes
-#define FLASH_SEG_XT_WHT        6
-#define FLASH_SEG_XT_CNT        7
-#define FLASH_SEG_FORCE         8 // 2 bytes
+#define FLASH_SEG_FIRSTPOS      2  // 2 bytes
+#define FLASH_SEG_DIRECTION     4
+#define FLASH_SEG_PATTERN       5
+#define FLASH_SEG_XT_MODE       6
+#define FLASH_SEG_XT_HUE        7  // 2 bytes
+#define FLASH_SEG_XT_WHT        9
+#define FLASH_SEG_XT_CNT        10
+#define FLASH_SEG_FORCE         11 // 2 bytes
 
 #define FLASHOFF_DEVICE_NAME    0
 #if EXTERNAL_COMM
@@ -168,8 +170,10 @@ void FlashGetStr(char *str)
   DBGOUT((F("FlashGetStr(@%d): \"%s\" (len=%d)"), strOffset, str, strlen(str)));
 }
 
-void FlashSetBright() { FlashSetValue(FLASH_SEG_BRIGHTNESS, pPixelNutEngine->getMaxBrightness());  FlashDone(); }
-void FlashSetDelay()  { FlashSetValue(FLASH_SEG_DELAYMSECS, pPixelNutEngine->getDelayOffset());    FlashDone(); }
+void FlashSetBright()    { FlashSetValue(FLASH_SEG_BRIGHTNESS, pPixelNutEngine->getMaxBrightness());  FlashDone(); }
+void FlashSetDelay()     { FlashSetValue(FLASH_SEG_DELAYMSECS, pPixelNutEngine->getDelayOffset());    FlashDone(); }
+void FlashSetFirst()     { FlashSetValue(FLASH_SEG_FIRSTPOS,   pPixelNutEngine->getFirstPosition());  FlashDone(); }
+void FlashSetDirection() { FlashSetValue(FLASH_SEG_DIRECTION,  pPixelNutEngine->getDirection());      FlashDone(); }
 
 void FlashSetPattern(byte pattern)  { FlashSetValue(FLASH_SEG_PATTERN, pattern); FlashDone(); }
 void FlashSetXmode(bool enable)     { FlashSetValue(FLASH_SEG_XT_MODE, enable);  FlashDone(); }
@@ -222,8 +226,11 @@ void FlashStartup(void)
   int8_t delay = (int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS);
   if ((delay < -DELAY_RANGE) || (DELAY_RANGE < delay)) delay = 0; // set to min if out of range
 
+  int16_t fpos = FlashGetValue(FLASH_SEG_FIRSTPOS);
+
   pPixelNutEngine->setMaxBrightness(bright);
   pPixelNutEngine->setDelayOffset(delay);
+  pPixelNutEngine->setFirstPosition(fpos);
 
   DBGOUT((F("Flash: brightness=%d%%"), bright));
   DBGOUT((F("Flash: delay=%d msecs"), (int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS)));
