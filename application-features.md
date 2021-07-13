@@ -61,7 +61,7 @@ The file 'MyPatterns.h' defines the pattern strings, and code in the files 'sele
 Use of EEPROM to Store Default Pattern
 ---------------------------------------------------------------
 
-If the hardware processor supports an EEPROM function (or flash memory that is made to appear as such by underlying library functions), various applications settings are stored there and retrieved on startup.
+The hardware system must support EEPROM (or flash memory that is made to appear as such by an underlying library), as various applications settings are stored there and retrieved upon startup.
 
 These settings include the initial preset effect pattern, and for applications that don't have physical controls, the current values for the brightness, animation delay, and all the externally set properties.
 
@@ -128,7 +128,7 @@ Only compiles in the <code> when debug mode is enabled.
 'DBGOUT((F(<format_str>), arg1, arg2, ...))' 
 What causes the <format_str> to be parsed using the substitution arguments 'arg1' etc, to create an output string sent to the Serial Monitor.
 
-(Note: the 'F()' macro is used to avoid taking up precious data space with the debug format strings.)
+(Note: the 'F()' macro is used to avoid taking up precious data space with the debug format strings, implemented on AVR processors, but not others.)
 
 One other thing to keep in mind when using the debug mode is that the application will wait for up to 5 seconds for the Serial Monitor to be attached, so as not to miss the beginning output. So you'll want to turn debug mode off when not using it to avoid an unnecessary pause each time you power up.
 

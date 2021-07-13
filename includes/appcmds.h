@@ -40,7 +40,12 @@ public:
         else if (isalpha(instr[0])) // have engine command
           useCmdStr = true;
 
-        else return false;
+        else
+        {
+          DBGOUT((F("Unknown command: %s"), instr));
+          pCustomCode->sendReply("?");
+          return false;
+        }
         break;
       }
       case '.': // start/stop saving a pattern into flash
@@ -52,13 +57,17 @@ public:
       }
       case '?': // returns current settings
       {
+        char outstr[STRLEN_PATTERNS];
+
         #if (SEGMENT_COUNT > 1)
         if (instr[1] == 'S') // send info about segments
         {
           DBGOUT((F("Segment Info:  %s"), SEGMENT_INFO));
           if (!pCustomCode->sendReply((char*)SEGMENT_INFO)) return false;
 
-          char outstr[FLASH_SEG_LENGTH * 5]; // max length of each value is 4 + space
+          // (FLASH_SEG_LENGTH * 5) <= STRLEN_PATTERNS
+          //char outstr[FLASH_SEG_LENGTH * 5]; // max length of each value is 4 + space
+
           for (int i = 0; i < SEGMENT_COUNT; ++i)
           {
             FlashSetSegment(i);
@@ -82,7 +91,6 @@ public:
         {
           DBGOUT((F("Patterns:  %d"), codePatterns));
 
-          char outstr[STRLEN_PATTERNS];
           for (int i = 0; i < codePatterns; ++i)
           {
             strcpy_P(outstr, customPatterns[i]);
@@ -95,7 +103,20 @@ public:
         }
         #endif
 
-        char outstr[100];
+        #if EXPORT_PLUGINS
+        if (instr[1] == 'G') // about internal plugins
+        {
+          // TODO: send info on each built-in plugin
+
+        }
+        #endif
+
+        if (instr[1] != 0)
+        {
+          DBGOUT((F("Unknown ? modifier: %c"), instr[1]));
+          pCustomCode->sendReply("?");
+          return false;
+        }
 
         DBGOUT((F("Info Line #1")));
         DBGOUT((F("  Title=P!")));
@@ -104,9 +125,11 @@ public:
         #if STRANDS_MULTI         // multiple physical strands
         DBGOUT((F("  Lines=2")));
         AddNumToStr(outstr, 2);   // number of lines to be sent
+
         #elif (SEGMENT_COUNT > 1) // multiple logical segments
         DBGOUT((F("  Lines=3")));
         AddNumToStr(outstr, 3);   // includes line 3
+
         #else                     // single strand and segment
         DBGOUT((F("  Lines=4")));
         AddNumToStr(outstr, 4);   // includes lines 3 & 4
@@ -172,7 +195,7 @@ public:
         AddNumToStr(outstr, pPixelNutEngine->getPropertyHue());
         AddNumToStr(outstr, pPixelNutEngine->getPropertyWhite());
         AddNumToStr(outstr, pPixelNutEngine->getPropertyCount());
-        AddNumToStr(outstr, FlashGetForce()); // not backward compatible
+        AddNumToStr(outstr, FlashGetForce()); // not backward compatible ???
 
         if (!pCustomCode->sendReply(outstr)) return false;
         #endif
@@ -189,6 +212,18 @@ public:
       {
         pPixelNutEngine->setDelayOffset( atoi(instr+1) );
         FlashSetDelay();
+        break;
+      }
+      case '^': // set first position
+      {
+        pPixelNutEngine->setFirstPosition( atoi(instr+1) );
+        FlashSetDelay();
+        break;
+      }
+      case '&': // set direction
+      {
+        pPixelNutEngine->setDirection( atoi(instr+1) );
+        FlashSetDirection();
         break;
       }
       case '[': // pause display updating
