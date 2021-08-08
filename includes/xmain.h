@@ -6,18 +6,7 @@ Copyright (c) 2015-2020, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
-#if defined(XMAIN_ENABLE) && XMAIN_ENABLE
-
-#if STRANDS_MULTI
-static bool pixelDir[SEGMENT_COUNT] = PIXEL_DIRS;
-static uint16_t pixelCounts[SEGMENT_COUNT] = PIXEL_COUNTS;
-static byte pixelPins[SEGMENT_COUNT] = PIXEL_PINS;
-static byte layer_track_counts[] = LAYER_TRACK_COUNTS;
-#else
-static bool pixelDir[SEGMENT_COUNT] = { true };
-static uint16_t pixelCounts[SEGMENT_COUNT] = { PIXEL_COUNT };
-static byte pixelPins[SEGMENT_COUNT] = { DPIN_PIXELS };
-#endif
+#if defined(XMAIN_ENABLE) && XMAIN_ENABLE && STRANDS_MULTI
 
 static uint16_t pixelBytes[SEGMENT_COUNT];
 static byte *pixelArrays[SEGMENT_COUNT];
@@ -56,9 +45,7 @@ void ShowPixels(int seg)
   byte *ptr = pixelArrays[seg];
   int count = pixelCounts[seg];
 
-  #if STRANDS_MULTI
-  digitalWrite(pixelPins[seg], LOW); // enable this strand
-  #endif
+  digitalWrite(PIXEL_PINS[seg], LOW); // enable this strand
   SPI.beginTransaction(spiSettings);
 
   // 4 byte start-frame marker
@@ -71,9 +58,7 @@ void ShowPixels(int seg)
   }
 
   SPI.endTransaction();
-  #if STRANDS_MULTI
-  digitalWrite(pixelPins[seg], HIGH); // disable this strand
-  #endif
+  digitalWrite(PIXEL_PINS[seg], HIGH); // disable this strand
 
   #else
   neoPixels[seg]->show(pixelArrays[seg], pixelBytes[seg]);
@@ -126,8 +111,8 @@ void setup()
   #if PIXELS_APA
   for (int i = 0; i < SEGMENT_COUNT; ++i) // config chip select pins
   {
-    pinMode(pixelPins[i], OUTPUT);
-    digitalWrite(pixelPins[i], HIGH);
+    pinMode(PIXEL_PINS[i], OUTPUT);
+    digitalWrite(PIXEL_PINS[i], HIGH);
   }
   SPI.begin(); // initialize SPI library
   #endif
@@ -153,7 +138,7 @@ void setup()
   // alloc arrays, turn off pixels, init patterns
   for (int i = 0; i < SEGMENT_COUNT; ++i)
   {
-    pixelBytes[i] = pixelCounts[i]*3;
+    pixelBytes[i] = PIXEL_COUNTS[i]*3;
 
     pixelArrays[i] = (byte*)calloc(pixelBytes[i], sizeof(byte));
     if (pixelArrays[i] == NULL)
@@ -163,7 +148,7 @@ void setup()
     }
 
     #if !PIXELS_APA
-    neoPixels[i] = new NeoPixelShow(pixelPins[i]);
+    neoPixels[i] = new NeoPixelShow(PIXEL_PINS[i]);
     if (neoPixels[i] == NULL)
     {
       DBGOUT((F("Alloc failed for neopixel class, segment=%d"), i));
@@ -180,13 +165,9 @@ void setup()
 
     ShowPixels(i); // turn off pixels
 
-    if (layer_track_counts[i*2] != 0)
-    {
-      lcount = layer_track_counts[i*2];
-      tcount = layer_track_counts[i*2 + 1];
-    }
-
-    pixelNutEngines[i] = new PixelNutEngine(pixelArrays[i], pixelCounts[i], PIXEL_OFFSET, pixelDir[i], lcount, tcount);
+    pixelNutEngines[i] = new PixelNutEngine(pixelArrays[i], PIXEL_COUNTS[i],
+                                PIXEL_OFFSET, PIXEL_DIRS[i],
+                                NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
 
     if ((pixelNutEngines[i] == NULL) || (pixelNutEngines[i]->pDrawPixels == NULL))
     {
@@ -243,8 +224,6 @@ void loop()
   }
 }
 
-#if STRANDS_MULTI
-
 extern PixelNutEngine *pixelNutEngines[];
 
 // could be called by internal controls
@@ -288,6 +267,5 @@ AppCommandsX appCmdX; // extended class instance
 AppCommands *pAppCmd = &appCmdX;
 
 #endif // (EXTERNAL_COMM && APPCMDS_EXTEND)
-#endif // STRANDS_MULTI
-#endif // XMAIN_ENABLE
+#endif // XMAIN_ENABLE && STRANDS_MULTI
 //*********************************************************************************************

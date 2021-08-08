@@ -145,30 +145,35 @@ void CreateReplyStr(void)
 
   #if (SEGMENT_COUNT > 1)
   byte pixcounts[] = PIXEL_COUNTS;
-  byte ltcounts[] = LAYER_TRACK_COUNTS;
   #else
   byte pixcounts[] = { PIXEL_COUNT };
-  byte ltcounts[] = { NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS, 0 };
   #endif
   byte lcount, tcount;
 
-  sprintf(rstr, "%s\n%d %d\n", wifiMQTT.deviceName, SEGMENT_COUNT, STRLEN_PATTERNS);
+  sprintf(rstr, "%s\n%d %d %d %d\n", wifiMQTT.deviceName,
+                  SEGMENT_COUNT, STRLEN_PATTERNS,
+                  NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
   rstr += strlen(rstr);
 
   for (int i = 0; i < SEGMENT_COUNT; ++i)
   {
     FlashSetSegment(i);
 
-    if (ltcounts[i*2] != 0)
-    {
-      lcount = ltcounts[i*2];
-      tcount = ltcounts[i*2 + 1];
-    }
-
     FlashGetStr(pstr);
-    sprintf(rstr, "%d %d %d %d %d\n%s", pixcounts[i], lcount, tcount,
+    sprintf(rstr, "%d %d %d %d %d\n%d %d %d %d %d %d\n%s",
+                  pixcounts[i],
                   FlashGetValue(FLASH_SEG_BRIGHTNESS),
-                  FlashGetValue(FLASH_SEG_DELAYMSECS), pstr);
+                  FlashGetValue(FLASH_SEG_DELAYMSECS),
+                  FlashGetValue(FLASH_SEG_FIRSTPOS),
+                  FlashGetValue(FLASH_SEG_DIRECTION),
+
+                  FlashGetValue(FLASH_SEG_XT_MODE),
+                  FlashGetValue(FLASH_SEG_XT_HUE),
+                  FlashGetValue(FLASH_SEG_XT_WHT),
+                  FlashGetValue(FLASH_SEG_XT_CNT),
+                  FlashGetValue(FLASH_SEG_FORCE),
+                  FlashGetValue(FLASH_SEG_PATTERN),
+                  pstr);
     rstr += strlen(rstr);
   }
 

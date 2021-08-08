@@ -29,7 +29,7 @@ Here are some of the main #define statements that determine important functional
 
 'STRLEN_PATTERNS' sets the size of the 'cmdStr' buffer used to hold the pattern strings, and MUST be large enough for the longest effect pattern defined internally, or to receive patterns sent from an external client.
 
-'NUM_PLUGIN_LAYERS' and 'NUM_PLUGIN_TRACKS' set the size of the stacks used in the PixelNutLib Library, and must be at large enough for the effect patterns being used. If multiple strands are used, then 'LAYER_TRACK_COUNTS' must be defined as '{ number_of_layers, number_of_tracks, 0 }'.
+'NUM_PLUGIN_LAYERS' and 'NUM_PLUGIN_TRACKS' set the size of the stacks used in the PixelNutLib Library, and must be at large enough for the effect patterns being used.
 
 'CUSTOM_PATTERNS' is set to 1 when defining internal patterns, whether because there is no external client, or because you're adding additional patterns. 'EXTERN_PATTERNS' is normally set to 1 if using an external client (which has built-in patterns). Set 'EXTERN_PATTERNS' to 0 when you don't want to use these external patterns, and use only internal custom ones. Use 'PATTERN_OVERRIDE' to override all of the above and only use specific patterns defined by your application (see FireFly example).
 

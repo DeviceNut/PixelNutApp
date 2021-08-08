@@ -195,7 +195,7 @@ public:
         AddNumToStr(outstr, pPixelNutEngine->getPropertyHue());
         AddNumToStr(outstr, pPixelNutEngine->getPropertyWhite());
         AddNumToStr(outstr, pPixelNutEngine->getPropertyCount());
-        AddNumToStr(outstr, FlashGetForce()); // not backward compatible ???
+        AddNumToStr(outstr, FlashGetForce());
 
         if (!pCustomCode->sendReply(outstr)) return false;
         #endif
