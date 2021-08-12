@@ -38,8 +38,9 @@ public:
           useCmdStr = true;
         }
         else if (isalpha(instr[0])) // have engine command
+        {
           useCmdStr = true;
-
+        }
         else
         {
           DBGOUT((F("Unknown command: %s"), instr));
@@ -115,7 +116,7 @@ public:
         {
           DBGOUT((F("Unknown ? modifier: %c"), instr[1]));
           pCustomCode->sendReply("?");
-          return false;
+          break; // don't return false for error
         }
 
         DBGOUT((F("Info Line #1")));

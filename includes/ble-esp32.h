@@ -227,6 +227,8 @@ bool BleEsp32::sendReply(char *instr)
       delay(10);
     }
   }
+
+  return true;
 }
 
 void BleEsp32::loop(void)
