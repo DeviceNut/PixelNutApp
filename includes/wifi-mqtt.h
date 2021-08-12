@@ -51,11 +51,13 @@ See license.txt for the terms of this license.
 
 extern void CheckExecCmd(char *instr); // defined in main.h
 
-#define MQTT_TOPIC_BASE       "PixelNut/"
+#define MQTT_TOPIC_COMMAND    "PixelNut/Cmd/" // + name
 #define MQTT_TOPIC_NOTIFY     "PixelNut/Notify"
 #define MQTT_TOPIC_REPLY      "PixelNut/Reply"
 #define MAXLEN_DEVICE_IPSTR   15 // aaa.bbb.ccc.ddd
 #define MSECS_CONNECT_PUB     3000 // msecs between connect publishes
+#define STR_CONNECT_SEPARATOR ","
+#define STRLEN_SEPARATOR      1
 
 class WiFiMqtt : public CustomCode
 {
@@ -69,6 +71,7 @@ public:
   void loop(void);
 
   bool setName(char *name);
+  bool sendReply(char *instr);
 
   PubSubClient mqttClient;
 
@@ -85,9 +88,9 @@ private:
   char localIP[MAXLEN_DEVICE_IPSTR];  // local IP address
 
   // topic to subscribe to, with device name
-  char devnameTopic[sizeof(MQTT_TOPIC_BASE) + MAXLEN_DEVICE_NAME + 1];
+  char devnameTopic[sizeof(MQTT_TOPIC_COMMAND) + MAXLEN_DEVICE_NAME + 1];
   // string sent to the MQTT_TOPIC_NOTIFY topic
-  char connectStr[MAXLEN_DEVICE_IPSTR + MAXLEN_DEVICE_NAME + 1];
+  char connectStr[MAXLEN_DEVICE_IPSTR + STRLEN_SEPARATOR + MAXLEN_DEVICE_NAME + 1];
   uint32_t nextConnectTime = 0; // next time to send notify string
 
   void ConnectWiFi(void);   // waits for connection to WiFi
@@ -118,10 +121,12 @@ bool WiFiMqtt::ConnectMqtt(void)
 
   if (!mqttClient.connected())
   {
-    DBGOUT(("Connect to Mqtt..."));
+    DBGOUT(("Connecting to Mqtt..."));
+
+    // this crash/reboots if no broker found FIXME
     if (mqttClient.connect(deviceName))
     {
-      DBGOUT(("Subscribing to: %s", devnameTopic));
+      DBGOUT(("Subscribe to: %s", devnameTopic));
       mqttClient.subscribe(devnameTopic);
     }
   }
@@ -200,10 +205,10 @@ void CallbackMqtt(char* topic, byte* message, unsigned int msglen)
     cmdStr[msglen] = 0;
     DBGOUT(("Process: \"%s\"", cmdStr));
 
-    if (*cmdStr == '?')
+    if (!strcmp(cmdStr, "?"))
     {
       CreateReplyStr();
-      DBGOUT(("ReplyStr: \"%s\"", wifiMQTT.replyStr));
+      DBGOUT(("MQTT ReplyStr: \"%s\"", wifiMQTT.replyStr));
       wifiMQTT.mqttClient.publish(MQTT_TOPIC_REPLY, wifiMQTT.replyStr);
       *cmdStr = 0; // MUST clear string before returning
     }
@@ -228,12 +233,26 @@ void WiFiMqtt::MakeHostName(void)
 
 void WiFiMqtt::MakeMqttStrs(void)
 {
-  strcpy(devnameTopic, MQTT_TOPIC_BASE);
+  strcpy(devnameTopic, MQTT_TOPIC_COMMAND);
   strcat(devnameTopic, deviceName);
 
   strcpy(connectStr, deviceName);
-  strcat(connectStr, ",");
+  strcat(connectStr, STR_CONNECT_SEPARATOR);
   strcat(connectStr, localIP);
+}
+
+bool WiFiMqtt::sendReply(char *instr)
+{
+  char *rstr = wifiMQTT.replyStr;
+  rstr[0] = 0;
+
+  sprintf(rstr, "%s\n%s\n", wifiMQTT.deviceName, instr);
+
+  DBGOUT(("ReplyStr: \"%s\"", wifiMQTT.replyStr));
+  wifiMQTT.mqttClient.publish(MQTT_TOPIC_REPLY, wifiMQTT.replyStr);
+  *cmdStr = 0; // MUST clear string before returning
+
+  return true;
 }
 
 bool WiFiMqtt::setName(char *name)
@@ -274,7 +293,7 @@ void WiFiMqtt::setup(void)
   strcpy(localIP, WiFi.localIP().toString().c_str());
   MakeMqttStrs();
 
-  DBGOUT(("Device \"%s\":", deviceName));
+  DBGOUT(("Device: \"%s\"", deviceName));
   DBGOUT(("  LocalIP=%s", localIP));
   DBGOUT(("  Hostname=%s", WiFi.getHostname()));
   DBGOUT(("  Broker=%s:%d", MQTT_BROKER_IPADDR, MQTT_BROKER_PORT));
