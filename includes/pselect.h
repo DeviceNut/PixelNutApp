@@ -18,7 +18,7 @@ void GetCurPattern(char *instr)
   {
     strcpy_P(instr, customPatterns[curPattern-1]);
     DBGOUT((F("Retrieved custom pattern #%d"), curPattern));
-    pPixelNutEngine->popPluginStack(); // clear stack to prepare for new cmds
+    pPixelNutEngine->clearStack(); // clear stack to prepare for new cmds
   }
   #endif
   #if EXTERN_PATTERNS
