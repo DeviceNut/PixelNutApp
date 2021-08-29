@@ -33,9 +33,6 @@ See license.txt for the terms of this license.
 #if (!STRANDS_MULTI && (SEGMENT_COUNT > 1))
 #error("Logical segments not supported with WiFi/Mqtt")
 #endif
-#if CUSTOM_PATTERNS
-#error("Custom patterns not supported with WiFi/Mqtt")
-#endif
 
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -155,8 +152,8 @@ void CreateReplyStr(void)
   #endif
   byte lcount, tcount;
 
-  sprintf(rstr, "%s\n%d %d %d %d\n", wifiMQTT.deviceName,
-                  SEGMENT_COUNT, STRLEN_PATTERNS,
+  sprintf(rstr, "%s\n%d %d %d %d %d %d\n", wifiMQTT.deviceName,
+                  SEGMENT_COUNT, STRLEN_PATTERNS, codePatterns, 0, // custom plugin count TODO
                   NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
   rstr += strlen(rstr);
 
