@@ -218,7 +218,7 @@ public:
       case '^': // set first position
       {
         pPixelNutEngine->setFirstPosition( atoi(instr+1) );
-        FlashSetDelay();
+        FlashSetFirst();
         break;
       }
       case '&': // set direction
