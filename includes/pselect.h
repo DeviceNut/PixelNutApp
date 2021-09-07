@@ -14,7 +14,7 @@ See license.txt for the terms of this license.
 void GetCurPattern(char *instr)
 {
   #if CUSTOM_PATTERNS
-  if ((curPattern > 0) && (curPattern <= codePatterns))
+  if ((0 < curPattern) && (curPattern <= codePatterns))
   {
     strcpy_P(instr, customPatterns[curPattern-1]);
     DBGOUT((F("Retrieved custom pattern #%d"), curPattern));

@@ -213,10 +213,11 @@ void FlashStartup(void)
   FlashStart();
 
   curPattern = FlashGetValue(FLASH_SEG_PATTERN);
-  if (!curPattern) curPattern = 1; // starts with 1
   #if !EXTERN_PATTERNS
-  if (curPattern > codePatterns) curPattern = 1;
+  if (!curPattern || (curPattern > codePatterns))
+    curPattern = 1; // 1..codePatterns
   #endif
+  // else if EXTERN_PATTERNS then any number is valid
  
   DBGOUT((F("Flash: pattern=#%d"), curPattern));
 
