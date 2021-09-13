@@ -50,19 +50,18 @@ void FlashStartup(void) {}
 #include <EEPROM.h>
 
 // for each segment:
-#define FLASH_SEG_LENGTH        13
+#define FLASH_SEG_LENGTH        12
 
 // offsets within each segment space:
 #define FLASH_SEG_BRIGHTNESS    0
 #define FLASH_SEG_DELAYMSECS    1
 #define FLASH_SEG_FIRSTPOS      2  // 2 bytes
-#define FLASH_SEG_DIRECTION     4
-#define FLASH_SEG_PATTERN       5
-#define FLASH_SEG_XT_MODE       6
-#define FLASH_SEG_XT_HUE        7  // 2 bytes
-#define FLASH_SEG_XT_WHT        9
-#define FLASH_SEG_XT_CNT        10
-#define FLASH_SEG_FORCE         11 // 2 bytes
+#define FLASH_SEG_PATTERN       4
+#define FLASH_SEG_XT_MODE       5
+#define FLASH_SEG_XT_HUE        6  // 2 bytes
+#define FLASH_SEG_XT_WHT        8
+#define FLASH_SEG_XT_CNT        9
+#define FLASH_SEG_FORCE         10 // 2 bytes
 
 #define FLASHOFF_DEVICE_NAME    0
 #if EXTERNAL_COMM
@@ -173,7 +172,6 @@ void FlashGetStr(char *str)
 void FlashSetBright()    { FlashSetValue(FLASH_SEG_BRIGHTNESS, pPixelNutEngine->getMaxBrightness());  FlashDone(); }
 void FlashSetDelay()     { FlashSetValue(FLASH_SEG_DELAYMSECS, pPixelNutEngine->getDelayOffset());    FlashDone(); }
 void FlashSetFirst()     { FlashSetValue(FLASH_SEG_FIRSTPOS,   pPixelNutEngine->getFirstPosition());  FlashDone(); }
-void FlashSetDirection() { FlashSetValue(FLASH_SEG_DIRECTION,  pPixelNutEngine->getDirection());      FlashDone(); }
 
 void FlashSetPattern(byte pattern)  { FlashSetValue(FLASH_SEG_PATTERN, pattern); FlashDone(); }
 void FlashSetXmode(bool enable)     { FlashSetValue(FLASH_SEG_XT_MODE, enable);  FlashDone(); }

@@ -14,7 +14,7 @@ See license.txt for the terms of this license.
 
  1) This Client has the Wifi credentials and the Broker's IP hardcoded.
 
- 2) Client sends to Broker (topic="PixelNutNotify"): <DevName> <IPaddr>
+ 2) Client sends to Broker (topic="PixelNutNotify"): <DevName>, <IPaddr>
     IPaddr: local ip address (e.g. 192.168.1.122)
     DevName: Friendly name of this device (e.g. "My Device")
     This is sent periodically to maintain a connection.
@@ -24,6 +24,8 @@ See license.txt for the terms of this license.
 
  4) If command starts with "?" then client will reply (topic="PixelNutReply"): <reply>
     <reply> is one or more lines of text with information, depending on the command.
+
+ 4) If command is "?P" then the reply is a list of custom patterns stored in the device.
 
 *****************************************************************************************/
 
@@ -162,12 +164,11 @@ void CreateReplyStr(void)
     FlashSetSegment(i);
 
     FlashGetStr(pstr);
-    sprintf(rstr, "%d %d %d %d %d\n%d %d %d %d %d %d\n%s",
+    sprintf(rstr, "%d %d %d %d\n%d %d %d %d %d %d\n%s",
                   pixcounts[i],
                   FlashGetValue(FLASH_SEG_BRIGHTNESS),
                   FlashGetValue(FLASH_SEG_DELAYMSECS),
                   FlashGetValue(FLASH_SEG_FIRSTPOS),
-                  FlashGetValue(FLASH_SEG_DIRECTION),
 
                   FlashGetValue(FLASH_SEG_XT_MODE),
                   FlashGetValue(FLASH_SEG_XT_HUE),

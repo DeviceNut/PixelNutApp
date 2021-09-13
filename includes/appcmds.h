@@ -221,12 +221,6 @@ public:
         FlashSetFirst();
         break;
       }
-      case '&': // set direction
-      {
-        pPixelNutEngine->setDirection( atoi(instr+1) );
-        FlashSetDirection();
-        break;
-      }
       case '[': // pause display updating
       {
         doUpdate = false;
