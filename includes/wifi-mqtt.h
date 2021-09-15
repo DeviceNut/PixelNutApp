@@ -54,7 +54,7 @@ extern void CheckExecCmd(char *instr); // defined in main.h
 #define MQTT_TOPIC_NOTIFY     "PixelNut/Notify"
 #define MQTT_TOPIC_REPLY      "PixelNut/Reply"
 #define MAXLEN_DEVICE_IPSTR   15 // aaa.bbb.ccc.ddd
-#define MSECS_CONNECT_PUB     3000 // msecs between connect publishes
+#define MSECS_CONNECT_PUB     2000 // msecs between connect publishes
 #define STR_CONNECT_SEPARATOR ","
 #define STRLEN_SEPARATOR      1
 
