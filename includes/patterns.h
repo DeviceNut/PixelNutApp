@@ -38,7 +38,7 @@ static PROGMEM const char pattern_spectrum[] = "E0 B60 H250 W50 T E70 V1 T G";
 #if PATTERN_JULY4
 #define JULY4_NAME "July 4th"
 #define JULY4_DESC "Celebrate the holiday with Red, White, and Blue twinkles!"
-static PROGMEM const char pattern_july4[] = JK(0,33) "E50 H355 D10 T " JK(33,34) "E50 W100 D10 T " JK(67,34) "E50 H230 D10 T G";
+static PROGMEM const char pattern_july4[] = "E50 " JK(0,33) "H355 D10 T E50 " JK(33,34) "W100 D10 T E50 " JK(67,34) "H230 D10 T G";
 #endif
 
 #if EXTERNAL_COMM // define descriptions sent to clients
