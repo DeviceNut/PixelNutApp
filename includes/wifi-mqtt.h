@@ -167,7 +167,7 @@ void CreateReplyStr(void)
     sprintf(rstr, "%d %d %d %d\n%d %d %d %d %d %d\n%s",
                   pixcounts[i],
                   FlashGetValue(FLASH_SEG_BRIGHTNESS),
-                  FlashGetValue(FLASH_SEG_DELAYMSECS),
+                  (int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS),
                   FlashGetValue(FLASH_SEG_FIRSTPOS),
 
                   FlashGetValue(FLASH_SEG_XT_MODE),
