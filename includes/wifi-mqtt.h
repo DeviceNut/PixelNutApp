@@ -152,7 +152,6 @@ void CreateReplyStr(void)
   #else
   byte pixcounts[] = { PIXEL_COUNT };
   #endif
-  byte lcount, tcount;
 
   sprintf(rstr, "%s\n%d %d %d %d %d %d\n", wifiMQTT.deviceName,
                   SEGMENT_COUNT, STRLEN_PATTERNS, codePatterns, 0, // custom plugin count TODO
@@ -162,8 +161,10 @@ void CreateReplyStr(void)
   for (int i = 0; i < SEGMENT_COUNT; ++i)
   {
     FlashSetSegment(i);
-
     FlashGetStr(pstr);
+
+    uint16_t hue = FlashGetValue(FLASH_SEG_XT_HUE) + (FlashGetValue(FLASH_SEG_XT_HUE+1) << 8);
+
     sprintf(rstr, "%d %d %d %d\n%d %d %d %d %d %d\n%s",
                   pixcounts[i],
                   FlashGetValue(FLASH_SEG_BRIGHTNESS),
@@ -171,7 +172,7 @@ void CreateReplyStr(void)
                   FlashGetValue(FLASH_SEG_FIRSTPOS),
 
                   FlashGetValue(FLASH_SEG_XT_MODE),
-                  FlashGetValue(FLASH_SEG_XT_HUE),
+                  hue,
                   FlashGetValue(FLASH_SEG_XT_WHT),
                   FlashGetValue(FLASH_SEG_XT_CNT),
                   FlashGetValue(FLASH_SEG_FORCE),
@@ -201,7 +202,7 @@ void CallbackMqtt(char* topic, byte* message, unsigned int msglen)
   {
     strncpy(cmdStr, (char*)message, msglen);
     cmdStr[msglen] = 0;
-    DBGOUT(("Process: \"%s\"", cmdStr));
+    DBGOUT(("Mqtt Message: \"%s\"", cmdStr));
 
     if (!strcmp(cmdStr, "?"))
     {
@@ -255,12 +256,17 @@ bool WiFiMqtt::sendReply(char *instr)
 
 bool WiFiMqtt::setName(char *name)
 {
+  DBGOUT(("Unsubscribe to: %s", devnameTopic));
+  mqttClient.subscribe(devnameTopic);
+
+  DBGOUT(("Disconnect from Mqtt..."));
+  mqttClient.disconnect();
+
   FlashSetName(name);
   strcpy(deviceName, name);
 
   // re-connect with new name next loop
   MakeMqttStrs();
-  mqttClient.disconnect();
   nextConnectTime = 0;
 
   return true;
