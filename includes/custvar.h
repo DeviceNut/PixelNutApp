@@ -14,7 +14,7 @@ CustomCode *pCustomCode = &customSegs; // override with segment handler
 CustomCode *pCustomCode = &bleBluefruit;    // override with bluefruit handler
 
 #elif BLE_ESP32
-CustomCode *pCustomCode = &bleEsp32;        // override with bluefruit handler
+CustomCode *pCustomCode = &bleEsp32;        // override with bluetooth handler
 
 #elif WIFI_SOFTAP
 CustomCode *pCustomCode = &wifiSAP;         // override with wifi SoftAP handler

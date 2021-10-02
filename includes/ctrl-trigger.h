@@ -1,5 +1,5 @@
 // PixelNutApp Trigger Intercept Controls
-// Selects the current preset pattern from physical controls.
+// Sets the trigger force and triggers from physical controls.
 //
 // Uses global variables: 'pPixelNutEngine' and 'pixelNutSupport'.
 //========================================================================================
