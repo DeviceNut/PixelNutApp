@@ -233,8 +233,10 @@ public:
       }
       case '_': // set external mode on/off
       {
-        FlashSetXmode(atoi(instr+1) != 0);
-        FlashSetProperties();
+        bool mode = (atoi(instr+1) != 0);
+        FlashSetXmode(mode);
+        pPixelNutEngine->setPropertyMode(mode);
+        //FlashSetProperties();
         break;
       }
       case '=': // set color hue/white and count properties
@@ -251,7 +253,10 @@ public:
         byte cnt = atoi(instr);
 
         FlashSetExterns(hue, wht, cnt);
-        FlashSetProperties();
+        //FlashSetProperties();
+
+        pPixelNutEngine->setColorProperty(hue, wht);
+        pPixelNutEngine->setCountProperty(cnt);
         break;
       }
       case '!': // causes a trigger given specified force
