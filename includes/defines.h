@@ -69,9 +69,6 @@ See license.txt for the terms of this license.
 #if defined(WIFI_SOFTAP) && WIFI_SOFTAP
 #define WIFI_COMM               1               // using WiFi SoftAP mode
 #endif
-#if defined(WIFI_MQTT) && WIFI_MQTT
-#define WIFI_COMM               1               // using WiFi MQTT mode
-#endif
 #if !defined(WIFI_COMM)
 #define WIFI_COMM               0               // default is no wifi
 #endif
@@ -94,7 +91,7 @@ See license.txt for the terms of this license.
 #if (!STRANDS_MULTI && (SEGMENT_COUNT > 1))     // logical segments
 #define NUM_PLUGIN_LAYERS       (4 + SEGMENT_COUNT)
 #define NUM_PLUGIN_TRACKS       (3 + SEGMENT_COUNT)
-#elif STRANDS_MULTI || WIFI_MQTT || ESP32     // or any 32-bit processor? FIXME
+#elif STRANDS_MULTI || ESP32     // or any 32-bit processor? FIXME
 #define NUM_PLUGIN_LAYERS       16
 #define NUM_PLUGIN_TRACKS       4
 #else

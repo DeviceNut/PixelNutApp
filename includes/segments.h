@@ -96,8 +96,6 @@ class LogicalSegs : public BleBluefruit
 class LogicalSegs : public BleEsp32
 #elif WIFI_SOFTAP
 class LogicalSegs : public WiFiSoftAp
-#elif WIFI_MQTT
-class LogicalSegs : public WiFiMqtt
 #else
 class LogicalSegs : public CustomCode
 #endif

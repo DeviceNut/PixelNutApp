@@ -19,9 +19,6 @@ CustomCode *pCustomCode = &bleEsp32;        // override with bluetooth handler
 #elif WIFI_SOFTAP
 CustomCode *pCustomCode = &wifiSAP;         // override with wifi SoftAP handler
 
-#elif WIFI_MQTT
-CustomCode *pCustomCode = &wifiMQTT;        // override with wifi MQTT handler
-
 #elif !(defined(CUSTOM_CODE) && CUSTOM_CODE)
 CustomCode customcode;
 CustomCode *pCustomCode = &customcode;  // base class handler
