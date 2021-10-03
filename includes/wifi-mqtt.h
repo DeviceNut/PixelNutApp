@@ -165,7 +165,7 @@ void CreateReplyStr(void)
 
     uint16_t hue = FlashGetValue(FLASH_SEG_XT_HUE) + (FlashGetValue(FLASH_SEG_XT_HUE+1) << 8);
 
-    sprintf(rstr, "%d %d %d %d\n%d %d %d %d %d %d\n%s",
+    sprintf(rstr, "%d %d %d %d\n%d %d %d %d %d\n%s",
                   pixcounts[i],
                   FlashGetValue(FLASH_SEG_BRIGHTNESS),
                   (int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS),
@@ -176,7 +176,6 @@ void CreateReplyStr(void)
                   FlashGetValue(FLASH_SEG_XT_WHT),
                   FlashGetValue(FLASH_SEG_XT_CNT),
                   FlashGetValue(FLASH_SEG_FORCE),
-                  FlashGetValue(FLASH_SEG_PATTERN),
                   pstr);
     rstr += strlen(rstr);
   }
@@ -276,15 +275,7 @@ void WiFiMqtt::setup(void)
 {
   DBGOUT(("---------------------------------------"));
 
-  #if defined(ESP32)
-  esp_chip_info_t sysinfo;
-  esp_chip_info(&sysinfo);
-  DBGOUT(("ESP32 Board:"));
-  DBGOUT(("  SDK Version=%s", esp_get_idf_version()));
-  DBGOUT(("  ModelRev=%d.%d", sysinfo.model, sysinfo.revision));
-  DBGOUT(("  Cores=%d", sysinfo.cores));
-  DBGOUT(("  Heap=%d bytes", esp_get_free_heap_size()));
-  #endif
+  DBGOUT((F("Setting up WiFi/Mqtt...")));
 
   FlashGetName(deviceName);
   MakeHostName();

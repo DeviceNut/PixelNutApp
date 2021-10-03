@@ -54,19 +54,7 @@ void WiFiSoftAp::setup(void)
 
   DBGOUT(("---------------------------------------"));
 
-  esp_chip_info_t sysinfo;
-  esp_chip_info(&sysinfo);
-
-  #if defined(ESP32)
-  DBGOUT(("ESP32 Board:"));
-  DBGOUT(("  SDK Version=%s", esp_get_idf_version()));
-  DBGOUT(("  ModelRev=%d.%d", sysinfo.model, sysinfo.revision));
-  DBGOUT(("  Cores=%d", sysinfo.cores));
-  DBGOUT(("  Heap=%d bytes", esp_get_free_heap_size()));
-  #endif
-
-  DBGOUT(("WiFi Info:"));
-  DBGOUT(("  SoftAP=%s", devname));
+  DBGOUT((F("Setting up SoftAP: %s..."), devname));
 
   WiFi.softAP(devname, NULL);
   delay(100); // do this or crashes when client connects !!

@@ -40,6 +40,17 @@ void DisplayConfiguration(void)
   DBGOUT((F("  FLASHOFF_PATTERN_START = %d"), FLASHOFF_PATTERN_START));
   DBGOUT((F("  FLASHOFF_PATTERN_END   = %d"), FLASHOFF_PATTERN_END));
   DBGOUT((F("  EEPROM_FREE_BYTES      = %d"), EEPROM_FREE_BYTES));
+
+  #if defined(ESP32)
+  esp_chip_info_t sysinfo;
+  esp_chip_info(&sysinfo);
+  DBGOUT(("ESP32 Board:"));
+  DBGOUT(("  SDK Version=%s", esp_get_idf_version()));
+  DBGOUT(("  ModelRev=%d.%d", sysinfo.model, sysinfo.revision));
+  DBGOUT(("  Cores=%d", sysinfo.cores));
+  DBGOUT(("  Heap=%d bytes", esp_get_free_heap_size()));
+  #endif
+
 }
 
 #if !(defined(MAIN_OVERRIDE) && MAIN_OVERRIDE)

@@ -104,14 +104,6 @@ public:
         }
         #endif
 
-        #if EXPORT_PLUGINS
-        if (instr[1] == 'G') // about internal plugins
-        {
-          // TODO: send info on each built-in plugin
-
-        }
-        #endif
-
         if (instr[1] != 0)
         {
           DBGOUT((F("Unknown ? modifier: %c"), instr[1]));
