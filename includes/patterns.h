@@ -88,7 +88,9 @@ const char* const customPhelp[] =
 // For example:                                   "---------------------------------------------------------------------------------------------------"
 
 // Color hue changes "ripple" down the strip. The colors move through the spectrum, and appear stationary until Triggered.
-// The Force applied changes the amount of color change per pixel. At maximum Force the entire spectrum is displayed again.
+// The Force applied changes the amount of color change per pixel. At maximum Force the entire spectrum is displayed.
+// The Force modifies the amount of color change per pixel. At maximum Force the entire spectrum is displayed without moving,
+// with 0 force it's a single color, and any other force value the colors continually change.
 #define PATTERN_RAINBOW_RIPPLE                    "E2 D20 T E101 F1000 I T G"
 
 // Colors hue changes occur at the head and get pushed down the strip. When the end is reached they start getting cleared,

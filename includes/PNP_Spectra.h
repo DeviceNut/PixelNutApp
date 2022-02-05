@@ -5,22 +5,13 @@
 //*********************************************************************************************
 // What Effect Does:
 //
-//    Fades to dark whatever has been previouly drawn on the strip, restarting the
-//    process each time it is triggered.
-//
 // Calling trigger():
-//
-//    The trigger force is used to modify the time it takes to fade all pixels.
-//    The larger the force, the longer it takes to fade to black.
 //
 // Calling nextstep():
 //
-//    Modifies the brightness of each pixel in the strip, then reduces the brightness
-//    scaling by the amount calculated in trigger().
-//
 // Properties Used:
 //
-//    pixCount - current value is the counter for the number of pixels to clear and set.
+//    none
 //
 // Properties Affected:
 //

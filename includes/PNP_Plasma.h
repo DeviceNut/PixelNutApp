@@ -14,8 +14,7 @@
 //
 // Calling trigger():
 //
-//    The trigger force is used to modify the time it takes to fade all pixels.
-//    The larger the force, the longer it takes to fade to black.
+//    Not instantiated.
 //
 // Calling nextstep():
 //
