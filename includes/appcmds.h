@@ -44,7 +44,7 @@ public:
         else
         {
           DBGOUT((F("Unknown command: %s"), instr));
-          pCustomCode->sendReply("?");
+          pCustomCode->sendReply((char*)"?");
           return false;
         }
         break;
@@ -107,7 +107,7 @@ public:
         if (instr[1] != 0)
         {
           DBGOUT((F("Unknown ? modifier: %c"), instr[1]));
-          pCustomCode->sendReply("?");
+          pCustomCode->sendReply((char*)"?");
           break; // don't return false for error
         }
 
