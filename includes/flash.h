@@ -5,7 +5,7 @@
 // Set global variable: 'curPattern'.
 //========================================================================================
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2024, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
@@ -55,13 +55,12 @@ void FlashStartup(void) {}
 // offsets within each segment space:
 #define FLASH_SEG_BRIGHTNESS    0
 #define FLASH_SEG_DELAYMSECS    1
-#define FLASH_SEG_FIRSTPOS      2  // 2 bytes
-#define FLASH_SEG_PATTERN       4
-#define FLASH_SEG_XT_MODE       5
-#define FLASH_SEG_XT_HUE        6  // 2 bytes
-#define FLASH_SEG_XT_WHT        8
-#define FLASH_SEG_XT_CNT        9
-#define FLASH_SEG_FORCE         10 // 2 bytes
+#define FLASH_SEG_PATTERN       2
+#define FLASH_SEG_XT_MODE       3
+#define FLASH_SEG_XT_HUE        4  // 2 bytes
+#define FLASH_SEG_XT_WHT        6
+#define FLASH_SEG_XT_CNT        7
+#define FLASH_SEG_FORCE         8 // 2 bytes
 
 #define FLASHOFF_DEVICE_NAME    0
 #if EXTERNAL_COMM
@@ -169,9 +168,8 @@ void FlashGetStr(char *str)
   DBGOUT((F("FlashGetStr(@%d): \"%s\" (len=%d)"), strOffset, str, strlen(str)));
 }
 
-void FlashSetBright()    { FlashSetValue(FLASH_SEG_BRIGHTNESS, pPixelNutEngine->getMaxBrightness());  FlashDone(); }
-void FlashSetDelay()     { FlashSetValue(FLASH_SEG_DELAYMSECS, pPixelNutEngine->getDelayOffset());    FlashDone(); }
-void FlashSetFirst()     { FlashSetValue(FLASH_SEG_FIRSTPOS,   pPixelNutEngine->getFirstPosition());  FlashDone(); }
+void FlashSetBright() { FlashSetValue(FLASH_SEG_BRIGHTNESS, pPixelNutEngine->getMaxBrightness());  FlashDone(); }
+void FlashSetDelay()  { FlashSetValue(FLASH_SEG_DELAYMSECS, pPixelNutEngine->getDelayOffset());    FlashDone(); }
 
 void FlashSetPattern(byte pattern)  { FlashSetValue(FLASH_SEG_PATTERN, pattern); FlashDone(); }
 void FlashSetXmode(bool enable)     { FlashSetValue(FLASH_SEG_XT_MODE, enable);  FlashDone(); }
@@ -216,7 +214,7 @@ void FlashStartup(void)
     curPattern = 1; // 1..codePatterns
   #endif
   // else if EXTERN_PATTERNS then any number is valid
- 
+
   DBGOUT((F("Flash: pattern=#%d"), curPattern));
 
   byte bright = FlashGetValue(FLASH_SEG_BRIGHTNESS);
@@ -225,11 +223,8 @@ void FlashStartup(void)
   int8_t delay = (int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS);
   if ((delay < -DELAY_RANGE) || (DELAY_RANGE < delay)) delay = 0; // set to min if out of range
 
-  int16_t fpos = FlashGetValue(FLASH_SEG_FIRSTPOS);
-
   pPixelNutEngine->setMaxBrightness(bright);
   pPixelNutEngine->setDelayOffset(delay);
-  pPixelNutEngine->setFirstPosition(fpos);
 
   DBGOUT((F("Flash: brightness=%d%%"), bright));
   DBGOUT((F("Flash: delay=%d msecs"), (int8_t)FlashGetValue(FLASH_SEG_DELAYMSECS)));

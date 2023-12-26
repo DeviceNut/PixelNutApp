@@ -6,7 +6,7 @@
 //                        'FlashSetForce', 'FlashSetProperties', 'ErrorHandler'.
 //========================================================================================
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2024, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
@@ -205,12 +205,6 @@ public:
       {
         pPixelNutEngine->setDelayOffset( atoi(instr+1) );
         FlashSetDelay();
-        break;
-      }
-      case '^': // set first position
-      {
-        pPixelNutEngine->setFirstPosition( atoi(instr+1) );
-        FlashSetFirst();
         break;
       }
       case '[': // pause display updating

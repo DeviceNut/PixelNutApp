@@ -4,7 +4,7 @@
 // Calls global routines: 'FlashSetSegment', 'FlashSetProperties'.
 //========================================================================================
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2024, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
@@ -16,8 +16,8 @@ class PixelNutEngineX : public PixelNutEngine
 {
 public:
 
-  PixelNutEngineX(byte *ptr_pixels, uint16_t num_pixels, uint16_t first_pixel, bool goupwards, short num_layers, short num_tracks) :
-    PixelNutEngine(ptr_pixels, num_pixels, first_pixel, goupwards, num_layers, num_tracks)
+  PixelNutEngineX(byte *ptr_pixels, uint16_t num_pixels, bool goupwards, short num_layers, short num_tracks) :
+    PixelNutEngine(ptr_pixels, num_pixels, goupwards, num_layers, num_tracks)
   {
     // NOTE: cannot call DBGOUT from constructor
   }
