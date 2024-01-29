@@ -43,6 +43,7 @@
 #define DPIN_DELAY_BUTTON       12          // delay selection button
 #define DPIN_BRIGHT_BUTTON      26          // brightness selection button
 
+#define CUSTOM_PATTERNS         1           // enables extended patterns in general
 #define PATTERN_JULY4           1           // enable extended "July 4th" pattern
 
 //**************************************************************************************************
