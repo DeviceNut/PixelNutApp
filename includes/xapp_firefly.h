@@ -18,7 +18,7 @@ See license.txt for the terms of this license.
 // 6) YZ direction - ferris wheel, triggering changes color, direction, and number of spokes
 // 7) XZ direction - expanding pink blinky window, triggering surges rate of expansion
 // 8) no clear dir - multicolor random blinking, triggering surges speed of blinking
- 
+
 static PROGMEM const char pattern_1[] = "E0 B50 H270 T E142 F300 T E20 V1 H30 C20 D20 F0 I T G";
 static PROGMEM const char pattern_2[] = "E10 C50 D40 T E101 T E131 F100 I T G";
 static PROGMEM const char pattern_3[] = "E0 B20 H60 T E141 F1 I T E50 B70 H300 C50 D10 T G";
@@ -571,27 +571,24 @@ void loop(void)
           break;
         }
 
-        if (CheckCaptureDone())
-        {
-          if (faderEnabled)
-          {
-            uint32_t addtime = MSECS_TOPLAY(captureMsecs) + MSECS_MIN_PLAYING;
-            faderTime = stateTime + addtime;
-            faderWaiting = true;
-            #if DEBUG_STATE_CHANGE
-            DBGOUT((F("Fade starting in %d msecs..."), addtime));
-            #endif
+        if (!CheckCaptureDone()) CheckForTrigger();
 
-          }
-          else ClearBuffers();
+        else if (faderEnabled)
+        {
+          uint32_t addtime = MSECS_TOPLAY(captureMsecs) + MSECS_MIN_PLAYING;
+          faderTime = stateTime + addtime;
+          faderWaiting = true;
+          #if DEBUG_STATE_CHANGE
+          DBGOUT((F("Fade starting in %d msecs..."), addtime));
+          #endif
+
         }
-        else CheckForTrigger();
+        else ClearBuffers();
         break;
       }
       case STATE_FADING:
       {
-        if (!CheckCaptureDone())
-          CheckForTrigger();
+        if (!CheckCaptureDone()) CheckForTrigger();
 
         if (!stepsFadeCount--)
         {
@@ -618,6 +615,7 @@ void loop(void)
         {
           int hue = (MAX_BRIGHT - maxBright) * 3;
           sprintf(cmdStr, "P E0 H%d T G", hue); // sequence hue from ~240-0
+
           if (!--stepsFadeCount)
           {
             ++maxBright;
@@ -634,6 +632,7 @@ void loop(void)
           theState = STATE_RESTART;
           stateTime += MSECS_MIN_DARKNESS;
         }
+
         pPixelNutEngine->setMaxBrightness(maxBright);
         break;
       }
