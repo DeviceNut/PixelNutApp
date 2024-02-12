@@ -8,7 +8,7 @@
 //                         'CheckForPatterns', 'GetCurPattern', and all
 //                         'Setup<>Controls' and 'Check<>Controls' calls.
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2024, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
@@ -136,11 +136,7 @@ void setup()
 
   CheckForPatterns();     // check for internal patterns, fail if none and required
   FlashStartup();         // get curPattern and settings from flash, set engine properties
-  GetCurPattern(cmdStr);  // get pattern string corresponding to that pattern number
-  CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
-
-  pCustomCode->setup();   // custom initialization here (external communications setup)
-
+  
   SetupBrightControls();  // Setup any physical controls present
   SetupDelayControls();
   SetupEModeControls();
@@ -148,6 +144,11 @@ void setup()
   SetupCountControls();
   SetupTriggerControls();
   SetupPatternControls();
+
+  GetCurPattern(cmdStr);  // get pattern string corresponding to that pattern number
+  CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
+
+  pCustomCode->setup();   // custom initialization here (external communications setup)
 
   BlinkStatusLED(0, 2);   // indicate success
   DBGOUT((F("** Setup complete **")));

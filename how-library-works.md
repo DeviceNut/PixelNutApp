@@ -25,7 +25,7 @@ Main Control #defines
 
 Here are some of the main #define statements that determine important functionality of the application. All of these defines are listed in the "keywords.txt" file.
 
-'PIXEL_COUNT' sets the number of pixels to be displayed, and "PIXEL_OFFSET' shifts the drawing window around the pixel strip.
+'PIXEL_COUNT' sets the number of pixels to be displayed.
 
 'STRLEN_PATTERNS' sets the size of the 'cmdStr' buffer used to hold the pattern strings, and MUST be large enough for the longest effect pattern defined internally, or to receive patterns sent from an external client.
 

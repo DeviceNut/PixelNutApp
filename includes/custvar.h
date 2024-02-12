@@ -1,7 +1,7 @@
 // PixelNutApp Custom Class: Sets global reference to custom code handler
 //========================================================================================
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2024, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
@@ -10,7 +10,7 @@ See license.txt for the terms of this license.
 CustomCode *pCustomCode = &customSegs; // override with segment handler
 // note that this will call into bluetooth/wifi handler if needed
 
-#elif BLE_BLUEFUIT
+#elif BLE_BLUEFRUIT
 CustomCode *pCustomCode = &bleBluefruit;    // override with bluefruit handler
 
 #elif BLE_ESP32

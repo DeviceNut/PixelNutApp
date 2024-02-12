@@ -1,7 +1,7 @@
 // PixelNutApp Global Variables
 //========================================================================================
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2024, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
@@ -50,7 +50,7 @@ PixelNutSupport pixelNutSupport = PixelNutSupport((GetMsecsTime)millis, &pixorde
 #if defined(PIXENGINE_OVERRIDE) && PIXENGINE_OVERRIDE
 extern PixelNutEngine *pPixelNutEngine;
 #else
-PixelNutEngine pixelNutEngine = PixelNutEngine(pPixelData, PIXEL_COUNT, PIXEL_OFFSET, DIRECTION_UP, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
+PixelNutEngine pixelNutEngine = PixelNutEngine(pPixelData, PIXEL_COUNT, DIRECTION_UP, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
 PixelNutEngine *pPixelNutEngine = &pixelNutEngine;
 #endif
 

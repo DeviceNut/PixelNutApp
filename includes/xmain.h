@@ -2,7 +2,7 @@
 // Custom Setup & Loop routines (required for multiple physical segment configurations).
 //*********************************************************************************************
 /*
-Copyright (c) 2015-2020, Greg de Valois
+Copyright (c) 2015-2024, Greg de Valois
 Software License Agreement (BSD License)
 See license.txt for the terms of this license.
 */
@@ -125,14 +125,6 @@ void setup()
 
   DisplayConfiguration(); // Display configuration settings
 
-  SetupBrightControls();  // Setup any physical controls present
-  SetupDelayControls();
-  SetupEModeControls();
-  SetupColorControls();
-  SetupCountControls();
-  SetupTriggerControls();
-  SetupPatternControls();
-
   CheckForPatterns(); // only do this once
 
   DBGOUT((F(">>> Begin extended setup...")));
@@ -167,8 +159,7 @@ void setup()
 
     ShowPixels(i); // turn off pixels
 
-    pixelNutEngines[i] = new PixelNutEngine(pixelArrays[i], pixcounts[i],
-                                PIXEL_OFFSET, pixdirs[i],
+    pixelNutEngines[i] = new PixelNutEngine(pixelArrays[i], pixcounts[i], pixdirs[i],
                                 NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
 
     if ((pixelNutEngines[i] == NULL) || (pixelNutEngines[i]->pDrawPixels == NULL))
@@ -176,10 +167,21 @@ void setup()
       DBGOUT((F("Failed to alloc pixel engine buffers, segment=%d"), i));
       ErrorHandler(2, PixelNutEngine::Status_Error_Memory, true);
     }
+
     pPixelNutEngine = pixelNutEngines[i];
 
     FlashSetSegment(curSegment = i);
     FlashStartup();         // get curPattern and settings from flash, set engine properties
+
+    // sets engine properties, so must do for each strand
+    SetupBrightControls();  // Setup any physical controls present
+    SetupDelayControls();
+    SetupEModeControls();
+    SetupColorControls();
+    SetupCountControls();
+    SetupTriggerControls();
+    SetupPatternControls();
+
     GetCurPattern(cmdStr);  // get pattern string corresponding to that pattern number
     CheckExecCmd(cmdStr);   // load that pattern into the engine: ready to be displayed
   }

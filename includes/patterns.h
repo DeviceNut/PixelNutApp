@@ -15,8 +15,6 @@ See license.txt for the terms of this license.
 #if !defined(PLUGIN_SPECTRA)
 #define PLUGIN_SPECTRA 0
 #endif
-
-// extended patterns
 #if !defined(PATTERN_JULY4)
 #define PATTERN_JULY4 0
 #endif

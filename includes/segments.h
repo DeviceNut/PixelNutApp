@@ -34,7 +34,7 @@ public:
   }
 };
 
-PixelNutEngineX pixelNutEngineX   = PixelNutEngineX(pPixelData, PIXEL_COUNT, PIXEL_OFFSET, DIRECTION_UP, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
+PixelNutEngineX pixelNutEngineX   = PixelNutEngineX(pPixelData, PIXEL_COUNT, DIRECTION_UP, NUM_PLUGIN_LAYERS, NUM_PLUGIN_TRACKS);
 PixelNutEngineX *pPixelNutEngineX = &pixelNutEngineX;
 PixelNutEngine *pPixelNutEngine   = pPixelNutEngineX;
 

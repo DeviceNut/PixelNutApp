@@ -14,7 +14,7 @@ See license.txt for the terms of this license.
 void GetCurPattern(char *instr)
 {
   #if CUSTOM_PATTERNS
-  if ((0 < curPattern) && (curPattern <= codePatterns))
+  if ((1 <= curPattern) && (curPattern <= codePatterns))
   {
     strcpy_P(instr, customPatterns[curPattern-1]);
     DBGOUT((F("Retrieved custom pattern #%d"), curPattern));
@@ -60,18 +60,28 @@ void CheckForPatterns(void)
 
 void GetNextPattern(void)
 {
+  #if EXTERN_PATTERNS
+  // allow selecting stored external pattern as part of the cycle
+  if (curPattern > codePatterns) curPattern = 0;
+  else ++curPattern;
+  #else
   // curPattern must be 1...codePatterns
-  if (++curPattern > codePatterns)
-    curPattern = 1;
+  if (++curPattern > codePatterns) curPattern = 1;
+  #endif
 
   GetCurPattern(cmdStr);
 }
 
 void GetPrevPattern(void)
 {
-  // curPattern must be 1...codePatterns
-  if (curPattern <= 1) curPattern = codePatterns;
+  #if EXTERN_PATTERNS
+  // allow selecting stored external pattern as part of the cycle
+  if (!curPattern) curPattern = codePatterns;
   else --curPattern;
+  #else
+  // curPattern must be 1...codePatterns
+  if (curPattern-- <= 1) curPattern = codePatterns;
+  #endif
 
   GetCurPattern(cmdStr);
 }

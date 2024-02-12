@@ -31,9 +31,6 @@ See license.txt for the terms of this license.
 #endif
 #endif
 
-#if !defined(PIXEL_OFFSET)
-#define PIXEL_OFFSET            0               // start drawing at the first pixel
-#endif
 #if !defined(DIRECTION_UP)
 #define DIRECTION_UP            true            // draw from start to end by default
 #endif
