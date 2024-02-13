@@ -62,7 +62,7 @@ void GetNextPattern(void)
 {
   #if EXTERN_PATTERNS
   // allow selecting stored external pattern as part of the cycle
-  if (curPattern > codePatterns) curPattern = 0;
+  if (curPattern > codePatterns) curPattern = 1;
   else ++curPattern;
   #else
   // curPattern must be 1...codePatterns
@@ -76,7 +76,7 @@ void GetPrevPattern(void)
 {
   #if EXTERN_PATTERNS
   // allow selecting stored external pattern as part of the cycle
-  if (!curPattern) curPattern = codePatterns;
+  if (!curPattern || (curPattern > codePatterns)) curPattern = codePatterns;
   else --curPattern;
   #else
   // curPattern must be 1...codePatterns
